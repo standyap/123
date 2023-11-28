@@ -1,0 +1,445 @@
+#right_panel_background {
+top: 0px;
+right: 0px;
+width: 180px;
+height: 100%;
+background-image:url("media/right_panel_background.png");
+background-position: 50% 50%;
+background-repeat: no-repeat;
+background-size: 100% 100%;
+position: absolute;
+z-index: 0;
+}
+
+
+
+
+/**
+*   TABS
+*/
+
+
+
+
+#carpet_tab
+{
+    top: 345px;
+    transform: rotate(-90deg);
+    right: 134px;
+    cursor:pointer;
+    position: fixed;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    color: white;
+    z-index: 1;
+}
+
+#parquet_tab
+{
+    top: 445px;
+    transform: rotate(-90deg);
+    right: 127px;
+    cursor:pointer;
+    position: fixed;
+    font-family: sans-serif;
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    color: white;
+    z-index: 1;
+}
+
+#laminate_tab
+{
+    top: 545px;
+    transform: rotate(-90deg);
+    right: 123px;
+    cursor:pointer;
+    position: fixed;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    text-align: center;
+    color: white;
+    z-index: 1;
+}
+
+
+
+
+
+#up_icon_right_panel{
+width:25px;
+height:15px;
+top:20px;
+right:65px;
+background-image:url('media/up_icon_menu.png');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:95% 95%;
+position:fixed;
+z-index:1;
+cursor:pointer;
+}
+#down_icon_right_panel{
+width:25px;
+height:15px;
+bottom:20px;
+right:65px;
+background-image:url('media/down_icon_menu.png');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:95% 95%;
+position:fixed;
+z-index:1;
+cursor:pointer;
+}
+
+#right_panel_icon_group {
+position: absolute;
+width: 200px;
+top: 50px;
+height:820px;
+overflow-y: scroll;
+}
+#right_panel_icon_group::-webkit-scrollbar {
+display:none;
+}
+
+#carpet0_icon{
+width:125px;
+height:125px;
+top:0px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet0_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet0_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+#carpet1_icon{
+width:125px;
+height:125px;
+top:145px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet1_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet1_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+
+#carpet2_icon{
+width:125px;
+height:125px;
+top:290px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet2_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet2_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+
+#carpet3_icon{
+width:125px;
+height:125px;
+top:435px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet3_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet3_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+#carpet4_icon{
+width:125px;
+height:125px;
+top:580px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet4_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet4_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+
+#carpet5_icon{
+width:125px;
+height:125px;
+top:725px;
+left:40px;
+border-radius:20px;
+background-image:url('media/carpet5_icon.jpg');
+background-position:50% 50%;
+background-repeat:no-repeat;
+background-size:100% 100%;
+position:absolute;
+cursor:pointer;
+}
+#carpet5_icon:hover {
+transform: scale(1.02, 1.02);
+transform-origin: center;}
+
+
+
+
+
+
+/**
+*   PARQUET ICONS
+*/
+
+
+
+
+
+
+
+#parquet0_icon{
+    width:125px;
+    height:125px;
+    top:0px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet0_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet0_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    #parquet1_icon{
+    width:125px;
+    height:125px;
+    top:145px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet1_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet1_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #parquet2_icon{
+    width:125px;
+    height:125px;
+    top:290px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet2_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet2_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #parquet3_icon{
+    width:125px;
+    height:125px;
+    top:435px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet3_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet3_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    #parquet4_icon{
+    width:125px;
+    height:125px;
+    top:580px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet4_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet4_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #parquet5_icon{
+    width:125px;
+    height:125px;
+    top:725px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/parquet5_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #parquet5_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+
+
+
+
+/**
+*   LAMINATE ICONS
+*/
+
+
+
+
+#laminate0_icon{
+    width:125px;
+    height:125px;
+    top:0px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate0_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate0_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    #laminate1_icon{
+    width:125px;
+    height:125px;
+    top:145px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate1_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate1_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #laminate2_icon{
+    width:125px;
+    height:125px;
+    top:290px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate2_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate2_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #laminate3_icon{
+    width:125px;
+    height:125px;
+    top:435px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate3_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate3_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    #laminate4_icon{
+    width:125px;
+    height:125px;
+    top:580px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate4_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate4_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+    
+    #laminate5_icon{
+    width:125px;
+    height:125px;
+    top:725px;
+    right:40px;
+    border-radius:20px;
+    background-image:url('media/laminate5_icon.jpg');
+    background-position:50% 50%;
+    background-repeat:no-repeat;
+    background-size:100% 100%;
+    position:absolute;
+    cursor:pointer;
+    }
+    #laminate5_icon:hover {
+    transform: scale(1.02, 1.02);
+    transform-origin: center;}
+
+
+
+
+

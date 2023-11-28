@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+   
+<head>
+    <script> //w3.includeHTML Script
+    function includeHTML() {
+  var z, i, elmnt, file, xhttp;
+  /* Loop through a collection of all HTML elements: */
+  z = document.getElementsByTagName("*");
+  for (i = 0; i < z.length; i++) {
+    elmnt = z[i];
+    /*search for elements with a certain atrribute:*/
+    file = elmnt.getAttribute("w3-include-html");
+    if (file) {
+      /* Make an HTTP request using the attribute value as the file name: */
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
+          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
+          /* Remove the attribute, and call this function once more: */
+          elmnt.removeAttribute("w3-include-html");
+          includeHTML();
+        }
+      }
+      xhttp.open("GET", file, true);
+      xhttp.send();
+      /* Exit the function: */
+      return;
+    }
+  }
+}
+    
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expo Configurator Test</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./switch-styles.css">
+    <link rel="stylesheet" href="./left-panel.css">
+    <link rel="stylesheet" href="./right-panel.css">
+    <link rel="stylesheet" href="./top-panel.css">
+    <link rel="stylesheet" href="./graphic-control-styles.css">
+    <link rel="stylesheet" href="./price.css">
+
+ <!--    <div id="login_form">
+      <div id=login_form_background></div>
+      <div class="form-popup" id="myForm">
+          <div id=admin_button>Admin</div>
+        <form class="form-container">
+          <h1>Login</h1>
+          <label for="email"><b>Email</b></label>
+          <input id=login_email type="text" placeholder="Enter Email" >
+      
+          <label for="psw"><b>Password</b></label>
+          <input id=login_password type="password" placeholder="Enter Password" >
+      
+          <button id=login_login_button type="button" class="btn">Login</button>
+          <button id=login_close_button type="button" class="btn cancel">Close</button>
+        </form>
+      </div>
+  </div>
+  
+  <div id="admin_login_form" style="display:none">
+      <div id=admin_login_form_background></div>
+  <div class="form-popup" id="myForm_admin">
+    <form class="form-container">
+      <h1>Admin Panel</h1>
+     
+      <label for="psw"><b>Password</b></label>
+      <input id=login_password_admin type="password" placeholder="Enter Password" >
+  
+      <button id=login_login_button_admin type="button" class="btn">Add User</button>
+      <button id=login_close_button_admin type="button" class="btn cancel">Close</button>
+    </form>
+  </div>
+  
+  </div> -->
+  
+
+    <!--SCRIPTS: -->
+      <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script> -->
+      <!-- <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script> -->
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> -->
+      <script src="https://smtpjs.com/v3/smtp.js"></script>
+      <script src="//static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
+
+
+
+</head>
+<body>
+    <canvas class="webgl"></canvas>
+    <script type="module" src="./script.js"></script>
+    <!-- <div id="loader"></div> -->
+    
+    <div w3-include-html="./panels.html"></div>
+    <div w3-include-html="./switches.html"></div>
+        <script>includeHTML();</script>
+        <div id="button" class="button">Test Button</div>
+        <div id="button2" class="button2">Test Button</div>
+        <img id="temp_background" ></img>
+        <div id="render_page" >
+          <img id="test_img" ></img>
+        </div>
+        
+       
+       
+
+</body>
+</html>

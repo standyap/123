@@ -1,0 +1,616 @@
+#top_panel_background 
+{
+  top: -200px;
+  left: 400px;
+  width: 1000px;
+  height: 250px;
+  background-image:url("media/top_panel_background.png");
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  position: fixed;
+  z-index: 1;
+}
+#stand_info_text /* stand tipine göre bottom ve left değişeceğinde javascript olarak değişken değerler verdik*/
+{
+  position: absolute;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white;
+}
+
+#storage_size_text 
+{
+  position: absolute;
+  bottom: 20px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white;
+}
+#up_icon_top_panel
+{
+  width:25px;
+  height:15px;
+  bottom:20px;
+  left:500px;
+  background-image:url('media/up_icon_menu.png');
+  background-position:50% 50%;
+  background-repeat:no-repeat;
+  background-size:95% 95%;
+  position:absolute;
+  z-index:1;
+  cursor:pointer;
+  display: none;
+}
+    
+#down_icon_top_panel
+{
+  width:25px;
+  height:15px;
+  bottom:20px;
+  left:500px;
+  background-image:url('media/down_icon_menu.png');
+  background-position:50% 50%;
+  background-repeat:no-repeat;
+  background-size:95% 95%;
+  position:absolute;
+  z-index:1;
+  cursor:pointer;
+  display: block;
+}
+
+#send_configuration_tab
+{
+  position: absolute;
+  bottom: 130px;
+  left: 335px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+
+/**
+
+ SAVE CONFIGURATION ELEMENTS
+ 
+ */
+
+
+.content 
+{
+  width: 300px;
+  height: 34px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, .2);
+  border-radius: 60px;
+  overflow: hidden;
+  bottom:100px;
+  left:335px;
+  position:absolute;
+}
+
+.subscription 
+{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.subscription .add-email
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  padding: 0 20px;
+}
+
+.subscription .submit-email 
+{
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: calc(100% - 2px);
+  width: 100px;
+  border: none;
+  border-radius: 60px;
+  outline: none;
+  margin: 1px;
+  padding: 0 20px;
+  cursor: pointer;
+  background: #ccc;
+  color: #FFFFFF;
+  transition: width .35s ease-in-out,
+  background .35s ease-in-out;
+}
+      
+.subscription.done .submit-email 
+{
+  width: calc(100% - 2px);
+  background: #2196F3;
+}
+
+.subscription .submit-email .before-submit,
+.subscription .submit-email .after-submit
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  line-height: 32px;
+  transition: visibility .35s ease-in-out,
+  opacity .35s ease-in-out;
+}
+
+.subscription.done .submit-email .before-submit,
+.subscription:not(.done) .submit-email .after-submit
+{
+  visibility: hidden;
+  opacity: 0;
+}
+
+.subscription .submit-email .after-submit 
+{
+  transition-delay: .35s;
+}
+
+.subscription:not(.done) .submit-email .before-submit,
+.subscription.done .submit-email .after-submit 
+{
+  visibility: visible;
+  opacity: 1;
+}
+
+
+/**
+
+ FURNITURES
+ 
+ */
+
+
+
+ #top_panel_furniture_list_bar_stool 
+{
+  position: absolute;
+  top: 15px;
+  left:50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_bar_stool_price
+{
+  position: absolute;
+  top: 15px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_bistro_table
+{
+  position: absolute;
+  top: 30px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_bistro_table_price
+{
+  position: absolute;
+  top: 30px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_single_sofa
+{
+  position: absolute;
+  top: 45px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_single_sofa_price
+{
+  position: absolute;
+  top: 45px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_double_sofa
+{
+  position: absolute;
+  top: 60px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_double_sofa_price
+{
+  position: absolute;
+  top: 60px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_chair
+{
+  position: absolute;
+  top: 75px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_chair_price
+{
+  position: absolute;
+  top: 75px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_coffee_table
+{
+  position: absolute;
+  top: 90px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_coffee_table_price
+{
+  position: absolute;
+  top: 90px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_high_table
+{
+  position: absolute;
+  top: 105px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_high_table_price
+{
+  position: absolute;
+  top: 105px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_tv42
+{
+  position: absolute;
+  top: 120px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_tv42_price
+{
+  position: absolute;
+  top: 120px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_tv55
+{
+  position: absolute;
+  top: 135px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_tv55_price
+{
+  position: absolute;
+  top: 135px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_brochure_rack
+{
+  position: absolute;
+  top: 150px;
+  left: 50px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_brochure_rack_price
+{
+  position: absolute;
+  top: 150px;
+  left: 250px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+
+
+/**
+
+ STORAGE FURNITURES
+ 
+ */
+
+
+
+#top_panel_furniture_list_shelves 
+{
+  position: absolute;
+  top: 15px;
+  left:750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_shelves_price
+{
+  position: absolute;
+  top: 15px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_kettle 
+{
+  position: absolute;
+  top: 30px;
+  left: 750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_kettle_price
+{
+  position: absolute;
+  top: 30px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_water_dispenser 
+{
+  position: absolute;
+  top: 45px;
+  left: 750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_water_dispenser_price
+{
+  position: absolute;
+  top: 45px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_refrigator 
+{
+  position: absolute;
+  top: 60px;
+  left: 750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_refrigator_price
+{
+  position: absolute;
+  top: 60px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_plant 
+{
+  position: absolute;
+  top: 75px;
+  left: 750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_plant_price
+{
+  position: absolute;
+  top: 75px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_trash_can 
+{
+  position: absolute;
+  top: 90px;
+  left: 750px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+#top_panel_furniture_list_trash_can_price
+{
+  position: absolute;
+  top: 90px;
+  left: 920px;
+  font-family: sans-serif;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  color: white; 
+}
+
+
+
+
+

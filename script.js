@@ -480,122 +480,217 @@ function switchesLoaded()
 */
 
 
-setTimeout(loadFurnitures, 5000)
-function loadFurnitures() 
-{
-    let stand = scene.getObjectByName( "stand_1" )
-    let barStool = scene.getObjectByName( "bar_stool")
-    let objectsBarStool = []
-    objectsBarStool.push(barStool)
-    const dragBarStool = new DragControls(objectsBarStool, camera, renderer.domElement)
-    dragBarStool.getRaycaster()
-
-     dragBarStool.transformGroup = true //bu ayar ile drag parent objeye etki edebiliyor bu ayar false olursa drag direk children'a etki ediyor.ama drag control obj bölümünde group olarak belirtilmesi de gerekiyor.
+    setTimeout(loadFurnitures, 5000)           //ÇALIŞAN BİR VERSİYON
+    function loadFurnitures() 
+    {
+        let stand = scene.getObjectByName( "stand_1" )
+        let barStool = scene.getObjectByName( "bar_stool")
+        let envFloor = scene.getObjectByName( "environment_floor")
+        let helperBarStool = new THREE.BoxHelper( barStool, 0xffff00 );
     
-
-
         /**
          *  Show bar stool
          */
-
-       
-             
-        let helperBarStool = new THREE.BoxHelper( barStool, 0xffff00 );
-
+    
         var mouse = new THREE.Vector2();
         var raycaster = new THREE.Raycaster(); 
         var intersect = new THREE.Vector3();
+    
+        var bboxHelper = new THREE.Box3().setFromObject(helperBarStool);
+        var bboxWidthHelper = Math.abs(bboxHelper.max.x)+Math.abs(bboxHelper.min.x)
+        var bboxDepthHelper = Math.abs(bboxHelper.max.z)+Math.abs(bboxHelper.min.z)
 
-        var bbox = new THREE.Box3().setFromObject(helperBarStool);
-        var bboxWidth = Math.abs(bbox.max.x)+Math.abs(bbox.min.x)
-        var bboxDepth = Math.abs(bbox.max.z)+Math.abs(bbox.min.z)
+        var bboxStand = new THREE.Box3().setFromObject(stand);
+        var bboxWidthStand = Math.abs(bboxStand.max.x)+Math.abs(bboxStand.min.x)
+        var bboxDepthStand = Math.abs(bboxStand.max.z)+Math.abs(bboxStand.min.z)
+    
+        let baseBarStoolGeo = new THREE.PlaneGeometry( bboxWidthHelper, bboxDepthHelper );
+        let baseBarStoolMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+        let baseBarStool = new THREE.Mesh( baseBarStoolGeo, baseBarStoolMat );
+        baseBarStool.rotation.x = THREE.MathUtils.degToRad(90)
+        baseBarStool.position.y = 0.11
 
-        
-        let grid = new THREE.GridHelper(4, 30, "aqua", "aqua");
-        grid.position.y = 0.1;
-        stand.add(grid);
-        
+        let draggerBarStool = new THREE.Mesh( new THREE.SphereGeometry( 0.1, 0.1, 0.1 ), new THREE.MeshBasicMaterial( { color: 0xffff00 } ) ); scene.add( draggerBarStool )
+        draggerBarStool.position.y = 0.08
 
 
-                        
+        var limiterPlaneGeo = new THREE.PlaneGeometry(bboxWidthStand - bboxWidthHelper , bboxDepthStand - bboxDepthHelper );
+        let limiterPlaneMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+        let limiterPlane = new THREE.Mesh( limiterPlaneGeo, limiterPlaneMat );
+        scene.add(limiterPlane)
+        limiterPlane.rotation.x = THREE.MathUtils.degToRad(90)
+        limiterPlane.position.y = 0.10
+        limiterPlane.visible = false
+    
         document.getElementById("bar_stool_icon").addEventListener("click", addBarStool)
-
+    
         function addBarStool()  //ADD BAR STOOL
         {
-            scene.getObjectByName( "bar_stool_1").visible = true
-            scene.getObjectByName( "bar_stool_2").visible = true
             window.addEventListener( 'mousemove', onMouseMove);
-           
         }
-
+    
         function onMouseMove(event) //FOLLOW CURSOR
         {
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
-        scene.add(helperBarStool)
-        raycaster.setFromCamera(mouse, camera);
-        intersect = raycaster.intersectObject(stand)
-        controls.enabled = false; 
-
-        window.addEventListener( 'click', function()   //FIRST DROP
-        {
-            window.removeEventListener('mousemove', onMouseMove)
-            scene.remove(helperBarStool)
-            
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                intersect = raycaster.intersectObject(limiterPlane)
+                controls.enabled = false; 
+        
            
-          
-        });
+                scene.getObjectByName( "bar_stool_1").visible = true
+                scene.getObjectByName( "bar_stool_2").visible = true
+                scene.add(helperBarStool)
+                scene.add(baseBarStool)
 
-        for ( let i = 0; i < intersect.length; i ++ )
-        {
-            var bboxWidth = Math.abs(bbox.max.x)+Math.abs(bbox.min.x)
-            var bboxDepth = Math.abs(bbox.max.z)+Math.abs(bbox.min.z)
-            console.log("mouse.x:" + mouse.x)
-            console.log("mouse.y:" + mouse.y)
-
-            var a = intersect[ i ].point.x 
-            var c = intersect[ i ].point.z  
-            var b = intersect[ i ].point.y 
+                if(intersect.length>0)
+                {
+                    console.log("intersection true")
+                  
+                    for ( let i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+                        baseBarStool.position.set(a,0.11,c)     //drag yaparken bu ayarı kapatıyoruz çünkü drag edilen objenin kendisi basebarstool
+                        barStool.position.set(a,0.12,c)
+                        helperBarStool.update()
+                        
+                    } 
+                }
+                else        
+                {
+                    intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                    for ( let i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+                       // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
+                       helperBarStool.update()
+                            
+                        if (Math.abs(a)<= bboxWidthStand/2-bboxWidthHelper/2)
+                        {
+                            if(c<0){barStool.position.x=a; baseBarStool.position.x=a}
+                            else if(c>0){barStool.position.x=a; baseBarStool.position.x=a}
+                        }
+    
+                        if (Math.abs(c)<= bboxDepthStand/2-bboxDepthHelper/2)
+                        {
+                            if(a<0){barStool.position.z=c; baseBarStool.position.z=c}
+                            else if(a>0){barStool.position.z=c; baseBarStool.position.z=c}
+                        }
+                                      
+                    }
+                    
+                } 
+               
+        
             
-            barStool.position.set(a,b,c)
-            helperBarStool.update()
-        } 
-    }
+        
+                window.addEventListener( 'click', function()   //FIRST DROP
+                {
+                    window.removeEventListener('mousemove', onMouseMove)
+                    scene.remove(helperBarStool)
+                    scene.remove(baseBarStool)
+                    controls.enabled = true; 
+                })
+            
+        }
 
-    dragBarStool.addEventListener( 'drag', function () 
-    {
-        window.addEventListener( 'mousemove', onMouseHover);
-        intersect = raycaster.intersectObject(stand)
-        controls.enabled = false; 
+    
+        let objectsBarStool = []
+        
        
-
-    })
-
-
-    function onMouseHover(event) //CHECK INTERSECTIONS THEN DRAG
-    {
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
-            scene.add(helperBarStool)
-            raycaster.setFromCamera(mouse, camera);
-            intersect = raycaster.intersectObject(stand)
-            controls.enabled = false; 
-
-        if(intersect.length>0)
-        {
-            dragBarStool.activate()
-            
-        }
-        else
-        {
-            dragBarStool.deactivate()
-        }
-    }
+        objectsBarStool.push(baseBarStool)
+        objectsBarStool.push(barStool)
+        objectsBarStool.push(draggerBarStool)
+       
+    
+        const dragBarStool = new DragControls(objectsBarStool, camera, renderer.domElement)
         
     
-} 
-      
+        dragBarStool.transformGroup = true //bu ayar ile drag parent objeye etki edebiliyor bu ayar false olursa drag direk children'a etki ediyor.ama drag control obj bölümünde group olarak belirtilmesi de gerekiyor.
+        
+        dragBarStool.addEventListener( 'drag', function()
+        {
+            window.addEventListener( 'mousemove', onMouseHover);
+            controls.enabled = false
+            scene.add(helperBarStool)
+            scene.add(baseBarStool)
+            helperBarStool.update()
+        })
+    
+    
+        function onMouseHover(event) //CHECK INTERSECTIONS THEN DRAG
+        {   
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            intersect = raycaster.intersectObject(limiterPlane)
+    
+            if(intersect.length>0)
+            {
+                console.log("intersection true")
+              
+                for ( let i = 0; i < intersect.length; i ++ )
+                {
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z  
+                  //  baseBarStool.position.set(a,0.11,c)
+                    barStool.position.set(a,0.12,c)
+                    
+                } 
+            }
+            else        
+            {
+                intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                for ( let i = 0; i < intersect.length; i ++ )
+                {
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z  
+                   // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
 
+                        
+                    if (Math.abs(a)<= bboxWidthStand/2-bboxWidthHelper/2)
+                    {
+                        if(c<0){barStool.position.x=a; baseBarStool.position.x=a}
+                        else if(c>0){barStool.position.x=a; baseBarStool.position.x=a}
+                    }
+
+                    if (Math.abs(c)<= bboxDepthStand/2-bboxDepthHelper/2)
+                    {
+                        if(a<0){barStool.position.z=c; baseBarStool.position.z=c}
+                        else if(a>0){barStool.position.z=c; baseBarStool.position.z=c}
+                    }
+                                  
+                }
+                
+            } 
+           
+        }
+            dragBarStool.addEventListener( 'dragend', function () 
+            {
+                window.removeEventListener( 'mousemove', onMouseHover)
+                controls.enabled = true; 
+                scene.remove(helperBarStool)
+                scene.remove(baseBarStool)
+            })
+    
+              dragBarStool.addEventListener( 'hoveron', function () 
+            {
+                scene.add(helperBarStool)
+                scene.add(baseBarStool)
+            })
+               dragBarStool.addEventListener( 'hoveroff', function () 
+            {
+                scene.remove(helperBarStool)
+                scene.remove(baseBarStool)
+            })
+            
+        
+        
+    }
 
 /*
 # ##### ####### ###  ##  # ##### ##   ## ######  #######  
@@ -1178,8 +1273,8 @@ function onClickBackWall()
     tempV.project(camera);// get the normalized screen coordinate of world position
 
     // convert the normalized position to CSS coordinates
-    const x = (tempV.x *  .5 + .5) * canvas.clientWidth;
-    const y = (tempV.y * -.5 + .5) * canvas.clientHeight;
+    var x = (tempV.x *  .5 + .5) * canvas.clientWidth;
+    var y = (tempV.y * -.5 + .5) * canvas.clientHeight;
     
     backWallGraphicControl.style.left = `${x}px`
     backWallGraphicControl.style.top = `${y}px`

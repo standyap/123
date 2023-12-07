@@ -225,6 +225,19 @@ console.log(bBox1.intersectsBox(bBox2))
 */
 
 
+//How To Subdivide A Plane Into Even Squares In Three.js
+//https://www.youtube.com/watch?v=oQbfy8QP8Lc
+mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+raycaster.setFromCamera(mousePosition, camera);
+intersects = raycaster.intersectObjects(scene.children);
+intersects.forEach(function(intersect) {
+    if(intersect.object.name === 'ground') {
+        const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
+        highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
+    })
+//
+
 
 /**
     *  Drag Hover 
@@ -437,8 +450,205 @@ getObjectByName( "stand" ).add(grid);
  ##  ## ##   ##  ## ##   ##      ## ##   
  ##  ## ### ###   ###    ##   #  ## ##   
  ##  ##  #####    ###   ####### #### ##  
-                                         
+      
+ 
+   /**
+     * INIT HOVER SETTINGS
+     */
 
+   var helperInfoDeskClones = []
+   var newHelperInfoDesk 
+
+   function hoverEventInfoDesk(event)
+   {   
+       mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+       mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+       
+       raycaster.setFromCamera(mouse, camera);
+       intersect = raycaster.intersectObject(infoDesk)
+
+       if(intersect.length>0)
+       {hoverOnInfoDesk}
+       else        
+       {hoverOffInfoDesk}
+   }
+   
+   function hoverOnInfoDesk() 
+   {   
+   newHelperInfoDesk = helperInfoDesk.clone()
+   console.log("hover newhelper")
+   scene.add(newHelperInfoDesk)
+   helperInfoDeskClones.push(newHelperInfoDesk)
+   }
+
+   function hoverOffInfoDesk() 
+   {  
+   console.log("hover out newhelper")
+   for (var i = 0; i < helperInfoDeskClones.length; i++) {
+   scene.remove(helperInfoDeskClones[i]); 
+   }
+   helperInfoDeskClones = []; 
+   }
+ setTimeout(loadFurnitures, 5000)           //ÇALIŞAN BİR VERSİYON
+ function loadFurnitures() 
+ {
+     let stand = scene.getObjectByName( "stand_1" )
+     let barStool = scene.getObjectByName( "bar_stool")
+     let helperBarStool = new THREE.BoxHelper( barStool, 0xffff00 );
+ 
+ 
+     /**
+      *  Show bar stool
+      */
+     
+ 
+     var mouse = new THREE.Vector2();
+     var raycaster = new THREE.Raycaster(); 
+     var intersect = new THREE.Vector3();
+ 
+     var bbox = new THREE.Box3().setFromObject(helperBarStool);
+     var bboxWidth = Math.abs(bbox.max.x)+Math.abs(bbox.min.x)
+     var bboxDepth = Math.abs(bbox.max.z)+Math.abs(bbox.min.z)
+ 
+ 
+     let baseBarStoolGeo = new THREE.PlaneGeometry( bboxWidth, bboxDepth );
+     let baseBarStoolMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+     let baseBarStool = new THREE.Mesh( baseBarStoolGeo, baseBarStoolMat );
+     baseBarStool.rotation.x = THREE.MathUtils.degToRad(90)
+     baseBarStool.position.y = 0.15
+     
+ 
+                     
+     document.getElementById("bar_stool_icon").addEventListener("click", addBarStool)
+ 
+     function addBarStool()  //ADD BAR STOOL
+     {
+         window.addEventListener( 'mousemove', onMouseMove);
+     }
+ 
+     function onMouseMove(event) //FOLLOW CURSOR
+     {
+         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
+         
+         raycaster.setFromCamera(mouse, camera);
+         intersect = raycaster.intersectObject(stand)
+         controls.enabled = false; 
+ 
+     if(intersect.length>0)
+     {
+         scene.getObjectByName( "bar_stool_1").visible = true
+         scene.getObjectByName( "bar_stool_2").visible = true
+         scene.add(helperBarStool)
+         scene.add(baseBarStool)
+ 
+     }
+ 
+     window.addEventListener( 'click', function()   //FIRST DROP
+     {
+         window.removeEventListener('mousemove', onMouseMove)
+         scene.remove(helperBarStool)
+         scene.remove(baseBarStool)
+         controls.enabled = true; 
+     });
+ 
+         for ( let i = 0; i < intersect.length; i ++ )
+         {
+             var bboxWidth = Math.abs(bbox.max.x)+Math.abs(bbox.min.x)
+             var bboxDepth = Math.abs(bbox.max.z)+Math.abs(bbox.min.z)
+             console.log("mouse.x:" + mouse.x)
+             console.log("mouse.y:" + mouse.y)
+ 
+             var a = intersect[ i ].point.x 
+             var c = intersect[ i ].point.z  
+             var b = intersect[ i ].point.y 
+             
+             barStool.position.set(a,b,c)
+             baseBarStool.position.set(a,b,c)
+             
+             helperBarStool.update()
+         } 
+     }
+ 
+     let objectsBarStool = []
+     
+     objectsBarStool.push(baseBarStool)
+    
+ 
+     const dragBarStool = new DragControls(objectsBarStool, camera, renderer.domElement)
+     //dragBarStool.getRaycaster()
+ 
+     dragBarStool.transformGroup = true //bu ayar ile drag parent objeye etki edebiliyor bu ayar false olursa drag direk children'a etki ediyor.ama drag control obj bölümünde group olarak belirtilmesi de gerekiyor.
+     
+     dragBarStool.addEventListener( 'drag', function()
+     {
+         window.addEventListener( 'mousemove', onMouseHover);
+         controls.enabled = false
+         scene.add(helperBarStool)
+         scene.add(baseBarStool)
+         helperBarStool.update()
+     })
+ 
+ 
+     function onMouseHover(event) //CHECK INTERSECTIONS THEN DRAG
+     {   
+         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
+         
+         raycaster.setFromCamera(mouse, camera);
+         intersect = raycaster.intersectObject(stand)
+ 
+         if(intersect.length>0)
+         {
+             console.log("intersection true")
+            dragBarStool.enabled = true
+             for ( let i = 0; i < intersect.length; i ++ )
+             {
+                 var a = intersect[ i ].point.x 
+                 var c = intersect[ i ].point.z  
+                 var b = intersect[ i ].point.y 
+                 
+                 barStool.position.set(a,b,c)
+                 baseBarStool.position.set(a,b,c)
+                 
+             } 
+         }
+         else
+         {
+             console.log("intersection false")
+             dragBarStool.enabled = false
+             baseBarStool.position.set(barStool.position.x,barStool.position.y,barStool.position.z)
+              window.addEventListener( 'mouseup', function()   
+             {
+                 console.log("mouse up")
+                 window.removeEventListener( 'mousemove', onMouseHover)
+             })
+         } 
+         
+     }
+ 
+         dragBarStool.addEventListener( 'dragend', function () 
+         {
+             window.removeEventListener( 'mousemove', onMouseHover)
+             controls.enabled = true; 
+             scene.remove(helperBarStool)
+             scene.remove(baseBarStool)
+         })
+ 
+           dragBarStool.addEventListener( 'hoveron', function () 
+         {
+             scene.add(helperBarStool)
+             scene.add(baseBarStool)
+         })
+            dragBarStool.addEventListener( 'hoveroff', function () 
+         {
+             scene.remove(helperBarStool)
+             scene.remove(baseBarStool)
+         })
+         
+     
+     
+ }
 
 /**
  *  Hover bar stool BU ŞEKİLDE YAPILIRSA VERGEDEKİ GİBİ POINTER DROP ŞEKLİNDE OLUYOR.
@@ -498,6 +708,13 @@ console.log('drag')
  ##### #######   ####     ##### ###### ####### #######  
                                                         
 
+
+ console.log("BoxSize: " + new THREE.Box3().setFromObject( helperBarStool ).getSize(new THREE.Vector3()).z);
+
+ console.log(baseBarStool.geometry.parameters.width , baseBarStool.geometry.parameters.height)
+             
+
+ 
 // shape keylere etki etmiyor.ama ölçüleri veriyor.
 const geometry = new THREE.BoxGeometry( 5, 2, 8 );
 const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
@@ -590,7 +807,7 @@ document.addEventListener('keydown', (event) => {
    ##  ##    ##    ##   ##  ##  ##  
    ##  ##   ####   ### ### #######  
    
-   
+   var allObjectsButInfoDesk = allObjects.filter(obj => obj.name !== 'info_desk_1').filter(obj => obj.name !== 'info_desk_2')
 
    document.getElementById("storage_size_text").style.left = "552px";
 
@@ -622,7 +839,7 @@ document.addEventListener('keydown', (event) => {
                                      
    
   var new = text.substring(42) // text cümlesinin 42. harfinden sonuna kadar olan kısımdır.
-
+  "abc".slice(-1); // "c";
 
 
 
@@ -743,3 +960,134 @@ function newFunction_1() {
       }
       client.send();
 
+
+      ######   #####   # #####  ###   # ##### #######  
+      ##  ## ### ### ## ## ## ## ## ## ## ##  ##   #  
+      ##  ## ##   ##    ##   ##   ##   ##     ##      
+      #####  ##   ##    ##   ##   ##   ##     ####    
+      ## ##  ##   ##    ##   #######   ##     ##      
+      ## ##  ### ###    ##   ##   ##   ##     ##   #  
+     #### ##  #####    ####  ##   ##  ####   #######  
+                                                      
+     
+
+
+      document.getElementById("rotate_icon_bar_stool").onclick = ()=>
+                {
+                   // scene.remove(baseBarStool)
+                    barStool.rotateY(5);
+                    helperBarStool.update()
+                   // let rotateHelperBarStool = new THREE.BoxHelper( barStool, 0xffff00 );
+                    var bboxRotateHelper = new THREE.Box3().setFromObject(barStool);
+                    var bboxWidthRotateHelper = Math.abs(bboxRotateHelper.max.x)+Math.abs(bboxRotateHelper.min.x)
+                    var bboxDepthRotateHelper = Math.abs(bboxRotateHelper.max.z)+Math.abs(bboxRotateHelper.min.z)
+                     console.log(bboxWidthRotateHelper , bboxDepthRotateHelper)
+                     console.log(baseBarStool.geometry.parameters.width , baseBarStool.geometry.parameters.height)
+                    // scene.add(baseBarStool)
+                 //   var bboxHelper = new THREE.Box3().setFromObject(helperBarStool);
+                    //var bboxWidthHelper = Math.abs(bboxHelper.max.x)+Math.abs(bboxHelper.min.x)
+                   // var bboxDepthHelper = Math.abs(bboxHelper.max.z)+Math.abs(bboxHelper.min.z)
+                   baseBarStool.scale.set(  bboxWidthRotateHelper / baseBarStool.geometry.parameters.height, 1 , bboxDepthRotateHelper  / baseBarStool.geometry.parameters.width  )
+
+                  // console.log(helperBarStool.geometry)
+                 //  console.log(helperBarStool.geometry.translate)
+
+                 //  var box3 = new THREE.Box3();
+                  //  var size = new THREE.Vector3(); // create once and reuse
+                  // box3.setFromObject( helperBarStool ); // or from mesh, same answer
+                  // console.log( box3 );
+                   
+                  // box3.getSize( size ); // pass in size so a new Vector3 is not allocated
+                  // console.log( size )
+                  
+                  
+                  /*   console.log("base bar stool width:" + baseBarStool.geometry.parameters.width)
+                    console.log("base bar stool height:" + baseBarStool.geometry.parameters.height) */
+
+               /*   console.log("bbox width helper:" + bboxWidthHelper)
+                 console.log("bbox width helper:" + bboxDepthHelper) */
+
+                
+                
+                /* let box = new THREE.Box3().setFromObject( helperBarStool )
+                console.log("BoxSize: " + box.getSize(new THREE.Vector3()).x); */
+
+                // console.log("bbox width helper test:" + helperBarStool.geometry.parameters.width)
+               //  console.log("bbox height helper test:" + helperBarStool.geometry.parameters.height)
+                   // baseBarStool.scale.set( 1, baseBarStool.geometry.parameters.width * bboxWidthHelper , baseBarStool.geometry.parameters.height * bboxDepthHelper )
+                    
+
+
+
+#####  ##   ## ######  
+##   ## ##   ##   ##    
+##      ##   ##   ##    
+## #### ##   ##   ##    
+##   ## ##   ##   ##    
+##   ## ##   ##   ##    
+#####   #####  ######  
+                                           
+                    
+
+// Dat gui controls
+/* var gui = new dat.GUI();
+
+var guiControls = new function () 
+{
+    this.depth = 0;
+    this.width = 0;
+    this.x = 1;
+    this.updateDepth = function () 
+    {
+        // Update morphtarget influence on change of control
+        /* scene.getObjectByName( "stand_1" ).morphTargetInfluences[4] = guiControls.depth;
+        scene.getObjectByName( "stand_2" ).morphTargetInfluences[4] = guiControls.depth;
+        scene.getObjectByName( "left_wall_1" ).morphTargetInfluences[0] = guiControls.depth;
+        scene.getObjectByName( "left_wall_2" ).morphTargetInfluences[0] = guiControls.depth;
+        scene.getObjectByName( "right_wall_1" ).morphTargetInfluences[0] = guiControls.depth;
+        scene.getObjectByName( "right_wall_2" ).morphTargetInfluences[0] = guiControls.depth; 
+               
+    }
+    this.updateWidth = function ()
+    {
+        
+        /* scene.getObjectByName( "stand_1" ).morphTargetInfluences[3] = guiControls.width;
+        scene.getObjectByName( "stand_2" ).morphTargetInfluences[3] = guiControls.width;
+        scene.getObjectByName( "back_wall_1" ).morphTargetInfluences[0] = guiControls.width;
+        scene.getObjectByName( "back_wall_2" ).morphTargetInfluences[0] = guiControls.width; 
+    } 
+}*/
+//gui.add(guiControls, 'depth', 0, 1).onChange(guiControls.updateDepth); //bu son satıra gelmeli
+//gui.add(guiControls, 'width', 0, 1).onChange(guiControls.updateWidth); //bu son satıra gelmeli 
+
+####### ##   ## ##   ##   ####   
+##   # ##   ## ###  ##  ##  ##  
+##     ##   ## #### ## ##       
+####   ##   ## ####### ##       
+##     ##   ## ## #### ##       
+##     ##   ## ##  ###  ##  ##  
+####     #####  ##   ##   ####   
+                                
+
+(function()         // DESCRIPTION HERE
+        {
+
+
+
+                    // CODE HERE
+
+
+
+       })()         // DESCRIPTION HERE
+
+
+       (     /*DESCRIPTION HERE*/      ) =>        
+       {
+ 
+ 
+         // CODE HERE
+ 
+ 
+ 
+            
+       };    /*DESCRIPTION HERE*/

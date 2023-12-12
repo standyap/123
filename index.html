@@ -2,36 +2,7 @@
 <html lang="en">
    
 <head>
-    <script> //w3.includeHTML Script
-    function includeHTML() {
-  var z, i, elmnt, file, xhttp;
-  /* Loop through a collection of all HTML elements: */
-  z = document.getElementsByTagName("*");
-  for (i = 0; i < z.length; i++) {
-    elmnt = z[i];
-    /*search for elements with a certain atrribute:*/
-    file = elmnt.getAttribute("w3-include-html");
-    if (file) {
-      /* Make an HTTP request using the attribute value as the file name: */
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
-          if (this.status == 200) {elmnt.innerHTML = this.responseText;}
-          if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
-          /* Remove the attribute, and call this function once more: */
-          elmnt.removeAttribute("w3-include-html");
-          includeHTML();
-        }
-      }
-      xhttp.open("GET", file, true);
-      xhttp.send();
-      /* Exit the function: */
-      return;
-    }
-  }
-}
     
-    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expo Configurator Test</title>
@@ -42,6 +13,7 @@
     <link rel="stylesheet" href="./top-panel.css">
     <link rel="stylesheet" href="./graphic-control-styles.css">
     <link rel="stylesheet" href="./price.css">
+    <link rel="stylesheet" href="./furnitures.css">
 
  <!--    <div id="login_form">
       <div id=login_form_background></div>
@@ -79,29 +51,329 @@
   
 
     <!--SCRIPTS: -->
-      <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script> -->
-      <!-- <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script> -->
-      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script> -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script>
+      <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
       <script src="https://smtpjs.com/v3/smtp.js"></script>
       <script src="//static.filestackapi.com/filestack-js/3.x.x/filestack.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/gsap@3.12/dist/gsap.min.js"></script>
 
 
 
 </head>
 <body>
+  <div class="container">
     <canvas class="webgl"></canvas>
+    <div class="html"></div>
+  </div>
+  
     <script type="module" src="./script.js"></script>
     <!-- <div id="loader"></div> -->
     
-    <div w3-include-html="./panels.html"></div>
-    <div w3-include-html="./switches.html"></div>
-        <script>includeHTML();</script>
         <div id="button" class="button">Test Button</div>
         <div id="button2" class="button2">Test Button</div>
         <img id="temp_background" ></img>
         <div id="render_page" >
           <img id="test_img" ></img>
         </div>
+
+ <!-- Left Panel Background -->
+ <div id="left_panel_background">
+    
+  <p id="add_tab">add item</p>
+  <p id="storage_tab">storage</p>
+  
+      <div id="up_icon_left_panel"></div>
+      <div id="down_icon_left_panel"></div>
+      <div id="left_panel_icon_group">
+          <div id="left_panel_icon_group_main" style="display:block">
+              
+              <div id="bar_stool_icon"></div>
+              <div id="bistro_table_icon"></div>
+              <div id="single_sofa_icon"></div>
+              <div id="double_sofa_icon"></div>
+              <div id="chair_icon"></div>
+              <div id="coffee_table_icon"></div>
+              <div id="high_table_icon"></div>
+              <div id="tv42_icon"></div>
+              <div id="tv55_icon"></div>
+              <div id="brochure_rack_icon"></div>
+              <div id="people0_icon"></div>
+          </div>
+          <div id="left_panel_icon_group_storage" style="display:none">
+              
+              <div id="shelves_icon"></div>
+              <div id="kettle_icon"></div>
+              <div id="water_dispenser_icon"></div>
+              <div id="refrigator_icon"></div>
+              <div id="plant_icon"></div>
+              <div id="trash_can_icon"></div>
+          </div>
+      </div>
+   </div>
+  
+  
+  
+   </div>
+  
+  <!--  Right Panel Background -->
+  <div id="right_panel_background">
+  
+  <p id="carpet_tab">carpet</p>
+  <p id="parquet_tab">parquet</p>
+  <p id="laminate_tab">laminate</p>
+  
+  
+      <div id="up_icon_right_panel"></div>
+      <div id="down_icon_right_panel"></div>
+      <div id="right_panel_icon_group">
+          <div id="right_panel_icon_group_carpet" style="display:block">
+              <div id="carpet0_icon"></div>
+              <div id="carpet1_icon"></div>
+              <div id="carpet2_icon"></div>
+              <div id="carpet3_icon"></div>
+              <div id="carpet4_icon"></div>
+              <div id="carpet5_icon"></div>
+          </div>
+          <div id="right_panel_icon_group_parquet" style="display:none">
+              
+              <div id="parquet0_icon"></div>
+              <div id="parquet1_icon"></div>
+              <div id="parquet2_icon"></div>
+              <div id="parquet3_icon"></div>
+              <div id="parquet4_icon"></div>
+              <div id="parquet5_icon"></div>
+          </div>
+  
+          <div id="right_panel_icon_group_laminate" style="display:none">
+              
+              <div id="laminate0_icon"></div>
+              <div id="laminate1_icon"></div>
+              <div id="laminate2_icon"></div>
+              <div id="laminate3_icon"></div>
+              <div id="laminate4_icon"></div>
+              <div id="laminate5_icon"></div>
+              <div id="laminate6_icon"></div>
+              <div id="laminate7_icon"></div>
+              <div id="laminate8_icon"></div>
+              <div id="laminate9_icon"></div>
+              <div id="laminate10_icon"></div>
+              <div id="laminate11_icon"></div>
+              <div id="laminate12_icon"></div>
+              <div id="laminate13_icon"></div>
+              <div id="laminate14_icon"></div>
+              <div id="laminate15_icon"></div>
+          
+          </div>
+  
+      </div>
+  </div>
+  
+  
+  <!--  Top Panel Background -->
+  <div id="top_panel_background">
+      <div id="stand_info_text"></div>
+      <div id="storage_size_text"></div>
+      <div id="total_price_top_panel"></div>
+      <div id="total_price_top_panel_text"></div>
+      <div id="up_icon_top_panel"></div>
+      <div id="down_icon_top_panel"></div>
+      <div id="e-mail_form">
+              <div class="content">
+                  <form class="subscription">
+                  <input id=email_form class="add-email" type="email" placeholder="myconfiguration@me.now">
+                  <button class="submit-email" type="button">
+                      <span id=send_button class="before-submit">Save</span>
+                      <span class="after-submit">Your Configuration Saved</span>
+                  </button>
+                  </form>
+              </div>
+      </div>
+      <p id="send_configuration_tab">save configuration & send e-mail</p>
+  
+  <!--  Add Furnitures -->
+  
+      <p id="top_panel_furniture_list_bar_stool">bar stool</p>
+      <p id="top_panel_furniture_list_bar_stool_price"></p>
+      <p id="top_panel_furniture_list_bistro_table">bistro table</p>
+      <p id="top_panel_furniture_list_bistro_table_price"></p>
+      <p id="top_panel_furniture_list_single_sofa">single sofa</p>
+      <p id="top_panel_furniture_list_single_sofa_price"></p>
+      <p id="top_panel_furniture_list_double_sofa">double sofa</p>
+      <p id="top_panel_furniture_list_double_sofa_price"></p>
+      <p id="top_panel_furniture_list_chair">chair</p>
+      <p id="top_panel_furniture_list_chair_price"></p>
+      <p id="top_panel_furniture_list_coffee_table">coffee table</p>
+      <p id="top_panel_furniture_list_coffee_table_price"></p>
+      <p id="top_panel_furniture_list_high_table">hight table</p>
+      <p id="top_panel_furniture_list_high_table_price"></p>
+      <p id="top_panel_furniture_list_tv42">42" tv</p>
+      <p id="top_panel_furniture_list_tv42_price"></p>
+      <p id="top_panel_furniture_list_tv55">55" tv</p>
+      <p id="top_panel_furniture_list_tv55_price"></p>
+      <p id="top_panel_furniture_list_brochure_rack">brochure rack</p>
+      <p id="top_panel_furniture_list_brochure_rack_price"></p>
+  
+  <!--  Storage Furnitures -->   
+  <p id="top_panel_furniture_list_shelves">shelves</p>
+  <p id="top_panel_furniture_list_shelves_price"></p>
+  <p id="top_panel_furniture_list_kettle">kettle</p>
+  <p id="top_panel_furniture_list_kettle_price"></p>
+  <p id="top_panel_furniture_list_water_dispenser">water dispenser</p>
+  <p id="top_panel_furniture_list_water_dispenser_price"></p>
+  <p id="top_panel_furniture_list_refrigator">refrigator</p>
+  <p id="top_panel_furniture_list_refrigator_price"></p>
+  <p id="top_panel_furniture_list_plant">plant</p>
+  <p id="top_panel_furniture_list_plant_price"></p>
+  <p id="top_panel_furniture_list_trash_can">trash can</p>
+  <p id="top_panel_furniture_list_trash_can_price"></p>
+  </div>
+  
+  
+  
+  <!--  Graphic Controls --> 
+  
+  <div id="graphics_control_icon_group_back_wall" style="visibility:hidden">
+      <div id="zoom_out_icon"></div>
+      <div id="zoom_in_icon"></div>
+      <div id="up_icon"></div>
+      <div id="down_icon"></div>
+      <div id="add_icon"></div>
+      <div id="refresh_icon"></div>
+      <div id="left_icon"></div>
+      <div id="right_icon"></div>
+      <div id="apply_icon"></div>
+  </div>
+
+  <div id="graphics_control_icon_group_right_wall" style="visibility:hidden">
+    <div id="zoom_out_icon_right"></div>
+    <div id="zoom_in_icon_right"></div>
+    <div id="up_icon_right"></div>
+    <div id="down_icon_right"></div>
+    <div id="add_icon_right"></div>
+    <div id="refresh_icon_right"></div>
+    <div id="left_icon_right"></div>
+    <div id="right_icon_right"></div>
+    <div id="apply_icon_right"></div>
+</div>
+
+  <div id="graphics_control_icon_group_left_wall" style="visibility:hidden">
+    <div id="zoom_out_icon_left"></div>
+    <div id="zoom_in_icon_left"></div>
+    <div id="up_icon_left"></div>
+    <div id="down_icon_left"></div>
+    <div id="add_icon_left"></div>
+    <div id="refresh_icon_left"></div>
+    <div id="left_icon_left"></div>
+    <div id="right_icon_left"></div>
+    <div id="apply_icon_left"></div>
+</div>
+  
+  <div id="graphics_control_icon_group_info_desk" style="visibility:hidden">
+      <div id="zoom_out_icon"></div>
+      <div id="zoom_in_icon"></div>
+      <div id="up_icon"></div>
+      <div id="down_icon"></div>
+      <div id="add_icon"></div>
+      <div id="refresh_icon"></div>
+      <div id="left_icon"></div>
+      <div id="right_icon"></div>
+      <div id="apply_icon"></div>
+  </div>
+  
+  <!--  Furniture Controls --> 
+  <div id="furniture_icon_group_bar_stool" style="visibility:hidden">
+      <div id="rotate_icon_bar_stool"></div>
+      <div id="trash_icon_bar_stool"></div>
+      <div id="color_black_icon_bar_stool"></div>
+      <div id="color_white_icon_bar_stool"></div>
+      
+  </div>
+  
+  <div id="furniture_icon_group_info_desk" style="visibility:hidden">
+      <div id="rotate_icon_info_desk"></div>
+      <div id="trash_icon_info_desk"></div>
+      <div id="color_black_icon_info_desk"></div>
+      <div id="color_white_icon_info_desk"></div>
+      
+  </div>
+  
+  <div id="furniture_icon_group_people" style="visibility:hidden">
+      <div id="rotate_icon_people"></div>
+      <div id="trash_icon_people"></div>
+      
+      
+  </div>
+  
+  
+  <!--  Login Form --> 
+
+   <!-- Floor Light Toogle Switch -->
+ <div id="toogle_switch_floor_light">
+  <div style="margin-left: 5px;" class="toogle_switch_text">floor<br>light</div>
+  <label class="switch"><input id=toogle_switch_floor_light_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Dark Mode Toogle Switch -->
+<div id="toogle_switch_dark_theme">
+  <div style="margin-left: 5px;" class="toogle_switch_text">dark<br>mode</div>
+  <label class="switch"><input id=toogle_switch_dark_theme_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Info Desk Toogle Switch -->
+<div id="toogle_switch_info_desk">
+  <div style="margin-left: 5px;" class="toogle_switch_text">info<br>desk</div>
+  <label class="switch"><input id=toogle_switch_info_desk_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Left Wall Toogle Switch -->
+<div id="toogle_switch_left_wall">
+  <div style="margin-left: 5px;" class="toogle_switch_text">left<br>wall</div>
+  <label class="switch"><input id=toogle_switch_left_wall_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Back Wall Toogle Switch -->
+<div id="toogle_switch_back_wall">
+  <div style="margin-left: 5px;" class="toogle_switch_text">back<br>wall</div>
+  <label class="switch"><input id=toogle_switch_back_wall_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Right Wall Toogle Switch -->
+<div id="toogle_switch_right_wall">
+  <div style="margin-left: 5px;" class="toogle_switch_text">right<br>wall</div>
+  <label class="switch"><input id=toogle_switch_right_wall_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Storage Toogle Switch -->
+<div id="toogle_switch_storage">
+  <div style="margin-left: -5px;" class="toogle_switch_text">storage</div>
+  <label class="switch"><input id=toogle_switch_storage_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+<!-- Raised Floor Toogle Switch -->
+<div id="toogle_switch_raised_floor">
+  <div style="margin-left: 5px;" class="toogle_switch_text">floor<br>height</div>
+  <label class="switch"><input id=toogle_switch_raised_floor_switch type="checkbox">
+  <span class="slider round"></span></label>
+  
+</div>
+
+<!-- Controllers Toogle Switch -->
+<div id="toogle_switch_controllers">
+  <div style="margin-left: -5px;" class="toogle_switch_text">controls</div>
+  <label class="switch"><input id=toogle_switch_controllers_switch type="checkbox">
+  <span class="slider round"></span></label>
+</div>
+
+
+
         
        
        

@@ -5,54 +5,48 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import { DragControls } from 'three/examples/jsm/controls/DragControls.js'
 
-
-import gsap from 'gsap';
-import { Scrool } from './scrool.js'
-//import { SendServerAddParam } from './send.js'
+//import gsap from 'gsap';
 import * as dat from 'three/examples/jsm/libs/lil-gui.module.min.js'
 import * as Functions from './functions.js'
-import { jsPDF } from "jspdf";
-import { _forEachName } from 'gsap/gsap-core.js'
-                                
+//import { jsPDF } from "jspdf";
+//import { _forEachName } from 'gsap/gsap-core.js'
 
+/*                                
+###### ##   ## ###### # ##### 
+##   ###  ##   ##  ## ## ## 
+##   #### ##   ##     ##    
+##   #######   ##     ##    
+##   ## ####   ##     ##    
+##   ##  ###   ##     ##    
+###### ##   ## ######  ####   
+*/                         
 
+{//START OF MAIN GROUP
 var container = document.querySelector('.container');
 var overlay = document.querySelector('.html');
-
-
+var mouse = new THREE.Vector2();
+var raycaster = new THREE.Raycaster(); 
+var intersect = new THREE.Vector3();
 /**
  * Loaders
  */
 
-const gltfLoader = new GLTFLoader()
-const rgbeLoader = new RGBELoader()
+var gltfLoader = new GLTFLoader()
+var rgbeLoader = new RGBELoader()
 
-
-/**
- * Load Panel Settings function after 5 seconds
- */
-const timeLoadScrool = setTimeout(loadScrool, 5000);
-
-    function loadScrool()
-    {
-        const scrFunc = new Scrool()
-    } 
-
-const global = {}
+var global = {}
 /**
  * Canvas
  */
-const canvas = document.querySelector('canvas.webgl')
+var canvas = document.querySelector('canvas.webgl')
 document.querySelector('.webgl').preserveDrawingBuffer=true 
-
-// Scene
-const scene = new THREE.Scene()
-//const light = new THREE.PointLight( 0xff0000, 5, 100 ); light.position.set( 0, 50, 0 ); scene.add( light );
-
+var scene = new THREE.Scene()
+//var light = new THREE.PointLight( 0xff0000, 5, 100 ); light.position.set( 0, 50, 0 ); scene.add( light );
 /**
  * Update all materials
  */
-const updateAllMaterials = ()=>
+updateAllMaterials()
+function updateAllMaterials()
 {
     scene.traverse(
         (child) =>
@@ -62,89 +56,79 @@ const updateAllMaterials = ()=>
             child.material.envMapIntensity = global.envMapIntensity
            // console.log(child.material)
             //console.log(child)
-
             //Hide All Objects on first initilazation
             child.visible = false;
-
             //Show first scene objects
             scene.getObjectByName( "environment" ).visible = true;
             scene.getObjectByName( "environment_floor" ).visible = true;
             scene.getObjectByName( "stand_1" ).visible = true;
             scene.getObjectByName( "stand_2" ).visible = true;
             scene.getObjectByName( "drag_front" ).visible = true;
+            scene.getObjectByName( "drag_right" ).visible = true;
+            scene.getObjectByName( "drag_left" ).visible = true;
                     
         }
     })
 }
 
-
-
-const loadEnvironmentMap = ()=>
+function loadEnvironmentMap()
 {
     /**
      * Environment map
      */
     global.envMapIntensity = 1.2
     // HDR (RGBE) equirectangular (Load after gltf model loaded)
-    const environmentMap = rgbeLoader.load('/media/environment.hdr', (environmentMap) =>
+    var environmentMap = rgbeLoader.load('/media/environment.hdr', (environmentMap) =>
     {
      // console.log(environmentMap)
-     environmentMap.mapping = THREE.EquirectangularReflectionMapping
+    environmentMap.mapping = THREE.EquirectangularReflectionMapping
     scene.environment = environmentMap
     scene.background = environmentMap
     })
 }
-/*
-
-##   ##   #####   #####    #######  ####     
-### ###  ### ###   ## ##    ##   #   ##      
-#######  ##   ##   ##  ##   ##       ##      
-## # ##  ##   ##   ##  ##   ####     ##      
-##   ##  ##   ##   ##  ##   ##       ##      
-##   ##  ### ###   ## ##    ##   #   ##  ##  
-### ###   #####   #####    #######  #######  
-  
-*/
-
-const loader = document.createElement("div")
-loader.id = "loader"
-document.body.appendChild(loader);
 
 
-gltfLoader.load(
-    '/model/expo_project.gltf',
-    (gltf) =>
+    var loader = document.createElement("div")
+    loader.id = "loader"
+    document.body.appendChild(loader);
+    
+    
+    gltfLoader.load(
+        '/model/standyap.gltf',
+        (gltf) =>
+        {
+            gltf.scene.scale.set(1, 1, 1)
+            scene.add(gltf.scene)
+            loadEnvironmentMap()
+            updateAllMaterials()
+            document.getElementById("loader").style.display = "none";  
+            
+      
+        })
+    /**
+     * Update Sizes
+     */
+    var sizes = {
+        width: window.innerWidth,
+        height: window.innerHeight
+    }
+    
+    window.addEventListener('resize', function resizeAll()
     {
-        gltf.scene.scale.set(1, 1, 1)
-        scene.add(gltf.scene)
-        loadEnvironmentMap()
-        updateAllMaterials()
-        document.getElementById("loader").style.display = "none";  
-        
-  
+        // Update sizes
+        sizes.width = window.innerWidth
+        sizes.height = window.innerHeight
+    
+        // Update camera
+        camera.aspect = sizes.width / sizes.height
+        camera.updateProjectionMatrix()
+    
+        // Update renderer
+        renderer.setSize(sizes.width, sizes.height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     })
-/**
- * Update Sizes
- */
-const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
-}
-
-window.addEventListener('resize', function resizeAll()
-{
-    // Update sizes
-    sizes.width = window.innerWidth
-    sizes.height = window.innerHeight
-
-    // Update camera
-    camera.aspect = sizes.width / sizes.height
-    camera.updateProjectionMatrix()
-
-    // Update renderer
-    renderer.setSize(sizes.width, sizes.height)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-})
+    
+}//END OF MAIN GROUP
 
 
 /*
@@ -157,42 +141,58 @@ window.addEventListener('resize', function resizeAll()
 ##      ####### ##   ##  ##      ## ##  #######  
  ##  ## ##   ## ##   ##  ##   #  ## ##  ##   ##  
   ####  ##   ## ### ### ####### #### ## ##   ##  
-                                                 
 
-*/                                             
-// Base camera
-    const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
-    camera.position.set(0, 2, 20)
+  ######  ####### ##   ## #####  ####### ######   
+ ##  ##  ##   # ###  ##  ## ##  ##   #  ##  ##  
+ ##  ##  ##     #### ##  ##  ## ##      ##  ##  
+ #####   ####   #######  ##  ## ####    #####   
+ ## ##   ##     ## ####  ##  ## ##      ## ##   
+ ## ##   ##   # ##  ###  ## ##  ##   #  ## ##   
+#### ## ####### ##   ## #####  ####### #### ##  
+                                                
+
+*/                                                 
+{//START OF MAIN GROUP
+    var camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
+    camera.position.set(9, 8, 9) //x,y,z
+    
     scene.add(camera)
-    // Smooth camera movement
+    
     gsap.to(camera.position,
         {
-        duration: 6,
-        x: 5,
-        y: 10,
-        z: 25,
-        delay: 2,
+        duration: 3,
+        x: 8,
+        y: 6,
+        z: 12,
+        delay: 0,
     });
+    /**
+ * GSAP KAMERA AYARI YAPARKEN 
+ * CAMERA POSITION DEĞERLERİ BAŞLANGIÇ DEĞERLERİ GSAP DEĞERLERİ İSE ULAŞILACAK DEĞERLERİ GÖSTERİYOR.
+ * controls.target.y = 1.5 BU KAMERANIN UZAKLIĞINI BELİRLİYOR.
+ * KAMERA POZİSYONUNU EKRANDAN OKUYUP ONA GÖRE AYARLAMA YAPMAK İÇİN TEST BUTONUNA CONSOLE.LOG(CAMERA.POSITION) VEYA TICK'İN İÇİNE DE KOYABİLİRİZ BU SAYEDE HER KAREDE 
+ * KAMERA POZİSYONU OKUYABİLİRİZ.
+ */
     // Camera Controls
-    const controls = new OrbitControls(camera, canvas)
-    controls.target.y = 3.5
-    controls.enableDamping = true
+    var controls = new OrbitControls(camera, canvas)
+    controls.target.y = 1.5
+    //controls.enableZoom=true
+    controls.enableDamping = true   //used to give a sense of weight to the controls. 
+    controls.enablePan = false
     // Min Max Distance and Rotation Limits
     controls.minPolarAngle = 0;
     controls.maxPolarAngle =  Math.PI * 0.5;
-    controls.maxDistance = 15
-    controls.minDistance = 5
-
-
+    controls.maxDistance = 21   //MAKS ZOOM
+    controls.minDistance = 5    //MIN ZOOM
 
 // Render cameras
 
-const cameraRight = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
+var cameraRight = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
 cameraRight.position.set(14, 4, 0)
 scene.add(cameraRight)
 cameraRight.lookAt(0,0,0)
 
-const controlsRight = new OrbitControls(cameraRight, canvas)
+var controlsRight = new OrbitControls(cameraRight, canvas)
 controlsRight.target.y = 3.5
 controlsRight.enableDamping = true
 controlsRight.minPolarAngle = 0;
@@ -200,13 +200,11 @@ controlsRight.maxPolarAngle =  Math.PI * 0.5;
 controlsRight.maxDistance = 15
 controlsRight.minDistance = 5
 
-
-
-const cameraLeft = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
+var cameraLeft = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
 cameraLeft.position.set(-20, 6, 0)
 //scene.add(cameraLeft)
 
-const cameraBack = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
+var cameraBack = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 5000)
 cameraBack.position.set(0, 6, 20)
 //scene.add(cameraBack)
 
@@ -215,7 +213,7 @@ cameraBack.position.set(0, 6, 20)
 /**
  * Renderer
  */
-const renderer = new THREE.WebGLRenderer({canvas: canvas , preserveDrawingBuffer: true})
+var renderer = new THREE.WebGLRenderer({canvas: canvas , preserveDrawingBuffer: true})
 
 
 //configure WebGLRenderer as follows when using glTF
@@ -225,11 +223,11 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate main camera
  */
-const clock = new THREE.Clock()
-const tick = () =>
+var clock = new THREE.Clock()
+var tick = () =>
 {
     // Time
-    const elapsedTime = clock.getElapsedTime()
+    var elapsedTime = clock.getElapsedTime()
 
     // Update controls
     controls.update()
@@ -249,11 +247,11 @@ tick();
  * Animate right camera
  */
 
-const clockRight = new THREE.Clock()
+var clockRight = new THREE.Clock()
 function tickRight()
 {
     // Time
-    const elapsedTime = clockRight.getElapsedTime()
+    var elapsedTime = clockRight.getElapsedTime()
 
     // Update controls
     controlsRight.update()
@@ -267,6 +265,413 @@ function tickRight()
     //console.log(camera.position)
 }
 
+}//END OF MAIN GROUP
+
+/*
+##### ####     ##### ######    ###   ####     
+##   ## ##     ### ### ##  ##  ## ##   ##      
+##      ##     ##   ## ##  ## ##   ##  ##      
+## #### ##     ##   ## #####  ##   ##  ##      
+##   ## ##     ##   ## ##  ## #######  ##      
+##   ## ##  ## ### ### ##  ## ##   ##  ##  ##  
+ ##### #######  ##### ######  ##   ## #######  
+                                               
+ ####### ##   ## ##   ##   ####   
+  ##   # ##   ## ###  ##  ##  ##  
+  ##     ##   ## #### ## ##       
+  ####   ##   ## ####### ##       
+  ##     ##   ## ## #### ##       
+  ##     ##   ## ##  ###  ##  ##  
+ ####     #####  ##   ##   ####   
+ */                                 
+ var allObjects = []
+
+ setTimeout(loadGlobalFunctions, 5000)      
+ function loadGlobalFunctions() 
+ {
+    /**
+     *  ON EVENT OF CLICK ALL
+     */
+    
+    function getAllObjects()        //  BU KULLANIM ŞEKLİYLE PROJENİN HERHANGİ BİR ALANINDA ALLOBJECTS VARIABLE'I BİE GETALLOBJECTS OLARAK DÖNÜYOR. VARIABLE FONKSİYONUN DIŞINDA YALNIZ BAŞINA TANIMLANMALIDIR.
+    {
+        scene.traverse( function( objects ) 
+        {
+            if ( objects.isMesh ) 
+                {
+                    allObjects.push(objects)
+                }
+                
+        })
+    }
+    getAllObjects()
+    
+ } 
+
+/*
+
+##### ######    ###   ######  ##  ## ###### ####   
+##   ## ##  ##  ## ##   ##  ## ##  ##   ##  ##  ##  
+##      ##  ## ##   ##  ##  ## ##  ##   ## ##       
+## #### #####  ##   ##  #####  ######   ## ##       
+##   ## ## ##  #######  ##     ##  ##   ## ##       
+##   ## ## ##  ##   ##  ##     ##  ##   ##  ##  ##  
+ ##### #### ## ##   ## ####    ##  ## ###### ####   
+
+*/
+var tempB,tempR,tempL , backWallUploadResponseUrl,bb,rr,ll,rightWallUploadResponseUrl,leftWallUploadResponseUrl,hoverBack,hoverRight,hoverLeft 
+/**
+ * 
+ * BU FONKSİYONLARA NEDEN SETTIMEOUT VERMEDİK?
+ * ÇÜNKÜ BU FONKSİYONLARI SWITCHLER AKTİF OLDUĞUNDA ÇALIŞTIRACAĞIZ VE SWITCHLERİN AKTİF OLMASI İÇİN İSE ONLARIN SETTIMEOUT METODUNU BEKLEMEMİZ GEREKECEK
+ * YANİ ZAMAN DOLMADAN SWITCH'E TIKLARSAK BİR HATA MESAJI ALMAYIZ AMA İŞLEM DE YAPAMAYIZ.SWITCH'İ GERİ DÖNDÜRMEMİZ GEREKİR.
+ * 
+ */
+
+
+function loadGraphicControlsBack()// FUNCTION WORKS WHEN RIGHTWALL SWITCH ON
+{
+var backWall = scene.getObjectByName( "back_wall" )
+var backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")       
+window.addEventListener( 'mousemove', detectClickBackWall);
+function detectClickBackWall(event)
+{
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
+    //console.log("mouse coordinates:" + mouse.x , mouse.y)
+
+    raycaster.setFromCamera(mouse, camera);
+    intersect = raycaster.intersectObject(backWall)
+    if (intersect.length > 0)
+    {   
+        console.log("hovered back wall")
+        window.addEventListener( 'mousedown', onClickBackWall); //WHEN HOVERED DETECT CLICK EVENT
+    }
+    else
+    {   
+        window.removeEventListener( 'mousedown', onClickBackWall);
+    }
+}
+function onClickBackWall()
+{
+    tempB = backWall.getWorldPosition(new THREE.Vector3())
+    tempB.project(camera);// get the normalized screen coordinate of world position
+
+    // convert the normalized position to CSS coordinates
+    var x = (tempB.x *  .5 + .5) * canvas.clientWidth;
+    var y = (tempB.y * -.5 + .5) * canvas.clientHeight;
+    
+    backWallGraphicControl.style.left = `${x}px`
+    backWallGraphicControl.style.top = `${y}px`
+    backWallGraphicControl.style.visibility = "visible"
+    
+}
+document.getElementById("add_icon").onclick = ()=>
+{   
+    var inputBack = document.createElement('input');
+    inputBack.type = 'file';
+    
+    inputBack.onchange = e => 
+    { 
+       // getting a hold of the file reference
+       var fileBack = e.target.files[0]; 
+       // setting up the reader
+       var readerBack = new FileReader();
+       readerBack.readAsDataURL(fileBack); // this is reading as data url
+       // here we tell the reader what to do when it's done reading...
+       readerBack.onload = readerEvent => 
+       {
+        var contentBack = readerEvent.target.result; // this is the content!
+        var textureBack = new THREE.TextureLoader().load(contentBack);
+        
+        Functions.sendDataParams(contentBack , backWallUploadResponseUrl , "backwall_image" )
+        scene.getObjectByName( "back_wall_1" ).material.map = textureBack
+        textureBack.rotation = THREE.MathUtils.degToRad(90);
+        textureBack.colorSpace = THREE.SRGBColorSpace;
+        textureBack.wrapS = THREE.RepeatWrapping;
+        textureBack.wrapT = THREE.RepeatWrapping;
+        textureBack.repeat.set( 1, 1 );
+            
+    //The last thing to note about the example is that if you change wrapS or wrapT on the texture you must also set texture.needsUpdate so three.js knows to apply those settings. The other settings are automatically applied.
+    // textureBack.needsUpdate =true
+    //scene.getObjectByName( "back_wall_1" ).material.needsUpdate = true
+       }
+    }
+    inputBack.click();
+}
+bb=1
+document.getElementById("zoom_out_icon").onclick = ()=>
+{   
+bb = bb   + 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
+//PARAMS SAVE BACK WALL ZOOM OUT
+Functions.addOrUpdateURLParam ("backwall_image_zoom_out" , `${bb}`)
+}
+document.getElementById("zoom_in_icon").onclick = ()=>
+{   
+bb = bb   - 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
+//PARAMS SAVE BACK WALL ZOOM IN
+Functions.addOrUpdateURLParam ("backwall_image_zoom_in" , `${bb}`)
+}
+
+document.getElementById("left_icon").onclick = ()=>
+{   
+bb = bb   - 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
+//PARAMS SAVE BACK WALL POSITION LEFT
+Functions.addOrUpdateURLParam ("backwall_image_position_left" , `${bb}`)
+}
+document.getElementById("right_icon").onclick = ()=>
+{   
+bb = bb   + 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
+//PARAMS SAVE BACK WALL POSITION RIGHT
+Functions.addOrUpdateURLParam ("backwall_image_position_right" , `${bb}`)
+}
+document.getElementById("up_icon").onclick = ()=>
+{   
+bb = bb   + 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
+//PARAMS SAVE BACK WALL POSITION UP
+Functions.addOrUpdateURLParam ("backwall_image_position_up" , `${bb}`)
+}
+document.getElementById("down_icon").onclick = ()=>
+{   
+bb = bb   - 0.2
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
+//PARAMS SAVE BACK WALL POSITION DOWN
+Functions.addOrUpdateURLParam ("backwall_image_position_down" , `${bb}`)
+}
+document.getElementById("apply_icon").onclick = ()=>
+{ 
+    backWallGraphicControl.style.visibility = "hidden"       
+}
+}
+function loadGraphicControlsRight()// FUNCTION WORKS WHEN RIGHTWALL SWITCH ON
+{
+var rightWall = scene.getObjectByName( "right_wall" )
+var rightWallGraphicControl = document.getElementById("graphics_control_icon_group_right_wall")       
+window.addEventListener( 'mousemove', detectClickRightWall);
+function detectClickRightWall(event)
+{
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
+    //console.log("mouse coordinates:" + mouse.x , mouse.y)
+
+    raycaster.setFromCamera(mouse, camera);
+    intersect = raycaster.intersectObject(rightWall)
+    if (intersect.length > 0)
+    {   
+        console.log("hovered right wall")
+        window.addEventListener( 'mousedown', onClickRightWall); //WHEN HOVERED DETECT CLICK EVENT
+    }
+    else
+    {   
+        window.removeEventListener( 'mousedown', onClickRightWall);
+    }
+}
+
+function onClickRightWall()
+{
+    
+   // console.log("clicked back wall")
+    tempR = rightWall.getWorldPosition(new THREE.Vector3())
+    tempR.project(camera);// get the normalized screen coordinate of world position
+
+    // convert the normalized position to CSS coordinates
+    var x = (tempR.x *  .5 + .5) * canvas.clientWidth;
+    var y = (tempR.y * -.5 + .5) * canvas.clientHeight;
+    
+    rightWallGraphicControl.style.left = `${x}px`
+    rightWallGraphicControl.style.top = `${y}px`
+    rightWallGraphicControl.style.visibility = "visible"
+    
+}
+document.getElementById("add_icon_right").onclick = ()=>
+{   
+    var inputRight = document.createElement('input');
+    inputRight.type = 'file';
+    
+    inputRight.onchange = e => 
+    { 
+    
+       // getting a hold of the file reference
+       var fileRight = e.target.files[0]; 
+    
+       // setting up the reader
+       var readerRight = new FileReader();
+       readerRight.readAsDataURL(fileRight); // this is reading as data url
+    
+       // here we tell the reader what to do when it's done reading...
+       readerRight.onload = readerEvent => 
+       {
+        var contentRight = readerEvent.target.result; // this is the content!
+        
+        var textureRight = new THREE.TextureLoader().load(contentRight);
+        
+        Functions.sendDataParams(contentRight , rightWallUploadResponseUrl , "rightwall_image" )
+        scene.getObjectByName( "right_wall_1" ).material.map = textureRight
+        textureRight.rotation = THREE.MathUtils.degToRad(90);
+        textureRight.colorSpace = THREE.SRGBColorSpace;
+        textureRight.wrapS = THREE.RepeatWrapping;
+        textureRight.wrapT = THREE.RepeatWrapping;
+        textureRight.repeat.set( 1, 1 );
+   
+       }
+    }
+    inputRight.click();
+}
+rr=1
+document.getElementById("zoom_out_icon_right").onclick = ()=>
+{   
+rr = rr   + 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
+}
+document.getElementById("zoom_in_icon_right").onclick = ()=>
+{   
+rr = rr   - 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
+}
+
+document.getElementById("left_icon_right").onclick = ()=>
+{   
+rr = rr   - 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.offset.set(rr, 1)
+}
+document.getElementById("right_icon_right").onclick = ()=>
+{   
+rr = rr   + 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.offset.set(rr, 1)
+}
+document.getElementById("up_icon_right").onclick = ()=>
+{   
+rr = rr   + 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, rr)
+}
+document.getElementById("down_icon_right").onclick = ()=>
+{   
+rr = rr   - 0.2
+scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, rr)
+}
+
+document.getElementById("apply_icon_right").onclick = ()=>
+{ 
+    rightWallGraphicControl.style.visibility = "hidden"       
+}
+}
+function loadGraphicControlsLeft()// FUNCTION WORKS WHEN LEFTWALL SWITCH ON
+{
+var leftWall = scene.getObjectByName( "left_wall" )
+var leftWallGraphicControl = document.getElementById("graphics_control_icon_group_left_wall")       
+window.addEventListener( 'mousemove', detectClickLeftWall);
+function detectClickLeftWall(event)
+{
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
+
+    raycaster.setFromCamera(mouse, camera);
+    intersect = raycaster.intersectObject(leftWall)
+    if (intersect.length > 0)
+    {   
+        console.log("hovered left wall")
+        window.addEventListener( 'mousedown', onClickLeftWall); //WHEN HOVERED DETECT CLICK EVENT
+    }
+    else
+    {   
+        window.removeEventListener( 'mousedown', onClickLeftWall);
+    }
+}
+
+function onClickLeftWall()
+{
+    
+   // console.log("clicked back wall")
+    tempL = leftWall.getWorldPosition(new THREE.Vector3())
+    tempL.project(camera);// get the normalized screen coordinate of world position
+
+    // convert the normalized position to CSS coordinates
+    var x = (tempL.x *  .5 + .5) * canvas.clientWidth;
+    var y = (tempL.y * -.5 + .5) * canvas.clientHeight;
+    
+    leftWallGraphicControl.style.left = `${x}px`
+    leftWallGraphicControl.style.top = `${y}px`
+    leftWallGraphicControl.style.visibility = "visible"
+    
+}
+document.getElementById("add_icon_left").onclick = ()=>
+{   
+    var inputLeft = document.createElement('input');
+    inputLeft.type = 'file';
+    
+    inputLeft.onchange = e => 
+    { 
+    
+       // getting a hold of the file reference
+       var fileLeft = e.target.files[0]; 
+    
+       // setting up the reader
+       var readerLeft = new FileReader();
+       readerLeft.readAsDataURL(fileLeft); // this is reading as data url
+    
+       // here we tell the reader what to do when it's done reading...
+       readerLeft.onload = readerEvent => 
+       {
+        var contentLeft = readerEvent.target.result; // this is the content!
+        
+        var textureLeft = new THREE.TextureLoader().load(contentLeft);
+        
+        Functions.sendDataParams(contentLeft , leftWallUploadResponseUrl , "leftwall_image" )
+        scene.getObjectByName( "left_wall_1" ).material.map = textureLeft
+        textureLeft.rotation = THREE.MathUtils.degToRad(90);
+        textureLeft.colorSpace = THREE.SRGBColorSpace;
+        textureLeft.wrapS = THREE.RepeatWrapping;
+        textureLeft.wrapT = THREE.RepeatWrapping;
+        textureLeft.repeat.set( 1, 1 );
+   
+       }
+    }
+    inputLeft.click();
+}
+ll=1
+document.getElementById("zoom_out_icon_left").onclick = ()=>
+{   
+ll = ll   + 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
+}
+document.getElementById("zoom_in_icon_left").onclick = ()=>
+{   
+ll = ll   - 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
+}
+
+document.getElementById("left_icon_left").onclick = ()=>
+{   
+ll = ll   - 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.offset.set(ll, 1)
+}
+document.getElementById("right_icon_left").onclick = ()=>
+{   
+ll = ll   + 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.offset.set(ll, 1)
+}
+document.getElementById("up_icon_left").onclick = ()=>
+{   
+ll = ll   + 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, ll)
+}
+document.getElementById("down_icon_left").onclick = ()=>
+{   
+ll = ll   - 0.2
+scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, ll)
+}
+
+document.getElementById("apply_icon_left").onclick = ()=>
+{ 
+    leftWallGraphicControl.style.visibility = "hidden"       
+}
+}
+
 /*
 
  #####   ##   ##   ######   # #####    ####    ##  ##  #######   #####   
@@ -278,13 +683,10 @@ function tickRight()
  #####   ##   ##   ######    ####      ####    ##  ##  #######   #####   
  
  */
-
-
-
 /**
  *  Global Variables
  */
-var switchBack , switchLeft , switchRight , switchStorage , standWidth , standDepth , standInfo , standSize ,currentUrl
+var standWidth , standDepth , standInfo , standSize ,currentUrl
 /**
  *  Global Variables
  */
@@ -294,9 +696,9 @@ function switchesLoaded()
     
 //INIT
 
-    switchLeft = document.getElementById("toogle_switch_left_wall_switch")
-    switchBack = document.getElementById("toogle_switch_back_wall_switch")
-    switchRight = document.getElementById("toogle_switch_right_wall_switch")
+    var switchLeft = document.getElementById("toogle_switch_left_wall_switch")
+    var switchBack = document.getElementById("toogle_switch_back_wall_switch")
+    var switchRight = document.getElementById("toogle_switch_right_wall_switch")
 /**
  * TEMPORARILY USED THESE INIT VALUES BECAUSE IF WE INIT WITH URL PARAMETERS WE NEED TO SET VALUES BY VISIBILITIES OF WALLS
  */
@@ -314,7 +716,7 @@ function switchesLoaded()
         {
             scene.getObjectByName( "back_wall_1" ).visible = true;
             scene.getObjectByName( "back_wall_2" ).visible = true;
-            loadGraphicControls()
+            loadGraphicControlsBack()
             
             var standInfo = "peninsula"
             document.getElementById("stand_info_text").style.left = "315px";
@@ -351,13 +753,103 @@ function switchesLoaded()
           
             
             Functions.removeURLParameters(['backwall'])
+            Functions.removeURLParameters(['rightwall'])
+            Functions.removeURLParameters(['leftwall'])
+            Functions.removeURLParameters(['backwall_image'])
+            Functions.removeURLParameters(['leftwall_image'])
+            Functions.removeURLParameters(['rightwall_image'])
             
         }
                
         });
 
 //CHECK LEFT WALL
+switchLeft.addEventListener('change', function () {
+    if (switchLeft.checked ) 
+    {
+        scene.getObjectByName( "left_wall_1" ).visible = true;
+        scene.getObjectByName( "left_wall_2" ).visible = true;
+        scene.getObjectByName( "back_wall_1" ).visible = true;
+        scene.getObjectByName( "back_wall_2" ).visible = true;
+        loadGraphicControlsBack()
+        loadGraphicControlsLeft()
+        
+        var standInfo = "corner left"
+        document.getElementById("stand_info_text").style.left = "315px";
+        document.getElementById("stand_info_text").style.bottom = "22px";
+        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+//PARAMS SAVE LEFT WALL
+        Functions.addOrUpdateURLParam ("leftwall" , "visible")
+        Functions.addOrUpdateURLParam ("backwall" , "visible")
+
+        //SEND CURRENT URL TO FILESTACK
+        var currentUrl = window.location.href    
+       // Functions.sendData(currentUrl)       
+       switchBack.checked = true  
+
+    } 
+        
+    else 
+    {
+        scene.getObjectByName( "left_wall_1" ).visible = false;
+        scene.getObjectByName( "left_wall_2" ).visible = false;
+
+        var standInfo = "peninsula"
+        document.getElementById("stand_info_text").style.left = "330px";
+        document.getElementById("stand_info_text").style.bottom = "22px";
+        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+        
+        //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
+        //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
+        switchLeft.checked = false
+        Functions.removeURLParameters(['leftwall'])
+        Functions.removeURLParameters(['leftwall_image'])
+        
+    }
+})
 //CHECK RIGHT WALL
+switchRight.addEventListener('change', function () {
+    if (switchRight.checked ) 
+    {
+        scene.getObjectByName( "right_wall_1" ).visible = true;
+        scene.getObjectByName( "right_wall_2" ).visible = true;
+        scene.getObjectByName( "back_wall_1" ).visible = true;
+        scene.getObjectByName( "back_wall_2" ).visible = true;
+        loadGraphicControlsBack()
+        loadGraphicControlsRight()
+        
+        var standInfo = "corner right"
+        document.getElementById("stand_info_text").style.left = "315px";
+        document.getElementById("stand_info_text").style.bottom = "22px";
+        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+//PARAMS SAVE BACK WALL
+        Functions.addOrUpdateURLParam ("rightwall" , "visible")
+        Functions.addOrUpdateURLParam ("backwall" , "visible")
+
+        //SEND CURRENT URL TO FILESTACK
+        var currentUrl = window.location.href    
+       // Functions.sendData(currentUrl)          
+       switchBack.checked = true  
+    } 
+        
+    else 
+    {
+        scene.getObjectByName( "right_wall_1" ).visible = false;
+        scene.getObjectByName( "right_wall_2" ).visible = false;
+
+        var standInfo = "peninsula"
+        document.getElementById("stand_info_text").style.left = "330px";
+        document.getElementById("stand_info_text").style.bottom = "22px";
+        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+        
+        //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
+        //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
+        switchRight.checked = false
+        Functions.removeURLParameters(['rightwall'])
+        Functions.removeURLParameters(['rightwall_image'])
+        
+    }
+})
 //RAISED FLOOR SWITCH
 
     var checkbox4 = document.getElementById("toogle_switch_raised_floor_switch")
@@ -452,433 +944,6 @@ function switchesLoaded()
 
 } //END OF SWITCHES FUNCTION
 
-
-/*
- ####### ##   ## ######  ##   ##  # ##### ######   
-  ##   # ##   ##  ##  ## ###  ## ## ## ##  ##  ##  
-  ##     ##   ##  ##  ## #### ##    ##     ##  ##  
-  ####   ##   ##  #####  #######    ##     #####   
-  ##     ##   ##  ## ##  ## ####    ##     ## ##   
-  ##     ##   ##  ## ##  ##  ###    ##     ## ##   
- ####     #####  #### ## ##   ##   ####   #### ##  
-                                                                            
-*/
-
-
-
-
- //  setTimeout(loadFurnitures, 5000)      
-    function loadFurnitures() 
-    {
-        var mouse = new THREE.Vector2();
-        var raycaster = new THREE.Raycaster(); 
-        var intersect = new THREE.Vector3();
-        var standBase = scene.getObjectByName( "stand_1" )
-        var envFloor = scene.getObjectByName( "environment_floor")
-        var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-        var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-        var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-
-        var barStool = scene.getObjectByName( "bar_stool")
-        var helperBarStool = new THREE.BoxHelper( barStool, 0xffff00 );
-        
-    
-        var bboxHelper = new THREE.Box3().setFromObject(helperBarStool);
-        var bboxWidthHelper = Math.abs(bboxHelper.max.x)+Math.abs(bboxHelper.min.x)
-        var bboxDepthHelper = Math.abs(bboxHelper.max.z)+Math.abs(bboxHelper.min.z)
-        var bboxHeightHelper = Math.abs(bboxHelper.max.y)+Math.abs(bboxHelper.min.y)
-    
-
-        var draggerBarStool = new THREE.Mesh( new THREE.BoxGeometry(bboxWidthHelper , bboxHeightHelper , bboxDepthHelper), new THREE.MeshBasicMaterial( {color: 0x00ff00} ))    //DRAG EDİLEBİLİR GÖRÜNMEZ BİR OBJE YAPIYORUZ VE BU OBJENİN HELPER BOYUTUNDA OLMASI GEREKİYOR Kİ İMLEÇ ÜZERİNE GELDİĞİNDE HER YÖNDEN DRAG EDİLEBİLSİN.
-        scene.add(draggerBarStool)
-        
-        draggerBarStool.visible = false
-        draggerBarStool.position.y = bboxHeightHelper/2
-        
-
-        var limiterPlaneGeo = new THREE.PlaneGeometry(dimWidthStandBase - bboxWidthHelper , dimDepthStandBase - bboxDepthHelper );
-        var limiterPlaneMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-        var limiterPlane = new THREE.Mesh( limiterPlaneGeo, limiterPlaneMat );
-       
-        limiterPlane.rotation.x = THREE.MathUtils.degToRad(90)
-        limiterPlane.position.y = 0.11
-        limiterPlane.visible = false
-
-      
-       container.addEventListener( 'mousedown',
-       function (event) 
-        {
-                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, camera);
-               
-                intersect = raycaster.intersectObjects(allObjects)
-
-                if(intersect.length>0)
-                {
-                    onClickAllObjects()
-                }
-        })
-/**
- *  ON EVENT OF CLICK OBJECT
- */
-        window.addEventListener( 'mousedown',
-        function (event) 
-        {
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            
-            intersect = raycaster.intersectObject(barStool)
-
-            if(intersect.length>0)
-            {
-                onClickBarStool()
-            }
-        })
-
-
-
-/**
- *  INIT DRAG SETTINGS FOR BAR STOOL
- */
-
-        var objectsBarStool = []
-        objectsBarStool.push(draggerBarStool)
-        var dragBarStool = new DragControls(objectsBarStool, camera, renderer.domElement)
-        dragBarStool.enabled = false
-
-/**
- *  ON EVENT OF CLICK BAR STOOL ICON
- */
-    
-        document.getElementById("bar_stool_icon").addEventListener("click", addBarStool)
-    
-        function addBarStool()  //ADD BAR STOOL
-        {
-            
-            scene.add(limiterPlane)
-            
-            window.addEventListener( 'mousemove', onMouseMove);
-        }
-    
-        function onMouseMove(event) //FOLLOW CURSOR
-        {
-                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, camera);
-                
-                intersect = raycaster.intersectObject(limiterPlane)
-                controls.enabled = false; 
-        
-           
-                scene.getObjectByName( "bar_stool_1").visible = true
-                scene.getObjectByName( "bar_stool_2").visible = true
-                scene.add(helperBarStool)
-                
-                
-
-                if(intersect.length>0)
-                {
-                    console.log("intersection true")
-                  
-                    for ( var i = 0; i < intersect.length; i ++ )
-                    {
-                        var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                        barStool.position.set(a,0.11,c)
-                        draggerBarStool.position.set(a,bboxHeightHelper/2,c)
-                        helperBarStool.update()
-                        
-                    } 
-                }
-                else        
-                {
-                    intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-                    for ( var i = 0; i < intersect.length; i ++ )
-                    {
-                        var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                       // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
-                       helperBarStool.update()
-                            
-                        if (Math.abs(a)<= dimWidthStandBase/2-bboxWidthHelper/2)
-                        {
-                            if(c<0){barStool.position.x=a}
-                            else if(c>0){barStool.position.x=a}
-                        }
-    
-                        if (Math.abs(c)<= dimDepthStandBase/2-bboxDepthHelper/2)
-                        {
-                            if(a<0){barStool.position.z=c }
-                            else if(a>0){barStool.position.z=c}
-                        }
-                                      
-                    }
-                    
-                } 
-               
-        
-                window.addEventListener( 'click', function()   //FIRST DROP
-                {
-                    window.removeEventListener('mousemove', onMouseMove)
-                   
-                    scene.remove(helperBarStool)
-                    controls.enabled = true;
-                    draggerBarStool.position.set(barStool.position.x,bboxHeightHelper/2,barStool.position.z)  //STAND INTERSECTION ALANI DIŞINDA DROP YAPTIĞIMIZDA DRAGGER SPHERE (DRAG OBJE SADECE KENDİSİ OLDUĞUNDAN) DIŞARDA KALIYOR O YÜZDEN TEKRAR OBJEYİ DRAG EDEBİLMEK İÇİN BU AYARI YAPIYORUZ.
-                    dragBarStool.enabled = true
-                })
-            
-        }
-       
-        dragBarStool.addEventListener( 'drag', function()
-        {
-            barStoolFurnitureControl.style.visibility = "hidden" 
-
-            window.addEventListener( 'mousemove', onMouseHover);
-            controls.enabled = false
-            scene.add(helperBarStool)
-            helperBarStool.update()
-            scene.add(draggerBarStool)
-            
-        })
-    
-    
-        function onMouseHover(event) //CHECK INTERSECTIONS THEN DRAG
-        {   
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            intersect = raycaster.intersectObject(limiterPlane)
-    
-            if(intersect.length>0)
-            {
-                console.log("intersection true")
-              
-                for ( var i = 0; i < intersect.length; i ++ )
-                {
-                    var a = intersect[ i ].point.x 
-                    var c = intersect[ i ].point.z  
-                    draggerBarStool.position.set(a,bboxHeightHelper/2,c)
-                    barStool.position.set(a,0.11,c)
-                    
-                } 
-            }
-            else        
-            {
-                intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-                for ( var i = 0; i < intersect.length; i ++ )
-                {
-                    var a = intersect[ i ].point.x 
-                    var c = intersect[ i ].point.z  
-                   // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
-
-                        
-                    if (Math.abs(a)<= dimWidthStandBase/2-bboxWidthHelper/2)
-                    {
-                        if(c<0){barStool.position.x=a}
-                        else if(c>0){barStool.position.x=a}
-                    }
-
-                    if (Math.abs(c)<= dimDepthStandBase/2-bboxDepthHelper/2)
-                    {
-                        if(a<0){barStool.position.z=c}
-                        else if(a>0){barStool.position.z=c}
-                    }
-                                  
-                }
-                
-            } 
-           
-        }
-           
-        var newHelperBarStool 
-         /*   var helperBarStoolClones = []
-
-                dragBarStool.addEventListener( 'hoveron', function () 
-                {   
-                    newHelperBarStool = helperBarStool.clone()
-                    scene.add(newHelperBarStool)
-                    helperBarStoolClones.push(newHelperBarStool)
-                                     
-                })
-                   dragBarStool.addEventListener( 'hoveroff', function () 
-                {  
-                    //scene.remove(newHelperBarStool)
-                    for (var i = 0; i < helperBarStoolClones.length; i++) {
-                        scene.remove(helperBarStoolClones[i]); // Remove from the scene
-                    }
-                    helperBarStoolClones = []; // Clear the array
-                    
-                }) */
-
-
-/**
- *  FURNITURE CONTROL ICONS
- */
-
-        var barStoolFurnitureControl = document.getElementById("furniture_icon_group_bar_stool")
-        
-        dragBarStool.addEventListener( 'dragend', function () //DRAGSTARTI CLICK OLARAK KULLANDIĞINDA CLICKTEN ELİNİ KALDIRDIĞINDA DROP'U İŞLEME ALIYOR.O YÜZDEN BİR OBJENİN CLICK'INI DRAG'IN HOVERINA EVENTLISTENER OLARAK VERİYORUZ
-        {
-            draggerBarStool.position.set(barStool.position.x,bboxHeightHelper/2,barStool.position.z)  //STAND INTERSECTION ALANI DIŞINDA DRAGEND YAPTIĞIMIZDA DRAGGER SPHERE (DRAG OBJE SADECE KENDİSİ OLDUĞUNDAN) DIŞARDA KALIYOR O YÜZDEN TEKRAR OBJEYİ DRAG EDEBİLMEK İÇİN BU AYARI YAPIYORUZ.
-            window.removeEventListener( 'mousemove', onMouseHover)
-            controls.enabled = true; 
-            scene.remove(helperBarStool)
-            barStoolFurnitureControl.style.visibility = "hidden" 
-            
-            
-        })
-
-
-        function onClickBarStool()
-        {
-            //scene.remove(helperBarStool)    // HIDE ALL HELPERS
-            
-            console.log("clicked bar stool object")
-            setTimeout(() => 
-            {
-            scene.add(helperBarStool)  
-            barStoolFurnitureControl.style.visibility = "visible" 
-            
-            var tempV = barStool.getWorldPosition(new THREE.Vector3())
-            tempV.project(camera)
-
-            var x = (tempV.x *  .5 + .5) * canvas.clientWidth;
-            var y = (tempV.y * -.5 + .5) * canvas.clientHeight;
-
-            barStoolFurnitureControl.style.left = `${x}px`
-            barStoolFurnitureControl.style.top = `${y}px`
-            }, "200")
-        }
-            
-        document.getElementById("rotate_icon_bar_stool").onclick = ()=>
-        {
-            scene.add(helperBarStool)
-            barStool.rotateY(5);
-            helperBarStool.update()
-            //onMouseHover()
-
-        }
-        document.getElementById("trash_icon_bar_stool").onclick = ()=>
-        {
-
-            console.log("clicked trash icon bar stool")
-            scene.getObjectByName( "bar_stool_1").visible = false
-            scene.getObjectByName( "bar_stool_2").visible = false
-            barStoolFurnitureControl.style.visibility = "hidden" 
-            scene.remove(barStool)
-            scene.remove(helperBarStool)
-            draggerBarStool.layers.set( 1 );        
-            //DISABLES DRAGLISTENERS FOR INVISIBLE OBJECTS  :   BU AYAR KENDİ BAŞINA FONKSİYON BAŞINDA TRUE FALSE GİBİ BİR DEĞER ALIYOR MU HENÜZ BULAMADIM O YÜZDEN
-            //dragBarStool.enabled = false KULLANDIK FOLLOW OBJECTTEN SONRA DRAG BAŞLADIĞI ANDA İSE dragBarStool.enabled = true KULLANDIK ÇÜNKÜ BÖYLE YAPMAZSAK
-            //BU SEFER BAR STOOL EKLENMEDİĞİ HALDE DRAG LISTENER ONU GÖRMEYE BAŞLIYOR 
-
-        }
-                
-                function onClickAllObjects()
-                {
-                    barStoolFurnitureControl.style.visibility = "hidden" 
-                    console.log("clicked all objects")
-                    scene.remove(helperBarStool)
-                }
-
-              
-    
-    }
-
-/*
-# ##### ####### ###  ##  # ##### ##   ## ######  #######  
-## ## ##  ##   # ###  ## ## ## ## ##   ##  ##  ##  ##   #  
-   ##     ##      #####     ##    ##   ##  ##  ##  ##      
-   ##     ####     ###      ##    ##   ##  #####   ####    
-   ##     ##      #####     ##    ##   ##  ## ##   ##      
-   ##     ##   # ##  ###    ##    ##   ##  ## ##   ##   #  
-  ####   ####### ##  ###   ####    #####  #### ## #######  
-*/  
-
-
-var texture
-
-setTimeout(loadTextures, 5000)
-function loadTextures() 
-{
-    // Carpet 0
-
-    document.getElementById("carpet0_icon").addEventListener("click", function()
-    {
-    texture = new THREE.TextureLoader().load( "./media/carpet0_icon.jpg" );
-    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
-    
-    texture.colorSpace = THREE.SRGBColorSpace;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    })
-
-    // Carpet 1
-
-    document.getElementById("carpet1_icon").addEventListener("click", function()
-    {
-    texture = new THREE.TextureLoader().load( "./media/carpet1_icon.jpg" );
-    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
-    texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    })
-
-    // Parquet 1
-
-    document.getElementById("parquet0_icon").addEventListener("click", function()
-    {
-    texture = new THREE.TextureLoader().load( "./media/parquet0_icon.jpg" );
-    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
-    texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    })
-
-    
-    // Parquet 2
-
-    document.getElementById("parquet1_icon").addEventListener("click", function()
-    {
-    texture = new THREE.TextureLoader().load( "./media/parquet1_icon.jpg" );
-    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
-    texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    })
-
-
-     // Laminate 0
-
-     document.getElementById("laminate0_icon").addEventListener("click", function()
-     {
-     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: 'white'});
-     })
-
-    // Laminate 1
-
-    document.getElementById("laminate1_icon").addEventListener("click", function()
-    {
-    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#C0C0C0'});
-    })
-
-
-
-
-
-
-
-}
-
 /*
 #####  ######    ###    #####   
  ## ##  ##  ##  ## ##  ##   ##  
@@ -887,125 +952,760 @@ function loadTextures()
  ##  ## ## ##  ####### ##   ##  
  ## ##  ## ##  ##   ## ##   ##  
 #####  #### ## ##   ##  #####   
-                                
 
 */                                         
-
 
 setTimeout(loadDrags, 5000)
 function loadDrags() 
 {
-
-var stand = scene.getObjectByName( "stand_1" )
-texture = scene.getObjectByName( "stand_1" ).material.map
-var bboxWidth,bboxDepth
-
-
-function updateSizes() {
-    var bbox = new THREE.Box3().setFromObject(stand);
-    bboxWidth = Math.abs(bbox.max.x)+Math.abs(bbox.min.x)   //GET WIDTH
-    bboxDepth = Math.abs(bbox.max.z)+Math.abs(bbox.min.z)   //GET DEPTH
-    //var bboxHeight = Math.abs(bbox.max.y)+Math.abs(bbox.min.y) //GET HEIGHT
+/**
+ *  DEFAULTS
+ */ 
     
-         
-    console.log("width:" + bboxWidth)
-    console.log("depth:" + bboxDepth)
-   // console.log("height:" + bboxHeight)
-   
-} 
-
-const objectsDragFront = []
-const dragFront = scene.getObjectByName( "drag_front" )
-objectsDragFront.push(scene.getObjectByName( "drag_front" ))
-const dragDragFront = new DragControls(objectsDragFront, camera, renderer.domElement)
-// Limit Drag front movement
-
-function constDragFront()
-{
-        dragFront.position.y = 0
-        dragFront.position.x = 0
-    if (dragFront.position.z < 0) 
-    {
-        dragFront.position.z = 0
-    } 
-    else if (dragFront.position.z > 6) 
-    {
-        dragFront.position.z = 6
-    }
-}
+    var getScaleFront=1 , getScaleLeft=1
+    /**
+     * SCALE FRONT VE SCALE LEFT(VE RIGHT) DEĞİŞKENLERİNE NEDEN İLK DEĞERLER VERİYORUZ?
+     * ÇÜNKÜ EĞER BU İLK DEĞERLERİ VERMEZSEK, DRAG FRONTU KULLANDIĞIMIZDA SCALE LEFT HENÜZ YAPILMIŞSA SLAE LEFT DEĞERİ HİÇ TANIMLANMAMIŞ OLUR VE 
+     * DRAG FRONTA DOKUNDUĞUMUZ ANDA STANDBASE KAYBOLUR.
+     */
+    var standBase = scene.getObjectByName( "stand_1" )
+    var standSides = scene.getObjectByName( "stand_2" )
+    var rightWall = scene.getObjectByName( "right_wall" )
+    var backWall = scene.getObjectByName( "back_wall" )
+    var leftWall = scene.getObjectByName( "left_wall" )
+    var dragFront = scene.getObjectByName( "drag_front" )
+    var dragRight = scene.getObjectByName( "drag_right" )
+    var dragLeft = scene.getObjectByName( "drag_left" )
+    var standTexture = standBase.material.map
+    var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+    var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+    var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
 
 /**
- *  Drag Move drag front
+ *  DRAG FRONT
  */ 
+    var objectsDragFront = []
+    objectsDragFront.push(dragFront)
+    var dragDragFront = new DragControls(objectsDragFront, camera, renderer.domElement)
+   
+/**
+ *  DRAG FRONT EVENT LISTENERS
+ */ 
+    dragDragFront.addEventListener( 'dragstart', ()=> 
+    {
+    controls.enabled = false    
+    })
 
-dragDragFront.addEventListener( 'dragstart', ()=> 
-{
-console.log('drag start')
-controls.enabled = false    
-})
-
-dragDragFront.addEventListener ( 'drag', ()=>
-{
-constDragFront()
-updateSizes()
-onDragEventDragFront()
-
-
-console.log('drag')
-
-//scale.set(width,height,depth)
-function onDragEventDragFront(params) {
-     if (dragFront.position.z < 0.25)
+    dragDragFront.addEventListener ( 'drag', onDragEventDragFront)
+    
+    function onDragEventDragFront() {
+        //CONSTRAINTS
+        /**
+         * CONSTRAINTS'İ DRAG START'A KOYMAYALIM.
+         * ÇÜNKÜ DRAG START ONLARI BİR KERE OKUYOR VE DRAG ANINDA TEKRAR ETMİYOR.
+         * DRAG ANLIK OLARAK HER KAREDE O DEĞERLERİ GÖRMEK İSTİYOR.
+         */
+        dragFront.position.y = 0
+        dragFront.position.x = 0
+    
+        if (dragFront.position.z < 0) 
         {
             dragFront.position.z = 0
-           
-            scene.getObjectByName( "back_wall" ).position.z = -1.9
-                        
-            scene.getObjectByName( "stand_1" ).scale.set(1, 1, 1)
-            scene.getObjectByName( "stand_2" ).scale.set(1, 1, 1)
-                        
-            texture.repeat.set(1, 1);
-            
         } 
-        else if (dragFront.position.z >= 0.25 && dragFront.position.z < 0.75)
+        else if (dragFront.position.z > 3) 
         {
-            dragFront.position.z = 0.6
-            
-            scene.getObjectByName( "back_wall" ).position.z = -2.4
-            
-    
-            scene.getObjectByName( "stand_1" ).scale.set(1, 1, 1.25)
-            scene.getObjectByName( "stand_2" ).scale.set(1, 1, 1.25)
-            
-            texture.repeat.set(1, 1.25);
-           
-            
+            dragFront.position.z = 3
         }
-        else if (dragFront.position.z >= 0.75 && dragFront.position.z < 1.25)
-        {
-            dragFront.position.z = 1.0023
-            
-            scene.getObjectByName( "back_wall" ).position.z = -2.9
-               
-            scene.getObjectByName( "stand_1" ).scale.set(1, 1, 1.5)
-            scene.getObjectByName( "stand_2" ).scale.set(1, 1, 1.5)
-            
-            texture.repeat.set(1, 1.5);
-            
-        } 
-}
- 
-      
+        //CONSTRAINTS
+
+        if (dragFront.position.z < 0.25)
+            {
+                dragFront.position.z = 0
+                backWall.position.z = -1.9//scale.set(width,height,depth)
+                standBase.scale.set(getScaleLeft, 1, 1)
+                standSides.scale.set(getScaleLeft, 1, 1)
+                standTexture.repeat.set(1, 1);
+                rightWallTexture.repeat.set(1, 1);
+                leftWallTexture.repeat.set(1, 1);
+                rightWall.scale.set(1,1,1)
+                leftWall.scale.set(1,1,1)
+                getScaleFront = 1
+            } 
+            else if (dragFront.position.z >= 0.25 && dragFront.position.z < 0.75)
+            {
+                dragFront.position.z = 0.6
+                backWall.position.z = -2.4
+                standBase.scale.set(getScaleLeft, 1, 1.25)
+                standSides.scale.set(getScaleLeft,1, 1.25)
+                standTexture.repeat.set(1, 1.25);
+                rightWallTexture.repeat.set(1, 1.25);
+                leftWallTexture.repeat.set(1, 1.25);
+                rightWall.scale.set(1,1,1.25)
+                leftWall.scale.set(1,1,1.25)
+                getScaleFront = 1.25
+            }
+            else if (dragFront.position.z >= 0.75 && dragFront.position.z < 1.25)
+            {
+                dragFront.position.z = 1.0023
+                backWall.position.z = -2.9
+                standBase.scale.set(getScaleLeft, 1, 1.5)
+                standSides.scale.set(getScaleLeft, 1, 1.5)
+                standTexture.repeat.set(1, 1.5);
+                rightWallTexture.repeat.set(1, 1.5);
+                leftWallTexture.repeat.set(1,1.5);
+                rightWall.scale.set(1,1,1.5)
+                leftWall.scale.set(1,1,1.5)
+                getScaleFront = 1.5
+            } 
+            else if (dragFront.position.z >= 1.25 && dragFront.position.z < 1.75)
+            {
+                dragFront.position.z = 1.5
+                backWall.position.z = -3.4
+                standBase.scale.set(getScaleLeft, 1, 1.75)
+                standSides.scale.set(getScaleLeft, 1, 1.75)
+                standTexture.repeat.set(1, 1.75);
+                rightWallTexture.repeat.set(1, 1.75);
+                leftWallTexture.repeat.set(1,1.75);
+                rightWall.scale.set(1,1,1.75)
+                leftWall.scale.set(1,1,1.75)
+                getScaleFront = 1.75
+            } 
+            else if (dragFront.position.z >= 1.75 && dragFront.position.z < 2.25)
+            {
+                dragFront.position.z = 1.998
+                backWall.position.z = -3.9
+                standBase.scale.set(getScaleLeft, 1, 2)
+                standSides.scale.set(getScaleLeft, 1, 2)
+                standTexture.repeat.set(1, 2);
+                rightWallTexture.repeat.set(1, 2);
+                leftWallTexture.repeat.set(1,2);
+                rightWall.scale.set(1,1,2)
+                leftWall.scale.set(1,1,2)
+                getScaleFront = 2
+            } 
+            else if (dragFront.position.z >= 2.25 && dragFront.position.z < 2.75)
+            {
+                dragFront.position.z = 2.499
+                backWall.position.z = -4.4
+                standBase.scale.set(getScaleLeft, 1, 2.25)
+                standSides.scale.set(getScaleLeft, 1, 2.25)
+                standTexture.repeat.set(1, 2.25);
+                rightWallTexture.repeat.set(1, 2.25);
+                leftWallTexture.repeat.set(1,2.25);
+                rightWall.scale.set(1,1,2.25)
+                leftWall.scale.set(1,1,2.25)
+                getScaleFront = 2.25
+            }
+            else if (dragFront.position.z >= 2.75 )
+            {
+                dragFront.position.z = 3
+                backWall.position.z = -4.9
+                standBase.scale.set(getScaleLeft, 1, 2.5)
+                standSides.scale.set(getScaleLeft, 1, 2.5)
+                standTexture.repeat.set(1, 2.5);
+                rightWallTexture.repeat.set(1, 2.5);
+                leftWallTexture.repeat.set(1,2.5);
+                rightWall.scale.set(1,1,2.5)
+                leftWall.scale.set(1,1,2.5)
+                getScaleFront = 2.5
+            }  
+    }
+    dragDragFront.addEventListener( 'dragend', ()=> 
+    {
+    controls.enabled = true
+    })
+
+   
+/**
+ *  DRAG RIGHT
+ */ 
+var objectsDragRight = []
+objectsDragRight.push(dragRight)
+var dragDragRight = new DragControls(objectsDragRight, camera, renderer.domElement)
+
+/**
+*  DRAG RIGHT EVENT LISTENERS
+*/ 
+dragDragRight.addEventListener( 'dragstart', ()=> 
+{ 
+controls.enabled = false  
 })
-dragDragFront.addEventListener( 'dragend', ()=> 
+
+dragDragRight.addEventListener ( 'drag', onDragEventDragRight)
+
+function onDragEventDragRight() 
+{  
+//CONSTRAINTS
+dragRight.position.y = 0
+dragRight.position.z = 0
+if (dragRight.position.x < 0) 
 {
-console.log('drag end')
+    dragRight.position.x = 0
+} 
+else if (dragRight.position.x > 3) 
+{
+    dragRight.position.x = 3
+}
+//CONSTRAINTS
+
+if (dragRight.position.x < 0.25)
+    {
+        dragRight.position.x = 0
+        dragLeft.position.x = 0
+    
+        rightWall.position.x = 1.95
+        leftWall.position.x = -1.95
+         //scale.set(width,height,depth)           
+        standBase.scale.set(1, 1, getScaleFront)
+        standSides.scale.set(1, 1, getScaleFront)
+        backWall.scale.set(1,1,1)
+        getScaleLeft = 1
+
+        standTexture.repeat.set(1, 1);
+        backWallTexture.repeat.set(1, 1);
+        
+    } 
+    else if (dragRight.position.x >= 0.25 && dragRight.position.x < 0.75)
+    {
+        dragRight.position.x = 0.6
+        dragLeft.position.x = -0.6
+        
+        rightWall.position.x = 2.5
+        leftWall.position.x = -2.5
+
+        standBase.scale.set(1.25, 1, getScaleFront)
+        standSides.scale.set(1.25, 1, getScaleFront)
+        backWall.scale.set(1.25,1,1)
+        getScaleLeft = 1.25
+
+        standTexture.repeat.set(1.25, 1);
+        backWallTexture.repeat.set(1, 1.25);
+        
+    }
+    else if (dragRight.position.x >= 0.75 && dragRight.position.x < 1.25)
+    {
+        dragRight.position.x = 1.0023
+        dragLeft.position.x = -1.0023
+
+        rightWall.position.x = 3
+        leftWall.position.x = -3
+        
+        standBase.scale.set(1.5, 1, getScaleFront)
+        standSides.scale.set(1.5, 1, getScaleFront)
+        backWall.scale.set(1.5,1,1)
+        getScaleLeft = 1.5
+
+        standTexture.repeat.set(1.5, 1);
+        backWallTexture.repeat.set(1, 1.5);
+        
+    }
+    else if (dragRight.position.x >= 1.25 && dragRight.position.x < 1.75)
+    {
+        dragRight.position.x = 1.5
+        dragLeft.position.x = -1.5
+
+        rightWall.position.x = 3.5
+        leftWall.position.x = -3.5
+        
+        standBase.scale.set(1.75, 1, getScaleFront)
+        standSides.scale.set(1.75, 1, getScaleFront)
+        backWall.scale.set(1.75,1,1)
+        getScaleLeft = 1.75
+
+        standTexture.repeat.set(1.75, 1);
+        backWallTexture.repeat.set(1, 1.75);
+        
+    } 
+    else if (dragRight.position.x >= 1.75 && dragRight.position.x < 2.25)
+    {
+        dragRight.position.x = 1.998
+        dragLeft.position.x = -1.998
+
+        rightWall.position.x = 4
+        leftWall.position.x = -4
+        
+        standBase.scale.set(2, 1, getScaleFront)
+        standSides.scale.set(2, 1, getScaleFront)
+        backWall.scale.set(2,1,1)
+        getScaleLeft = 2
+
+        standTexture.repeat.set(2, 1);
+        backWallTexture.repeat.set(1, 2);
+        
+    }
+    else if (dragRight.position.x >= 2.25 && dragRight.position.x < 2.75)
+    {
+        dragRight.position.x = 2.499
+        dragLeft.position.x = -2.499
+
+        rightWall.position.x = 4.5
+        leftWall.position.x = -4.5
+        
+        standBase.scale.set(2.25, 1, getScaleFront)
+        standSides.scale.set(2.25, 1, getScaleFront)
+        backWall.scale.set(2.25,1,1)
+        getScaleLeft = 2.25
+
+        standTexture.repeat.set(2.25, 1);
+        backWallTexture.repeat.set(1, 2.25);
+        
+    }
+    else if (dragRight.position.x >= 2.75)
+    {
+        dragRight.position.x = 3
+        dragLeft.position.x = -3
+
+        rightWall.position.x = 5
+        leftWall.position.x = -5
+        
+        standBase.scale.set(2.5, 1, getScaleFront)
+        standSides.scale.set(2.5, 1, getScaleFront)
+        backWall.scale.set(2.5,1,1)
+        getScaleLeft = 2.5
+
+        standTexture.repeat.set(2.5, 1);
+        backWallTexture.repeat.set(1, 2.5);
+        
+    }  
+}
+
+dragDragRight.addEventListener( 'dragend', ()=> 
+{
 controls.enabled = true
+})
+/**
+ *  DRAG LEFT
+ */ 
+var objectsDragLeft = []
+objectsDragLeft.push(dragLeft)
+var dragDragLeft = new DragControls(objectsDragLeft, camera, renderer.domElement)
 
+/**
+*  DRAG LEFT EVENT LISTENERS
+*/ 
 
+dragDragLeft.addEventListener( 'dragstart', ()=> 
+{ 
+controls.enabled = false  
+})
+
+dragDragLeft.addEventListener ( 'drag', onDragEventDragLeft)
+
+function onDragEventDragLeft() 
+{
+//CONSTRAINTS
+dragLeft.position.y = 0
+dragLeft.position.z = 0
+if (dragLeft.position.x > 0) 
+{
+dragLeft.position.x = 0
+} 
+else if (dragLeft.position.x < -3) 
+{
+dragLeft.position.x = -3
+}
+//CONSTRAINTS
+
+if (dragLeft.position.x > -0.25)
+{
+    dragLeft.position.x = 0
+    dragRight.position.x = 0
+
+    leftWall.position.x = -1.9
+    rightWall.position.x = 1.9
+     //scale.set(width,height,depth)           
+    standBase.scale.set(1, 1, getScaleFront)
+    standSides.scale.set(1, 1, getScaleFront)
+    backWall.scale.set(1,1,1)
+    getScaleLeft = 1
+
+    standTexture.repeat.set(1, 1);
+    backWallTexture.repeat.set(1, 1);
+} 
+else if (dragLeft.position.x <= -0.25 && dragLeft.position.x > -0.75)
+{
+    dragLeft.position.x = -0.6
+    dragRight.position.x = 0.6
+    
+    leftWall.position.x = -2.4
+    rightWall.position.x = 2.4
+
+    standBase.scale.set(1.25, 1, getScaleFront)
+    standSides.scale.set(1.25, 1, getScaleFront)
+    backWall.scale.set(1.25,1,1)
+    getScaleLeft = 1.25
+
+    standTexture.repeat.set(1.25, 1);
+    backWallTexture.repeat.set(1, 1.25);
+}
+else if (dragLeft.position.x <= -0.75 && dragLeft.position.x > -1.25)
+{
+    dragLeft.position.x = -1.0023
+    dragRight.position.x = 1.0023
+
+    leftWall.position.x = -2.9
+    rightWall.position.x = 2.9
+    
+    standBase.scale.set(1.5, 1, getScaleFront)
+    standSides.scale.set(1.5, 1, getScaleFront)
+    backWall.scale.set(1.5,1,1)
+    getScaleLeft = 1.5
+
+    standTexture.repeat.set(1.5, 1);
+    backWallTexture.repeat.set(1, 1.5);
+} 
+else if (dragLeft.position.x <= -1.25 && dragLeft.position.x > -1.75)
+{
+    dragLeft.position.x = -1.5
+    dragRight.position.x = 1.5
+
+    leftWall.position.x = -3.4
+    rightWall.position.x = 3.4
+    
+    standBase.scale.set(1.75, 1, getScaleFront)
+    standSides.scale.set(1.75, 1, getScaleFront)
+    backWall.scale.set(1.75,1,1)
+    getScaleLeft = 1.75
+
+    standTexture.repeat.set(1.5, 1);
+    backWallTexture.repeat.set(1, 1.5);
+} 
+else if (dragLeft.position.x <= -1.75 && dragLeft.position.x > -2.25)
+{
+    dragLeft.position.x = -1.998
+    dragRight.position.x = 1.998
+
+    leftWall.position.x = -3.9
+    rightWall.position.x = 3.9
+    
+    standBase.scale.set(2, 1, getScaleFront)
+    standSides.scale.set(2, 1, getScaleFront)
+    backWall.scale.set(2,1,1)
+    getScaleLeft = 2
+
+    standTexture.repeat.set(2, 1);
+    backWallTexture.repeat.set(1, 2);
+} 
+else if (dragLeft.position.x <= -2.25 && dragLeft.position.x > -2.75)
+{
+    dragLeft.position.x = -2.499
+    dragRight.position.x = 2.499
+
+    leftWall.position.x = -4.4
+    rightWall.position.x = 4.4
+    
+    standBase.scale.set(2.25, 1, getScaleFront)
+    standSides.scale.set(2.25, 1, getScaleFront)
+    backWall.scale.set(2.25,1,1)
+    getScaleLeft = 2.25
+
+    standTexture.repeat.set(2.25, 1);
+    backWallTexture.repeat.set(1, 2.25);
+} 
+else if (dragLeft.position.x <= -2.75)
+{
+    dragLeft.position.x = -3
+    dragRight.position.x = 3
+
+    leftWall.position.x = -4.9
+    rightWall.position.x = 4.9
+    
+    standBase.scale.set(2.5, 1, getScaleFront)
+    standSides.scale.set(2.5, 1, getScaleFront)
+    backWall.scale.set(2.5,1,1)
+    getScaleLeft = 2.5
+
+    standTexture.repeat.set(2.5, 1);
+    backWallTexture.repeat.set(1, 2.5);
+} 
+}
+
+dragDragLeft.addEventListener( 'dragend', ()=> 
+{
+controls.enabled = true
 })
 } 
 
+/*
+###### ######  ###### #### #######  #####   
+ ##  ## ##  ##   ##  ##  ## ##   # ##   ##  
+ ##  ## ##  ##   ## ##      ##     ##       
+ #####  #####    ## ##      ####    #####   
+ ##     ## ##    ## ##      ##          ##  
+ ##     ## ##    ##  ##  ## ##   # ##   ##  
+####   #### ## ###### #### #######  #####   
+*/                                       
+
+var pricebarStool = 0
+var priceBistroTable = 0
+var priceSingleSofa = 0
+var priceDoubleSofa = 0
+var priceChair = 0
+var priceCoffeeTable = 0
+var priceHightTable = 0
+var priceTv42 = 0
+var priceTv55 = 0
+var priceBrochureRack = 0
+
+var priceShelves = 0
+var priceKettle = 0
+var priceWaterDispenser = 0
+var priceRefrigator = 0
+var pricePlant = 0
+var priceTrashCan = 0
+
+var icon , price
+
+setTimeout(loadPrices, 5000)
+function loadPrices() 
+{
+
+//PRICE HOVER BAR STOOL
+
+var element = document.getElementById("top_panel_furniture_list_bar_stool_price")
+element.innerHTML = pricebarStool + "$"
+
+icon = document.getElementById("bar_stool_icon")
+icon.addEventListener
+( 
+    'mouseover', 
+    ()=>
+    {
+        console.log("mouseover")
+        price = document.createElement('p')
+        icon.appendChild(price)
+        price.id = "bar_stool_default_price"
+        price.innerHTML = "200$"
+    }
+)
+document.getElementById("bar_stool_icon").addEventListener
+( 
+    'mouseout', 
+    ()=>
+    {
+        console.log("mouseout")
+        price.remove()
+    }
+)
+
+
+var element2 = document.getElementById("top_panel_furniture_list_bistro_table_price")
+element2.innerHTML = priceBistroTable + "$"
+
+var element3 = document.getElementById("top_panel_furniture_list_single_sofa_price")
+element3.innerHTML = priceSingleSofa + "$"
+
+var element4 = document.getElementById("top_panel_furniture_list_double_sofa_price")
+element4.innerHTML = priceDoubleSofa + "$"
+
+var element5 = document.getElementById("top_panel_furniture_list_chair_price")
+element5.innerHTML = priceChair + "$"
+
+var element6 = document.getElementById("top_panel_furniture_list_coffee_table_price")
+element6.innerHTML = priceCoffeeTable + "$"
+
+var elemen7 = document.getElementById("top_panel_furniture_list_high_table_price")
+elemen7.innerHTML = priceHightTable + "$"
+
+var element8 = document.getElementById("top_panel_furniture_list_tv42_price")
+element8.innerHTML = priceTv42 + "$"
+
+var element9 = document.getElementById("top_panel_furniture_list_tv55_price")
+element9.innerHTML = priceTv55 + "$"
+
+var element10 = document.getElementById("top_panel_furniture_list_brochure_rack_price")
+element10.innerHTML = priceBrochureRack + "$"
+
+var element11 = document.getElementById("top_panel_furniture_list_shelves_price")
+element11.innerHTML = priceShelves + "$"
+
+var element12 = document.getElementById("top_panel_furniture_list_kettle_price")
+element12.innerHTML = priceKettle + "$"
+
+var element13 = document.getElementById("top_panel_furniture_list_water_dispenser_price")
+element13.innerHTML = priceWaterDispenser + "$"
+
+var element14 = document.getElementById("top_panel_furniture_list_refrigator_price")
+element14.innerHTML = priceRefrigator + "$"
+
+var element16 = document.getElementById("top_panel_furniture_list_plant_price")
+element16.innerHTML = pricePlant + "$"
+
+var element17 = document.getElementById("top_panel_furniture_list_trash_can_price")
+element17.innerHTML = priceTrashCan + "$"
+
+}
+
+/*
+# ##### #######  #####   # ##### 
+## ## ##  ##   # ##   ## ## ## ## 
+   ##     ##     ##         ##    
+   ##     ####    #####     ##    
+   ##     ##          ##    ##    
+   ##     ##   # ##   ##    ##    
+  ####   #######  #####    ####   
+*/                                
+
+
+document.getElementById("button").onclick = ()=>
+{
+    console.log(camera.position)
+}
+
+
+document.getElementById("button2").onclick = ()=>
+{
+
+    
+}
+
+/*
+#####    #### ######   #####   ##### ####     
+##   ##  ##  ## ##  ## ### ### ### ### ##      
+##      ##      ##  ## ##   ## ##   ## ##      
+ #####  ##      #####  ##   ## ##   ## ##      
+     ## ##      ## ##  ##   ## ##   ## ##      
+##   ##  ##  ## ## ##  ### ### ### ### ##  ##  
+ #####    #### #### ##  #####   ##### #######  
+ */                                              
+
+setTimeout(loadPanels, 5000)
+ function loadPanels() 
+ {
+        /**
+         * Left Panel
+         */
+        function scrollByDownLeft()
+        {
+        document.getElementById("left_panel_icon_group").scrollBy(0, -50);
+        }
+        function scrollByUpLeft()
+        {
+        document.getElementById("left_panel_icon_group").scrollBy(0, 50);
+        }
+        document.getElementById("up_icon_left_panel").addEventListener("click", scrollByDownLeft);
+        document.getElementById("down_icon_left_panel").addEventListener("click", scrollByUpLeft);
+        /**
+         * Right Panel
+         */
+        function scrollByDownRight()
+        {
+        document.getElementById("right_panel_icon_group").scrollBy(0, -50);
+        }
+        function scrollByUpRight()
+        {
+        document.getElementById("right_panel_icon_group").scrollBy(0, 50);
+        }
+        document.getElementById("up_icon_right_panel").addEventListener("click", scrollByDownRight);
+        document.getElementById("down_icon_right_panel").addEventListener("click", scrollByUpRight);                               
+}
+topPanel()
+function topPanel()
+{
+         /**
+         * Subscribe form
+         */
+        document.querySelector('.submit-email').addEventListener('mousedown', (e) => 
+        {
+                e.preventDefault();
+                document.querySelector('.subscription').classList.add('done');
+        });
+        /**
+         * Up Down Icons
+         */
+
+        document.getElementById("up_icon_top_panel").addEventListener("click", function () 
+        {
+                document.getElementById("top_panel_background").style.top = "-200px";
+                document.getElementById("down_icon_top_panel").style.display = "block";
+                document.getElementById("up_icon_top_panel").style.display = "none";
+        }
+        )
+        document.getElementById("down_icon_top_panel").addEventListener("click", function () 
+        {
+                document.getElementById("top_panel_background").style.top = "0px";
+                document.getElementById("up_icon_top_panel").style.display = "block";
+                document.getElementById("down_icon_top_panel").style.display = "none";
+        }
+        )
+}
+leftPanel()
+function leftPanel()
+{   var amountShelves = 0
+    var textnode
+    var shelvesIcon = document.getElementById("shelves_icon")
+        /**
+         * Storage Icons
+         */
+        document.getElementById("shelves_icon").addEventListener("click", function () 
+        {
+            amountShelves = amountShelves + 1
+            var updateShelvesAmount = document.createElement('div')
+            updateShelvesAmount.id = "shelves_amount"
+            shelvesIcon.appendChild(updateShelvesAmount)
+            updateShelvesAmount.innerHTML = `${amountShelves}`
+            setTimeout(removeHtmlElement, 1000)
+            function removeHtmlElement() 
+            {
+                updateShelvesAmount.remove()
+            }
+        })
+        //ADD TAB
+        document.getElementById("add_tab").addEventListener("click", function () 
+        {
+                document.getElementById("add_tab").style.color = "cyan";
+                document.getElementById("storage_tab").style.color = "white";
+                document.getElementById("left_panel_icon_group_main").style.display = "block";
+                document.getElementById("left_panel_icon_group_storage").style.display = "none";
+        })
+         //STORAGE TAB
+         document.getElementById("storage_tab").addEventListener("click", function () 
+         {
+                document.getElementById("storage_tab").style.color = "cyan";
+                document.getElementById("add_tab").style.color = "white";
+                document.getElementById("left_panel_icon_group_main").style.display = "none";
+                document.getElementById("left_panel_icon_group_storage").style.display = "block";
+         })
+}
+rightPanel()
+function rightPanel()
+{
+        /**
+         * Carpet Icons
+         */
+
+        //CARPET TAB
+        document.getElementById("carpet_tab").addEventListener("click", function () 
+        {
+                document.getElementById("carpet_tab").style.color = "#7CFC00";
+                document.getElementById("parquet_tab").style.color = "white";
+                document.getElementById("laminate_tab").style.color = "white";
+                document.getElementById("right_panel_icon_group_carpet").style.display = "block";
+                document.getElementById("right_panel_icon_group_parquet").style.display = "none";
+                document.getElementById("right_panel_icon_group_laminate").style.display = "none";
+        })
+         //PARQUET TAB
+         document.getElementById("parquet_tab").addEventListener("click", function () 
+         {
+                document.getElementById("parquet_tab").style.color = "#7CFC00";
+                document.getElementById("carpet_tab").style.color = "white";
+                document.getElementById("laminate_tab").style.color = "white";
+                document.getElementById("right_panel_icon_group_parquet").style.display = "block";
+                document.getElementById("right_panel_icon_group_carpet").style.display = "none";
+                document.getElementById("right_panel_icon_group_laminate").style.display = "none";
+         })
+
+          //LAMINATE TAB
+          document.getElementById("laminate_tab").addEventListener("click", function () 
+          {
+                document.getElementById("laminate_tab").style.color = "#7CFC00";
+                document.getElementById("carpet_tab").style.color = "white";
+                document.getElementById("parquet_tab").style.color = "white";
+                document.getElementById("right_panel_icon_group_laminate").style.display = "block";
+                document.getElementById("right_panel_icon_group_parquet").style.display = "none";
+                document.getElementById("right_panel_icon_group_carpet").style.display = "none";  
+          })
+}
 
 /*
   #####    ###   ##   ## #######  
@@ -1185,259 +1885,86 @@ function sendEmail()
 }  
 
 
-
-
-
 /*
-###### ######  ###### #### #######  #####   
- ##  ## ##  ##   ##  ##  ## ##   # ##   ##  
- ##  ## ##  ##   ## ##      ##     ##       
- #####  #####    ## ##      ####    #####   
- ##     ## ##    ## ##      ##          ##  
- ##     ## ##    ##  ##  ## ##   # ##   ##  
-####   #### ## ###### #### #######  #####   
-*/                                       
+# ##### ####### ###  ##  # ##### ##   ## ######  #######  
+## ## ##  ##   # ###  ## ## ## ## ##   ##  ##  ##  ##   #  
+   ##     ##      #####     ##    ##   ##  ##  ##  ##      
+   ##     ####     ###      ##    ##   ##  #####   ####    
+   ##     ##      #####     ##    ##   ##  ## ##   ##      
+   ##     ##   # ##  ###    ##    ##   ##  ## ##   ##   #  
+  ####   ####### ##  ###   ####    #####  #### ## #######  
+*/  
 
-var pricebarStool = 0
-var priceBistroTable = 0
-var priceSingleSofa = 0
-var priceDoubleSofa = 0
-var priceChair = 0
-var priceCoffeeTable = 0
-var priceHightTable = 0
-var priceTv42 = 0
-var priceTv55 = 0
-var priceBrochureRack = 0
 
-var priceShelves = 0
-var priceKettle = 0
-var priceWaterDispenser = 0
-var priceRefrigator = 0
-var pricePlant = 0
-var priceTrashCan = 0
 
-var icon , price
 
-setTimeout(loadPrices, 5000)
-function loadPrices() 
+setTimeout(loadTextures, 5000)
+function loadTextures() 
 {
+    // Carpet 0
 
-//PRICE HOVER BAR STOOL
-
-var element = document.getElementById("top_panel_furniture_list_bar_stool_price")
-element.innerHTML = pricebarStool + "$"
-
-icon = document.getElementById("bar_stool_icon")
-icon.addEventListener
-( 
-    'mouseover', 
-    ()=>
+    document.getElementById("carpet0_icon").addEventListener("click", function()
     {
-        console.log("mouseover")
-        price = document.createElement('p')
-        icon.appendChild(price)
-        price.id = "bar_stool_default_price"
-        price.innerHTML = "200$"
-    }
-)
-document.getElementById("bar_stool_icon").addEventListener
-( 
-    'mouseout', 
-    ()=>
+    var texture = new THREE.TextureLoader().load( "./media/carpet0_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+    
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+
+    // Carpet 1
+
+    document.getElementById("carpet1_icon").addEventListener("click", function()
     {
-        console.log("mouseout")
-        price.remove()
-    }
-)
+    var texture = new THREE.TextureLoader().load( "./media/carpet1_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+    texture.colorSpace = THREE.SRGBColorSpace;
+    scene.getObjectByName( "stand_1" ).material.map = texture
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
 
+    // Parquet 1
 
-var element2 = document.getElementById("top_panel_furniture_list_bistro_table_price")
-element2.innerHTML = priceBistroTable + "$"
-
-var element3 = document.getElementById("top_panel_furniture_list_single_sofa_price")
-element3.innerHTML = priceSingleSofa + "$"
-
-var element4 = document.getElementById("top_panel_furniture_list_double_sofa_price")
-element4.innerHTML = priceDoubleSofa + "$"
-
-var element5 = document.getElementById("top_panel_furniture_list_chair_price")
-element5.innerHTML = priceChair + "$"
-
-var element6 = document.getElementById("top_panel_furniture_list_coffee_table_price")
-element6.innerHTML = priceCoffeeTable + "$"
-
-var elemen7 = document.getElementById("top_panel_furniture_list_high_table_price")
-elemen7.innerHTML = priceHightTable + "$"
-
-var element8 = document.getElementById("top_panel_furniture_list_tv42_price")
-element8.innerHTML = priceTv42 + "$"
-
-var element9 = document.getElementById("top_panel_furniture_list_tv55_price")
-element9.innerHTML = priceTv55 + "$"
-
-var element10 = document.getElementById("top_panel_furniture_list_brochure_rack_price")
-element10.innerHTML = priceBrochureRack + "$"
-
-var element11 = document.getElementById("top_panel_furniture_list_shelves_price")
-element11.innerHTML = priceShelves + "$"
-
-var element12 = document.getElementById("top_panel_furniture_list_kettle_price")
-element12.innerHTML = priceKettle + "$"
-
-var element13 = document.getElementById("top_panel_furniture_list_water_dispenser_price")
-element13.innerHTML = priceWaterDispenser + "$"
-
-var element14 = document.getElementById("top_panel_furniture_list_refrigator_price")
-element14.innerHTML = priceRefrigator + "$"
-
-var element16 = document.getElementById("top_panel_furniture_list_plant_price")
-element16.innerHTML = pricePlant + "$"
-
-var element17 = document.getElementById("top_panel_furniture_list_trash_can_price")
-element17.innerHTML = priceTrashCan + "$"
-
-}
-
-
-
-/*
-
-##### ######    ###   ######  ##  ## ###### ####   
-##   ## ##  ##  ## ##   ##  ## ##  ##   ##  ##  ##  
-##      ##  ## ##   ##  ##  ## ##  ##   ## ##       
-## #### #####  ##   ##  #####  ######   ## ##       
-##   ## ## ##  #######  ##     ##  ##   ## ##       
-##   ## ## ##  ##   ##  ##     ##  ##   ##  ##  ##  
- ##### #### ## ##   ## ####    ##  ## ###### ####   
-
-*/
-
-/**
- * INIT 
- */
-
-var tempV , backWallUploadResponseUrl,i
-
-/**
- * INIT
- */
-
-
-
-function loadGraphicControls() // FUNCTION WORKS WHEN BACKWALL SWITCH ON
-{ 
-
-const backWall = scene.getObjectByName( "back_wall" )
-const backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")       
-window.addEventListener( 'mousemove', detectClickBackWall);
-function detectClickBackWall(event)
-{
-    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 0.9;
-    //console.log("mouse coordinates:" + mouse.x , mouse.y)
-
-    raycaster.setFromCamera(mouse, camera);
-    intersect = raycaster.intersectObject(backWall)
-    if (intersect.length > 0)
+    document.getElementById("parquet0_icon").addEventListener("click", function()
     {
-        console.log("hovered back wall")
-        canvas.style.cursor = "pointer"
-        window.addEventListener( 'mousedown', onClickBackWall); //WHEN HOVERED DETECT CLICK EVENT
-    }
-    else
+    var texture = new THREE.TextureLoader().load( "./media/parquet0_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+    texture.colorSpace = THREE.SRGBColorSpace;
+    scene.getObjectByName( "stand_1" ).material.map = texture
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+
+    
+    // Parquet 2
+
+    document.getElementById("parquet1_icon").addEventListener("click", function()
     {
-        canvas.style.cursor = "default"
-        window.removeEventListener( 'mousedown', onClickBackWall);
-        
-    }
+    var texture = new THREE.TextureLoader().load( "./media/parquet1_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+    texture.colorSpace = THREE.SRGBColorSpace;
+    scene.getObjectByName( "stand_1" ).material.map = texture
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+
+
+     // Laminate 0
+
+     document.getElementById("laminate0_icon").addEventListener("click", function()
+     {
+     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: 'white'});
+     })
+
+    // Laminate 1
+
+    document.getElementById("laminate1_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#C0C0C0'});
+    })
 }
-
-
-function onClickBackWall()
-{
-    
-   // console.log("clicked back wall")
-    tempV = backWall.getWorldPosition(new THREE.Vector3())
-    tempV.project(camera);// get the normalized screen coordinate of world position
-
-    // convert the normalized position to CSS coordinates
-    var x = (tempV.x *  .5 + .5) * canvas.clientWidth;
-    var y = (tempV.y * -.5 + .5) * canvas.clientHeight;
-    
-    backWallGraphicControl.style.left = `${x}px`
-    backWallGraphicControl.style.top = `${y}px`
-    backWallGraphicControl.style.visibility = "visible"
-    
-}
-document.getElementById("add_icon").onclick = ()=>
-{   
-    var input = document.createElement('input');
-    input.type = 'file';
-    
-    input.onchange = e => 
-    { 
-    
-       // getting a hold of the file reference
-       var file = e.target.files[0]; 
-    
-       // setting up the reader
-       var reader = new FileReader();
-       reader.readAsDataURL(file); // this is reading as data url
-    
-       // here we tell the reader what to do when it's done reading...
-       reader.onload = readerEvent => 
-       {
-        var content = readerEvent.target.result; // this is the content!
-        
-        var textureV = new THREE.TextureLoader().load(content);
-
-        
-        Functions.sendDataParams(content , backWallUploadResponseUrl , "backwall_image" )
-        
-
-        scene.getObjectByName( "back_wall_1" ).material.map = textureV
-        textureV.rotation = THREE.MathUtils.degToRad(90);
-        textureV.colorSpace = THREE.SRGBColorSpace;
-        textureV.wrapS = THREE.RepeatWrapping;
-        textureV.wrapT = THREE.RepeatWrapping;
-        textureV.repeat.set( 1, 1 );
-            
-    //The last thing to note about the example is that if you change wrapS or wrapT on the texture you must also set texture.needsUpdate so three.js knows to apply those settings. The other settings are automatically applied.
-    // textureV.needsUpdate =true
-    //scene.getObjectByName( "back_wall_1" ).material.needsUpdate = true
-
-        
-       }
-    }
-    input.click();
-}
-
-i=1
-document.getElementById("zoom_out_icon").onclick = ()=>
-{   
-i = i   + 0.2
-scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( i, i );
-}
-
-document.getElementById("left_icon").onclick = ()=>
-{   
-i = i   - 0.2
-scene.getObjectByName( "back_wall_1" ).material.map.offset.set(i, 1)
-}
-
-document.getElementById("apply_icon").onclick = ()=>
-{ 
-    backWallGraphicControl.style.visibility = "hidden"       
-
-}
-
-
-
-
-
-} //end of onClickBackWall function
-
-
 
 /*
 ####     #####   ##### ###### ##   ##  
@@ -1579,6 +2106,9 @@ function loginPanel()
 setTimeout(loadParameters, 5000)
 function loadParameters() 
 {
+    var switchLeft = document.getElementById("toogle_switch_left_wall_switch")
+    var switchBack = document.getElementById("toogle_switch_back_wall_switch")
+    var switchRight = document.getElementById("toogle_switch_right_wall_switch")
     
 //BACKWALL VISIBILITY
         if (Functions.getQueryVariable("backwall"))
@@ -1586,7 +2116,7 @@ function loadParameters()
             switchBack.checked = true
             scene.getObjectByName( "back_wall_1" ).visible = true;
             scene.getObjectByName( "back_wall_2" ).visible = true;
-            loadGraphicControls()
+            loadGraphicControlsBack()
                 
             var standInfo = "peninsula"
             document.getElementById("stand_info_text").style.left = "315px";
@@ -1611,935 +2141,121 @@ function loadParameters()
                 }
             )
         }
-
-}
-
-
-/*
- ###### ##   ## #######  #####   
-   ##   ###  ##  ##   # ### ###  
-   ##   #### ##  ##     ##   ##  
-   ##   #######  ####   ##   ##  
-   ##   ## ####  ##     ##   ##  
-   ##   ##  ###  ##     ### ###  
- ###### ##   ## ####     #####   
-                                 
-
-#####  #######  ##### ### ###  
- ## ##  ##   # ##   ## ## ##   
- ##  ## ##     ##      ####    
- ##  ## ####    #####  ###     
- ##  ## ##          ## ####    
- ## ##  ##   # ##   ## ## ##   
-#####  #######  ##### ### ###  
-*/    
-
-/**
-*  ON EVENT OF CLICK INFO DESK ICON
-*/
-
-//setTimeout(loadInfoDesk, 5000)      
-function loadInfoDesk() 
+//BACKWALL CUSTOM IMAGE POSITION RIGHT
+if (Functions.getQueryVariable("backwall_image_position_right"))
 {
-    var mouse = new THREE.Vector2();
-    var raycaster = new THREE.Raycaster(); 
-    var intersect = new THREE.Vector3();
-    var intersectInfoDeskPoster = new THREE.Vector3();
-    var intersectInfoDeskSides = new THREE.Vector3();
-    var standBase = scene.getObjectByName( "stand_1" )
-    var envFloor = scene.getObjectByName( "environment_floor")
-    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-    
-    var infoDeskFurnitureControl = document.getElementById("furniture_icon_group_info_desk")
-    var infoDeskGraphicControl =  document.getElementById("graphics_control_icon_group_info_desk")
-
-    var infoDesk = scene.getObjectByName( "info_desk")
-    var infoDeskPoster = scene.getObjectByName( "info_desk_2")
-    var infoDeskSides = scene.getObjectByName( "info_desk_1")
-    var switchInfoDesk = document.getElementById("toogle_switch_info_desk_switch")   
-
-    var draggerInfoDesk = new THREE.Mesh( new THREE.BoxGeometry(dimWidthInfoDesk , dimHeightInfoDesk , dimDepthInfoDesk), new THREE.MeshBasicMaterial( {color: 0x00ff00} ))    //DRAG EDİLEBİLİR GÖRÜNMEZ BİR OBJE YAPIYORUZ VE BU OBJENİN HELPER BOYUTUNDA OLMASI GEREKİYOR Kİ İMLEÇ ÜZERİNE GELDİĞİNDE HER YÖNDEN DRAG EDİLEBİLSİN.
-    draggerInfoDesk.visible = false
-    draggerInfoDesk.position.y = 0.11
-    var helperInfoDesk = new THREE.BoxHelper( infoDesk, 0xffff00 );
-    helperInfoDesk.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
-
-    var dimInfoDesk = new THREE.Box3().setFromObject(infoDesk);
-    var dimWidthInfoDesk = Math.abs(dimInfoDesk.max.x)+Math.abs(dimInfoDesk.min.x)
-    var dimDepthInfoDesk = Math.abs(dimInfoDesk.max.z)+Math.abs(dimInfoDesk.min.z)
-    var dimHeightInfoDesk = Math.abs(dimInfoDesk.max.y)+Math.abs(dimInfoDesk.min.y)
-
-    var limiterPlaneGeoInfoDesk = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
-    var limiterPlaneMatInfoDesk = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-    var limiterPlaneInfoDesk = new THREE.Mesh( limiterPlaneGeoInfoDesk, limiterPlaneMatInfoDesk );
-    scene.add(limiterPlaneInfoDesk)
-    limiterPlaneInfoDesk.rotation.x = THREE.MathUtils.degToRad(90)
-    limiterPlaneInfoDesk.position.y = 0.11
-    limiterPlaneInfoDesk.visible = false
-
-/**
- *  INIT TEXTURE SETTINGS
- */
-    var textureInfoDesk = new THREE.TextureLoader().load( "./media/info_desk.jpg" );
-    scene.getObjectByName( "info_desk_2" ).material = new THREE.MeshBasicMaterial({map :  textureInfoDesk})
-    
-    textureInfoDesk.colorSpace = THREE.SRGBColorSpace;
-    textureInfoDesk.wrapS = THREE.RepeatWrapping;
-    textureInfoDesk.wrapT = THREE.RepeatWrapping;
-    textureInfoDesk.repeat.set( 8, 8 )
-
-/**
- *  INIT CLICK VARIABLES
- */
-    var clickEventInfoDesk = false
-    var dragEventInfoDesk = false
-    var hoverEventInfoDesk = false
-
-/**
- *  INIT DRAG SETTINGS FOR INFO DESK
- */
-        
-     var objectsInfoDesk = []
-     objectsInfoDesk.push(draggerInfoDesk)
-     var dragInfoDesk = new DragControls(objectsInfoDesk, camera, renderer.domElement)
-     dragInfoDesk.enabled = false
-    
-    switchInfoDesk.addEventListener('change', function () 
-    {
-        if (switchInfoDesk.checked)
+    var posRightBackWall = Functions.getQueryVariable("backwall_image_position_right")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posRightBackWall, 1)
+}
+//BACKWALL CUSTOM IMAGE POSITION LEFT
+if (Functions.getQueryVariable("backwall_image_position_left"))
+{
+    var posLeftBackWall = Functions.getQueryVariable("backwall_image_position_right")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posLeftBackWall, 1)
+}
+//BACKWALL CUSTOM IMAGE POSITION UP
+if (Functions.getQueryVariable("backwall_image_position_up"))
+{
+    var posUpBackWall = Functions.getQueryVariable("backwall_image_position_up")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posUpBackWall)
+}
+//BACKWALL CUSTOM IMAGE POSITION DOWN
+if (Functions.getQueryVariable("backwall_image_position_down"))
+{
+    var posDownBackWall = Functions.getQueryVariable("backwall_image_position_down")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posDownBackWall)
+}
+//BACKWALL CUSTOM IMAGE ZOOM ++
+if (Functions.getQueryVariable("backwall_image_zoom_in"))
+{
+    var zoomInBackWall = Functions.getQueryVariable("backwall_image_zoom_in")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(zoomInBackWall, zoomInBackWall)
+}
+//BACKWALL CUSTOM IMAGE ZOOM --
+if (Functions.getQueryVariable("backwall_image_zoom_out"))
+{
+    var zoomOutBackWall = Functions.getQueryVariable("backwall_image_zoom_out")
+    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(zoomOutBackWall, zoomOutBackWall)
+}
+//RIGHTWALL VISIBILITY
+        if (Functions.getQueryVariable("rightwall"))
         {
-            scene.getObjectByName( "info_desk_1").visible = true
-            scene.getObjectByName( "info_desk_2").visible = true
-
-           /*  raycaster.layers.set( 0 ); 
-            draggerInfoDesk.layers.enable( 0 );  
-            infoDeskPoster.layers.enable( 0 ); 
-            infoDeskSides.layers.enable( 0 ); 
-            infoDesk.layers.enable( 0 ) */
-
-        console.log("info desk switch checked")
-        window.addEventListener( 'mousemove', onMouseMoveInfoDesk);
-
-    function onClickAllObjects()
-    {
-        infoDeskFurnitureControl.style.visibility = "hidden" 
-        infoDeskGraphicControl.style.visibility = "hidden" 
-        scene.remove(helperInfoDesk)
-    }
-
-
-    function onClickInfoDeskPoster()
-    {
-        scene.remove(helperInfoDesk)    // HIDE ALL HELPERS
-        
-        
-        setTimeout(() =>
-        {
-            scene.add(helperInfoDesk)  
-            infoDeskGraphicControl.style.visibility = "visible" 
-            infoDeskFurnitureControl.style.visibility = "hidden" 
-            
-            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
-            getPositionInfoDesk.project(camera);
-
-            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
-            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
-
-            infoDeskGraphicControl.style.left = `${x}px`
-            infoDeskGraphicControl.style.top = `${y}px`
-        }, "200");
-    }
-
-    function onClickInfoDeskSides()
-    {
-        scene.remove(helperInfoDesk)    // HIDE ALL HELPERS
-        
-        setTimeout(() =>
-        {
-            scene.add(helperInfoDesk)  
-            infoDeskFurnitureControl.style.visibility = "visible" 
-            infoDeskGraphicControl.style.visibility = "hidden"
-            
-            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
-            getPositionInfoDesk.project(camera);
-
-            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
-            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
-
-            infoDeskFurnitureControl.style.left = `${x}px`
-            infoDeskFurnitureControl.style.top = `${y}px`
-        }, "200");
-    }
-
-/**
- *  CLICK FOLLOW CURSOR
- */
-        
-        function onMouseMoveInfoDesk(event)
-        {
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
-            controls.enabled = false; 
-
-            scene.add(helperInfoDesk)
-
-            if(intersect.length>0)
-            {
-                // console.log("intersection true")
-                for ( var i = 0; i < intersect.length; i ++ )
-                {
-                    var a = intersect[ i ].point.x 
-                    var c = intersect[ i ].point.z  
-                    infoDesk.position.set(a,0.11,c)
-                    draggerInfoDesk.position.set(a,dimHeightInfoDesk,c)
-                    helperInfoDesk.update()
-                } 
-            }
-            else        
-            {
-                intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-                for ( var i = 0; i < intersect.length; i ++ )
-                {
-                    var a = intersect[ i ].point.x 
-                    var c = intersect[ i ].point.z  
-                    // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
-                    helperInfoDesk.update()
-
-                    if (Math.abs(a)<= dimWidthStandBase/2-dimWidthInfoDesk/2)
-                    {
-                        if(c<0){infoDesk.position.x=a}
-                        else if(c>0){infoDesk.position.x=a}
-                    }
-
-                    if (Math.abs(c)<= dimDepthStandBase/2-dimDepthInfoDesk/2)
-                    {
-                        if(a<0){infoDesk.position.z=c }
-                        else if(a>0){infoDesk.position.z=c}
-                    }
-
-                }
-
-            } 
-            
-            window.addEventListener( 'click', function()
-            {
-                console.log("first drop action")
-                scene.remove(helperInfoDesk)
-                controls.enabled = true;
-                draggerInfoDesk.position.set(infoDesk.position.x,dimHeightInfoDesk,infoDesk.position.z)  //STAND INTERSECTION ALANI DIŞINDA DROP YAPTIĞIMIZDA DRAGGER SPHERE (DRAG OBJE SADECE KENDİSİ OLDUĞUNDAN) DIŞARDA KALIYOR O YÜZDEN TEKRAR OBJEYİ DRAG EDEBİLMEK İÇİN BU AYARI YAPIYORUZ.
-                dragInfoDesk.enabled = true
-                scene.add(draggerInfoDesk)
-            })
-            
-        }window.removeEventListener( 'mousemove', onMouseMoveInfoDesk);
-
-        container.addEventListener( 'mousedown', function(event)
-        {
-            console.log("second click event")
-            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            
-            intersectInfoDeskPoster = raycaster.intersectObject(infoDeskPoster)
-            intersectInfoDeskSides = raycaster.intersectObject(infoDeskSides)
-
-            if(intersectInfoDeskPoster.length>0)
-            {
-                onClickInfoDeskPoster()
-                console.log("clicked info desk poster")
-                helperInfoDesk.material = new THREE.MeshBasicMaterial({color: "#00FF00"})
-            }
-            else if (intersectInfoDeskSides.length>0)
-            {
-                onClickInfoDeskSides()
-                console.log("clicked info desk sides")
-                helperInfoDesk.material = new THREE.MeshBasicMaterial({color: "#00FF00"})
-            }
-            else        //ÜSTTEKİ İKİ DURUMUN DA OLMAMASI HALİ
-            {
-                onClickAllObjects()
-                console.log("clicked all objects")
-            }
-           
-        })  
-        
-/**
- *  FIRST DRAG
- */
-
-    dragInfoDesk.addEventListener( 'drag', function()
-    {
-        dragEventInfoDesk  = true
-        infoDeskFurnitureControl.style.visibility = "hidden" 
-        infoDeskGraphicControl.style.visibility = "hidden" 
-        helperInfoDesk.material = new THREE.MeshBasicMaterial({color: "#32CD32"})
-        window.addEventListener( 'mousemove', onMouseHover);
-        controls.enabled = false
-        scene.add(helperInfoDesk)
-        helperInfoDesk.update()
-    })
-    
-    function onMouseHover(event) //CHECK INTERSECTIONS THEN DRAG
-    {   
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, camera);
-        intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
-
-        if(intersect.length>0)
-        {
-           // console.log("intersection true")
-            
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                draggerInfoDesk.position.set(a,dimHeightInfoDesk,c)
-                infoDesk.position.set(a,0.11,c)
+            switchRight.checked = true
+            scene.getObjectByName( "right_wall_1" ).visible = true;
+            scene.getObjectByName( "right_wall_2" ).visible = true;
+            loadGraphicControlsRight()
                 
-            } 
+            var standInfo = "corner right"
+            document.getElementById("stand_info_text").style.left = "315px";
+            document.getElementById("stand_info_text").style.bottom = "22px";
+            document.getElementById("stand_info_text").innerHTML = standInfo + standSize
         }
-        else        
+//RIGHTWALL CUSTOM IMAGE
+        if (Functions.getQueryVariable("rightwall_image"))
         {
-            intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                // console.log("projected coordinates on 3d space x=" + a + "z=" + c)
+            var uploadCodeRw = Functions.getQueryVariable("rightwall_image")
 
-                    
-                if (Math.abs(a)<= dimWidthStandBase/2-dimWidthInfoDesk/2)
+            new THREE.FileLoader().load //It can also be used directly to load any file type that does not have a loader. 
+            (
+                `https://cdn.filestackcontent.com/${uploadCodeRw}`,
+
+                // WHEN LOADED , DO 
+                function ( mapUrlRw ) 
                 {
-                    if(c<0){infoDesk.position.x=a}
-                    else if(c>0){infoDesk.position.x=a}
+                    var textureLoaderRw = new THREE.TextureLoader().load(mapUrlRw)
+                    scene.getObjectByName( "right_wall_1" ).material.map = textureLoaderRw
+                    textureLoaderRw.colorSpace = THREE.SRGBColorSpace;
                 }
-
-                if (Math.abs(c)<= dimDepthStandBase/2-dimDepthInfoDesk/2)
-                {
-                    if(a<0){infoDesk.position.z=c}
-                    else if(a>0){infoDesk.position.z=c}
-                }
-                                
-            }
-            
-        } 
-        
-    }
-
-/**
- *  FURNITURE CONTROL ICONS
- */
-            
-    dragInfoDesk.addEventListener( 'dragend', function () //DRAGSTARTI CLICK OLARAK KULLANDIĞINDA CLICKTEN ELİNİ KALDIRDIĞINDA DROP'U İŞLEME ALIYOR.O YÜZDEN BİR OBJENİN CLICK'INI DRAG'IN HOVERINA EVENTLISTENER OLARAK VERİYORUZ
-    {
-        dragEventInfoDesk  = false
-        draggerInfoDesk.position.set(infoDesk.position.x,dimHeightInfoDesk,infoDesk.position.z)  //STAND INTERSECTION ALANI DIŞINDA DRAGEND YAPTIĞIMIZDA DRAGGER SPHERE (DRAG OBJE SADECE KENDİSİ OLDUĞUNDAN) DIŞARDA KALIYOR O YÜZDEN TEKRAR OBJEYİ DRAG EDEBİLMEK İÇİN BU AYARI YAPIYORUZ.
-        window.removeEventListener( 'mousemove', onMouseHover)
-        controls.enabled = true; 
-        scene.remove(helperInfoDesk)
-        infoDeskFurnitureControl.style.visibility = "hidden" 
-        infoDeskGraphicControl.style.visibility = "hidden" 
-        
-        
-    })
-    
-    document.getElementById("rotate_icon_info_desk").onclick = ()=>
-    {
-        scene.add(helperInfoDesk)
-        infoDesk.rotateY(THREE.MathUtils.degToRad(15))
-        helperInfoDesk.update()
-    }
-    document.getElementById("trash_icon_info_desk").onclick = ()=>
-    {
-        console.log("clicked trash icon info desk")
-        scene.getObjectByName( "info_desk_1").visible = false
-        scene.getObjectByName( "info_desk_2").visible = false
-        infoDeskFurnitureControl.style.visibility = "hidden" 
-        infoDeskGraphicControl.style.visibility = "hidden" 
-        
-       // raycaster.layers.set( 1 ); 
-        switchInfoDesk.checked = false
-    }
-
-
-    }
-    /*if switchInfoDesk is not checked*/
-        else    
-        {
-            container.removeEventListener( 'mousedown', onEventOfClick )
-            console.log("switched off info switch")
-            scene.getObjectByName( "info_desk_1").visible = false
-            scene.getObjectByName( "info_desk_2").visible = false
-            infoDeskFurnitureControl.style.visibility = "hidden" 
-            infoDeskGraphicControl.style.visibility = "hidden"
-            // raycaster.layers.set( 1 ); 
+            )
         }
-
-    })  //      END OF        //        checkbox.addEventListener('change', function () 
-    
-}   //      END OF        //        setTimeout(loadInfoDesk, 5000)    
-
-/*
-##### ####     ##### ######    ###   ####     
-##   ## ##     ### ### ##  ##  ## ##   ##      
-##      ##     ##   ## ##  ## ##   ##  ##      
-## #### ##     ##   ## #####  ##   ##  ##      
-##   ## ##     ##   ## ##  ## #######  ##      
-##   ## ##  ## ### ### ##  ## ##   ##  ##  ##  
- ##### #######  ##### ######  ##   ## #######  
-                                               
- ####### ##   ## ##   ##   ####   
-  ##   # ##   ## ###  ##  ##  ##  
-  ##     ##   ## #### ## ##       
-  ####   ##   ## ####### ##       
-  ##     ##   ## ## #### ##       
-  ##     ##   ## ##  ###  ##  ##  
- ####     #####  ##   ##   ####   
- */                                 
-var allObjects = []
-
- setTimeout(loadGlobalFunctions, 5000)      
- function loadGlobalFunctions() 
- {
-    /**
-     *  ON EVENT OF CLICK ALL
-     */
-    
-    function getAllObjects()        //  BU KULLANIM ŞEKLİYLE PROJENİN HERHANGİ BİR ALANINDA ALLOBJECTS VARIABLE'I BİE GETALLOBJECTS OLARAK DÖNÜYOR. VARIABLE FONKSİYONUN DIŞINDA YALNIZ BAŞINA TANIMLANMALIDIR.
-    {
-        scene.traverse( function( objects ) 
-        {
-            if ( objects.isMesh ) 
-                {
-                    allObjects.push(objects)
-                }
-                
-        })
-    }
-    getAllObjects()
-    
- }   
-
-   
-/*
-# ##### #######  #####   # ##### 
-## ## ##  ##   # ##   ## ## ## ## 
-   ##     ##     ##         ##    
-   ##     ####    #####     ##    
-   ##     ##          ##    ##    
-   ##     ##   # ##   ##    ##    
-  ####   #######  #####    ####   
-*/                                
-
-
-document.getElementById("button").onclick = ()=>
+//LEFTWALL VISIBILITY
+if (Functions.getQueryVariable("leftwall"))
 {
+    switchLeft.checked = true
+    scene.getObjectByName( "left_wall_1" ).visible = true;
+    scene.getObjectByName( "left_wall_2" ).visible = true;
+    loadGraphicControlsLeft()
+        
+    var standInfo = "corner left"
+    document.getElementById("stand_info_text").style.left = "315px";
+    document.getElementById("stand_info_text").style.bottom = "22px";
+    document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+}
+//LEFTWALL CUSTOM IMAGE
+if (Functions.getQueryVariable("leftwall_image"))
+{
+    var uploadCodeLw = Functions.getQueryVariable("leftwall_image")
+
+    new THREE.FileLoader().load //It can also be used directly to load any file type that does not have a loader. 
+    (
+        `https://cdn.filestackcontent.com/${uploadCodeLw}`,
+
+        // WHEN LOADED , DO 
+        function ( mapUrlLw ) 
+        {
+            var textureLoaderLw = new THREE.TextureLoader().load(mapUrlLw)
+            scene.getObjectByName( "left_wall_1" ).material.map = textureLoaderLw
+            textureLoaderLw.colorSpace = THREE.SRGBColorSpace;
+        }
+    )
+}
 
 }
 
 
-document.getElementById("button2").onclick = ()=>
-{
-
-    
-}
 
 
-/*
-#####   # #####  ##### ######    ###    ##### #######  
-##   ## ## ## ## ### ### ##  ##  ## ##  ##   ## ##   #  
-##         ##    ##   ## ##  ## ##   ## ##      ##      
- #####     ##    ##   ## #####  ##   ## ## #### ####    
-     ##    ##    ##   ## ## ##  ####### ##   ## ##      
-##   ##    ##    ### ### ## ##  ##   ## ##   ## ##   #  
- #####    ####    ##### #### ## ##   ##  ##### #######  
-*/
-
-function switchOnStorage() 
-{
-/**
- * INIT VARIABLES
- */
-    {
-        {//DEFAULTS
-            var mouse = new THREE.Vector2();
-            var raycaster = new THREE.Raycaster(); 
-            var intersect = new THREE.Vector3();
-            var storage = scene.getObjectByName( "storage")
-            var standBase = scene.getObjectByName( "stand_1" )
-            var envFloor = scene.getObjectByName( "environment_floor")
-            var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-            var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-            var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-        }
-        {//HELPER
-            var helperStorage = new THREE.BoxHelper( storage, 0xffff00 );
-            helperStorage.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
-        }
-        {//STORAGE SIZES
-        var dimStorage = new THREE.Box3().setFromObject(storage);
-        var dimWidthStorage = Math.abs(dimStorage.max.x)+Math.abs(dimStorage.min.x)
-        var dimDepthStorage = Math.abs(dimStorage.max.z)+Math.abs(dimStorage.min.z)
-        var dimHeightStorage = Math.abs(dimStorage.max.y)+Math.abs(dimStorage.min.y)
-        }
-        {// LIMITER PLANE
-        var limiterPlaneGeoStorage = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthStorage/2 , dimDepthStandBase -  dimDepthStorage/2);
-        var limiterPlaneMatStorage = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-        var limiterPlaneStorage = new THREE.Mesh( limiterPlaneGeoStorage, limiterPlaneMatStorage );
-        limiterPlaneStorage.rotation.x = THREE.MathUtils.degToRad(90)
-        limiterPlaneStorage.position.y = -0.5
-        scene.add(limiterPlaneStorage)
-        limiterPlaneStorage.visible = true
-        }
-    }
-    
-/**
-* INIT DRAG SETTINGS
-*/
-    {
-    /* NOTLAR
-        AÇIK KAPILARIN TAŞMA PAYI : 0.3m
-        BoxGeometry(width : Float, height : Float, depth : Float)
-        width — Width;  X axis.
-        height —  Y axis.
-        depth —  Z axis.*/
-    var draggerStorage = scene.getObjectByName("dragger_storage")
-    draggerStorage.position.y = 0.11
-    draggerStorage.visible = false
-    var objectsStorage = []
-    objectsStorage.push(draggerStorage)
-    var dragStorage = new DragControls(objectsStorage, camera, renderer.domElement)
-    dragStorage.transformGroup = true
-    scene.getObjectByName("dragger_storage").layers.set(0)
-    
-    }
-/**
-* SETUP DRAG EVENTSLISTENERS
-*/
-    {
-        dragStorage.addEventListener( 'drag', function()
-        {
-            controls.enabled = false
-            scene.add(helperStorage)
-            helperStorage.material = new THREE.MeshBasicMaterial({color: "#32CD32"})
-            helperStorage.update()
-            window.addEventListener( 'mousemove', onEventstorageDragMouseMove);
-        })
-        dragStorage.addEventListener( 'dragend', function()
-        {
-            controls.enabled = true
-            window.removeEventListener( 'mousemove', onEventstorageDragMouseMove);
-            scene.remove(helperStorage)
-        })
-
-        function onEventstorageDragMouseMove(event) //CHECK INTERSECTIONS THEN DRAG
-        {   
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, camera);
-        intersect = raycaster.intersectObject(limiterPlaneStorage)
-
-        if(intersect.length>0)
-        {
-           // console.log("intersection true")
-            
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                draggerStorage.position.set(a,0.11,c)
-                storage.position.set(a,3.10,c)
-            } 
-        }
-        else  //EĞER KESİŞME YOKSA...STANDIN SINIRLARININ DIŞINDAKİ İMLEÇ HAREKETLERİNİ ENVFLOOR İLE YENİ KESİŞİM BELİRLEYEREK YAPIYORUZ.  
-        {
-            intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                    
-                if (Math.abs(a)<= dimWidthStandBase/2-dimWidthStorage/2)
-                {
-                    if(c<0){storage.position.x=a}
-                    else if(c>0){storage.position.x=a}
-                }
-
-                if (Math.abs(c)<= dimDepthStandBase/2-dimDepthStorage/2)
-                {
-                    if(a<0){storage.position.z=c}
-                    else if(a>0){storage.position.z=c}
-                }
-                                
-            }
-            
-        } 
-        
-    }
-        
-    }
-
-/**
-* SET STORAGE LAYERS TO "VISIBLE"
-*/
-    {
-        scene.getObjectByName( "storage_1" ).visible = true;
-        scene.getObjectByName( "storage_2" ).visible = true;
-        scene.getObjectByName( "storage_3" ).visible = true;
-        scene.getObjectByName( "storage_4" ).visible = true;
-        scene.getObjectByName( "storage_5" ).visible = true;
-    }
-
-/**
- *  INIT TEXTURE SETTINGS
- */
-    {
-        //1:INSIDE 2:FRONT
-        var textureStorageFrontWall = new THREE.TextureLoader().load( "./media/storage_front_wall.jpg" )
-        scene.getObjectByName( "storage_2" ).material = new THREE.MeshBasicMaterial({map :  textureStorageFrontWall})
-        textureStorageFrontWall.colorSpace = THREE.SRGBColorSpace;
-        textureStorageFrontWall.wrapS = THREE.RepeatWrapping;
-        textureStorageFrontWall.wrapT = THREE.RepeatWrapping;
-        textureStorageFrontWall.repeat.set( 2, 2 )
-
-    }
-/**
-* SET CONTROLLERS VISIBLE
-*/
-    {
-        
-        scene.getObjectByName( "drag_right_storage" ).visible = true;
-        scene.getObjectByName( "drag_front_door_storage" ).visible = true;
-        
-    }
-        
-}
-function switchOffStorage() 
-{
-/**
- * INIT VARIABLES
- */
-    {
-    {//DEFAULTS
-        var mouse = new THREE.Vector2();
-        var raycaster = new THREE.Raycaster(); 
-        var intersect = new THREE.Vector3();
-        var storage = scene.getObjectByName( "storage")
-        var standBase = scene.getObjectByName( "stand_1" )
-        var envFloor = scene.getObjectByName( "environment_floor")
-        var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-        var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-        var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-    }
-    {//HELPER
-        var helperStorage = new THREE.BoxHelper( storage, 0xffff00 );
-        helperStorage.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
-    }
-    {//STORAGE SIZES
-    var dimStorage = new THREE.Box3().setFromObject(storage);
-    var dimWidthStorage = Math.abs(dimStorage.max.x)+Math.abs(dimStorage.min.x)
-    var dimDepthStorage = Math.abs(dimStorage.max.z)+Math.abs(dimStorage.min.z)
-    var dimHeightStorage = Math.abs(dimStorage.max.y)+Math.abs(dimStorage.min.y)
-    }
-    {// LIMITER PLANE
-    var limiterPlaneGeoStorage = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthStorage/2 , dimDepthStandBase -  dimDepthStorage/2);
-    var limiterPlaneMatStorage = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-    var limiterPlaneStorage = new THREE.Mesh( limiterPlaneGeoStorage, limiterPlaneMatStorage );
-    limiterPlaneStorage.rotation.x = THREE.MathUtils.degToRad(90)
-    limiterPlaneStorage.position.y = 0.11
-    scene.add(limiterPlaneStorage)
-    limiterPlaneStorage.visible = false
-    }
-    }
-/**
-* INIT DRAG SETTINGS
-*/
-    {
-    //AÇIK KAPILARIN TAŞMA PAYI : 0.3m
-    // NOT: LAYERS SET OBJECT3D'İ GÖRÜYOR MESH'İ GÖRMÜYOR.KENDİ EKLEDİĞİMİZ DRAGGER STORAGE'İN LAYER SETİNİ YAPAMADIM.AMA GLTF EKLEDİĞİMİZ OBJELERE LAYER SET 
-        //UYGULANIYOR VE DRAG CONTROLLER AÇILIP KAPATILABİLİYOR.
-        
-    var draggerStorage = scene.getObjectByName("dragger_storage")
-    draggerStorage.visible = false
-    scene.getObjectByName("dragger_storage").layers.set(1)
-    
-    var objectsStorage = []
-    objectsStorage.push(draggerStorage)
-    var dragStorage = new DragControls(objectsStorage, camera, renderer.domElement)
-    dragStorage.transformGroup = true
-    }
-/**
-* SETUP DRAG EVENTSLISTENERS
-*/
-    {
-        dragStorage.addEventListener( 'drag', function()
-        {
-            controls.enabled = false
-            scene.add(helperStorage)
-            helperStorage.material = new THREE.MeshBasicMaterial({color: "#32CD32"})
-            helperStorage.update()
-         window.addEventListener( 'mousemove', onEventstorageDragMouseMove);
-        })
-        dragStorage.addEventListener( 'dragend', function()
-        {
-            controls.enabled = true
-            scene.remove(helperStorage)
-          window.removeEventListener( 'mousemove', onEventstorageDragMouseMove);
-        })
-
-        function onEventstorageDragMouseMove(event) //CHECK INTERSECTIONS THEN DRAG
-        {   
-        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-        
-        raycaster.setFromCamera(mouse, camera);
-        intersect = raycaster.intersectObject(limiterPlaneStorage)
-
-        if(intersect.length>0)
-        {
-        // console.log("intersection true")
-            
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                draggerStorage.position.set(a,0.11,c)
-                storage.position.set(a,3.11,c)
-            } 
-        }
-        else  //EĞER KESİŞME YOKSA...STANDIN SINIRLARININ DIŞINDAKİ İMLEÇ HAREKETLERİNİ ENVFLOOR İLE YENİ KESİŞİM BELİRLEYEREK YAPIYORUZ.  
-        {
-            intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-            for ( var i = 0; i < intersect.length; i ++ )
-            {
-                var a = intersect[ i ].point.x 
-                var c = intersect[ i ].point.z  
-                    
-                if (Math.abs(a)<= dimWidthStandBase/2-dimWidthStorage/2)
-                {
-                    if(c<0){storage.position.x=a}
-                    else if(c>0){storage.position.x=a}
-                }
-
-                if (Math.abs(c)<= dimDepthStandBase/2-dimDepthStorage/2)
-                {
-                    if(a<0){storage.position.z=c}
-                    else if(a>0){storage.position.z=c}
-                }
-                                
-            }
-            
-        } 
-        
-    }
-        
-    }
-/**
-* SET STORAGE LAYERS TO "1"
-*/
-    {
-        
-   
-    }
-/**
-* SET STORAGE LAYERS TO VISIBLE FALSE
-*/   
-    {
-        scene.getObjectByName( "storage_1" ).visible = false;
-        scene.getObjectByName( "storage_2" ).visible = false;
-        scene.getObjectByName( "storage_3" ).visible = false;
-        scene.getObjectByName( "storage_4" ).visible = false;
-        scene.getObjectByName( "storage_5" ).visible = false;
-    }
-
-/**
-* SET CONTROLLERS VISIBLE FALSE
-*/
-    {
-            
-        scene.getObjectByName( "drag_right_storage" ).visible = false;
-        scene.getObjectByName( "drag_front_door_storage" ).visible = false;
-        
-    }
-}
-
-
-/*
-###### #######  ##### ###### ####    #######  
- ##  ## ##   # ### ### ##  ## ##      ##   #  
- ##  ## ##     ##   ## ##  ## ##      ##      
- #####  ####   ##   ## #####  ##      ####    
- ##     ##     ##   ## ##     ##      ##      
- ##     ##   # ### ### ##     ##  ##  ##   #  
-####   #######  ##### ####   ####### #######  
- */                                             
-
-
-setTimeout(loadPeople, 5000)
-function loadPeople()
-{
-    
-    {//DEFAULTS
-        var mouse = new THREE.Vector2();
-        var raycaster = new THREE.Raycaster(); 
-        var intersect = new THREE.Vector3();
-        var people = scene.getObjectByName("people0")
-        var draggerPeople = scene.getObjectByName("dragger_people")
-        
-        var envFloor = scene.getObjectByName( "environment_floor")
        
-        var standBase = scene.getObjectByName( "stand_1" )
-        var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-        var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-        var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-        
-        
-        
-    }
-   
-/**
-* ADD PEOPLE
-*/
-var amount=0
-var clonedPeople=[]
-var clonedDraggerPeople=[]
-document.getElementById("people0_icon").onclick = ()=>
-{
-    addPeople()
-    function addPeople() 
-    {   amount=amount+1
-        var newPeople = people.clone()
-        var newDraggerPeople = draggerPeople.clone()
-        
-        
-        clonedPeople.push(newPeople)
-        clonedDraggerPeople.push(newDraggerPeople)
-        newPeople.name=`people${amount}`
-        newDraggerPeople.name=`dragger_people${amount}`
-        scene.add(newPeople)
-        scene.add(newDraggerPeople)
-        
-        newPeople.visible = true
-        newDraggerPeople.visible = false
-        console.log(clonedPeople)
-        console.log(clonedDraggerPeople)
-        
-    /**
-    * INIT FOR EACH DRAGGER
-    */
-        clonedDraggerPeople.forEach(currentDraggerPeople => 
-        {   
-            var current = currentDraggerPeople.name.slice(-1)
-            var currentPeople = scene.getObjectByName(`people${current}`)
-            
-            var currentHelperPeople = new THREE.BoxHelper( currentPeople, 0xffff00 );
-            currentHelperPeople.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
-            var dimCurrentPeople = new THREE.Box3().setFromObject(currentPeople);  //BoxGeometry(width , height , depth)
-            var dimWidthCurrentPeople = Math.abs(dimCurrentPeople.max.x)+Math.abs(dimCurrentPeople.min.x)
-            var dimDepthCurrentPeople = Math.abs(dimCurrentPeople.max.z)+Math.abs(dimCurrentPeople.min.z)
-            
-            console.log("dragging" + current + "people")
-        
-                
-            /**
-            * INIT DRAG SETTINGS
-            */
-            {
-                var objectsPeople = []
-                objectsPeople.push(currentDraggerPeople)
-                var dragPeople = new DragControls(objectsPeople, camera, renderer.domElement)
-            }
-            /**
-            * SETUP DRAG EVENTSLISTENERS
-            */
-            {
-                dragPeople.addEventListener( 'drag', function()
-                {
-                    window.addEventListener( 'mousemove', onEventPeopleDragMouseMove);
-                    controls.enabled = false
-                    scene.add(currentHelperPeople)
-                    currentHelperPeople.material = new THREE.MeshBasicMaterial({color: "#32CD32"})
-                    
-                })
-                dragPeople.addEventListener( 'dragend', function()
-                {
-                    controls.enabled = true
-                    scene.remove(currentHelperPeople)
-                    currentDraggerPeople.position.set(currentPeople.position.x,currentPeople.position.y,currentPeople.position.z)  //BUNU YAPMAZSAK  STANDIN DIŞINDA DRAG YAPTIKTAN SONRA DRAGGER STANDIN DIŞINDA KALIR BU YÜZDEN DROP DA PEOPLE'IN POZİSYON DEĞERLERİNE TAŞIYORUZ.
-                    window.removeEventListener( 'mousemove', onEventPeopleDragMouseMove);
-                })
-        
-            }
-            /**
-            * SETUP INTERSECTIONS
-            */
-            function onEventPeopleDragMouseMove(event) //CHECK INTERSECTIONS THEN DRAG
-            {   
-                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-                
-                raycaster.setFromCamera(mouse, camera);
-                intersect = raycaster.intersectObject(envFloor)
-        
-                if(intersect.length<0 )
-                {
-                // console.log("intersection true")
-                    
-                    for ( var i = 0; i < intersect.length; i ++ )
-                    {
-                        var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                        currentPeople.position.set(a,0.95,c)
-                        currentHelperPeople.update()
-                    } 
-                }
-                else  
-                {
-                    for ( var i = 0; i < intersect.length; i ++ )
-                    {
-                        var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                            
-                        if (Math.abs(a)<= dimWidthStandBase/2-dimWidthCurrentPeople/2)
-                        {
-                            if(c<0){currentPeople.position.x=a}
-                            else if(c>0){currentPeople.position.x=a}
-                            currentHelperPeople.update()
-                        }
-        
-                        if (Math.abs(c)<= dimDepthStandBase/2-dimDepthCurrentPeople/2)
-                        {
-                            if(a<0){currentPeople.position.z=c}
-                            else if(a>0){currentPeople.position.z=c}
-                            currentHelperPeople.update()
-                        }
-                                        
-                    }
-                    
-                } 
-                
-            }
-        
-        });
-            
-    }
-}
 
 
 
 
-
-
-
-}
     
  
+
+        
+    
+
+
+       
+         

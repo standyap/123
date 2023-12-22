@@ -27,6 +27,8 @@ var overlay = document.querySelector('.html');
 var mouse = new THREE.Vector2();
 var raycaster = new THREE.Raycaster(); 
 var intersect = new THREE.Vector3();
+var intersect2 = new THREE.Vector3();
+var intersect3 = new THREE.Vector3();
 /**
  * Loaders
  */
@@ -63,6 +65,7 @@ function updateAllMaterials()
             scene.getObjectByName( "environment_floor" ).visible = true;
             scene.getObjectByName( "stand_1" ).visible = true;
             scene.getObjectByName( "stand_2" ).visible = true;
+            scene.getObjectByName( "stand_2" ).material.emissive.setStyle("#000000")
             scene.getObjectByName( "drag_front" ).visible = true;
             scene.getObjectByName( "drag_right" ).visible = true;
             scene.getObjectByName( "drag_left" ).visible = true;
@@ -319,7 +322,7 @@ function tickRight()
  ##### #### ## ##   ## ####    ##  ## ###### ####   
 
 */
-var tempB,tempR,tempL , backWallUploadResponseUrl,bb,rr,ll,rightWallUploadResponseUrl,leftWallUploadResponseUrl,hoverBack,hoverRight,hoverLeft 
+var tempB,tempR,tempL , backWallUploadResponseUrl,bb,rr,ll,rightWallUploadResponseUrl,leftWallUploadResponseUrl,hoverBack,hoverRight,hoverLeft
 /**
  * 
  * BU FONKSİYONLARA NEDEN SETTIMEOUT VERMEDİK?
@@ -332,7 +335,19 @@ var tempB,tempR,tempL , backWallUploadResponseUrl,bb,rr,ll,rightWallUploadRespon
 function loadGraphicControlsBack()// FUNCTION WORKS WHEN RIGHTWALL SWITCH ON
 {
 var backWall = scene.getObjectByName( "back_wall" )
-var backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")       
+var rightWall = scene.getObjectByName( "right_wall" )
+var leftWall = scene.getObjectByName( "left_wall" )
+/**
+ * 
+ * HER DUVARIN GRAPHIC CONTROL ÖNCEDEN TANIMLAMAMIZ GEREKİYOR Kİ BİRİNE TIKLADIĞIMIZDA DİĞERİNİ GİZLEYEBİLELİM
+ * ÖRNEĞİN BİZ LEFT WALL'U BACK WALL'DEN SONRA TANIMLADIK AMA BROWSERDA ÖNCE LEFT WALL'I AÇTIK 
+ * /BACK WALL'I AÇTIĞIMIZDA LEFT WALL GRAPHIC CONTROL'U GİZLE DERSEK HENÜZ TANIMLANMADIĞI İÇİN İŞLEM YAPILMAZ
+ * 
+ */
+var backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")   
+var rightWallGraphicControl = document.getElementById("graphics_control_icon_group_right_wall")    
+var leftWallGraphicControl = document.getElementById("graphics_control_icon_group_left_wall")   
+
 window.addEventListener( 'mousemove', detectClickBackWall);
 function detectClickBackWall(event)
 {
@@ -342,28 +357,49 @@ function detectClickBackWall(event)
 
     raycaster.setFromCamera(mouse, camera);
     intersect = raycaster.intersectObject(backWall)
-    if (intersect.length > 0)
-    {   
-        console.log("hovered back wall")
-        window.addEventListener( 'mousedown', onClickBackWall); //WHEN HOVERED DETECT CLICK EVENT
+    intersect2= raycaster.intersectObject(rightWall)
+    intersect3= raycaster.intersectObject(leftWall)
+
+/**
+ * 
+ * SET CURSOR TO POINTER
+ * BU İŞLEMİ NEDEN YAPIYORUZ? ÇÜNKÜ HERBİRİNİ TEKER TEKER YAPARSAK BİRİNİN HOVEROUT'U DİĞERİNİN HOVERIYLA KESİŞİYOR
+ * BU DURUMDA SADECE SON EKLENEN HOVER POINTER OLUYOR DİĞERLERİ HOVER OLSA BİLE İLK OBJENİN HOVEROUTU GİBİ İŞLEM GÖRÜYOR.
+ * 
+ */
+    if ((intersect.length > 0) || (intersect2.length > 0) || (intersect3.length > 0))
+    {          
+        canvas.style.cursor = "pointer"
     }
     else
     {   
-        window.removeEventListener( 'mousedown', onClickBackWall);
+        canvas.style.cursor = "default"
+    }
+    if (intersect.length > 0) 
+    {
+        canvas.addEventListener( 'mousedown', onClickBackWall); //WHEN HOVERED DETECT CLICK EVENT
+    }
+    else
+    {
+        canvas.removeEventListener( 'mousedown', onClickBackWall);
     }
 }
 function onClickBackWall()
 {
-    tempB = backWall.getWorldPosition(new THREE.Vector3())
-    tempB.project(camera);// get the normalized screen coordinate of world position
-
-    // convert the normalized position to CSS coordinates
-    var x = (tempB.x *  .5 + .5) * canvas.clientWidth;
-    var y = (tempB.y * -.5 + .5) * canvas.clientHeight;
+    leftWallGraphicControl.style.visibility = "hidden"
+    rightWallGraphicControl.style.visibility = "hidden"
+    setTimeout(() => {
+        tempB = backWall.getWorldPosition(new THREE.Vector3())
+        tempB.project(camera);// get the normalized screen coordinate of world position
     
-    backWallGraphicControl.style.left = `${x}px`
-    backWallGraphicControl.style.top = `${y}px`
-    backWallGraphicControl.style.visibility = "visible"
+        // convert the normalized position to CSS coordinates
+        var x = (tempB.x *  .5 + .5) * canvas.clientWidth;
+        var y = (tempB.y * -.5 + .5) * canvas.clientHeight;
+        
+        backWallGraphicControl.style.left = `${x}px`
+        backWallGraphicControl.style.top = `${y}px`
+        backWallGraphicControl.style.visibility = "visible"
+      }, "200");
     
 }
 document.getElementById("add_icon").onclick = ()=>
@@ -399,50 +435,58 @@ document.getElementById("add_icon").onclick = ()=>
     }
     inputBack.click();
 }
+
+
+/**
+ * 
+ * 
+ * BACK WALL GRAPHIC ICONS
+ * 
+ * 
+ */ 
+
 bb=1
 document.getElementById("zoom_out_icon").onclick = ()=>
 {   
-bb = bb   + 0.2
+bb = Functions.roundXSteps(bb + 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
-//PARAMS SAVE BACK WALL ZOOM OUT
-Functions.addOrUpdateURLParam ("backwall_image_zoom_out" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_zoom_out" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM OUT
 }
+
 document.getElementById("zoom_in_icon").onclick = ()=>
 {   
-bb = bb   - 0.2
+bb = Functions.roundXSteps(bb - 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
-//PARAMS SAVE BACK WALL ZOOM IN
-Functions.addOrUpdateURLParam ("backwall_image_zoom_in" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_zoom_in" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM IN
 }
 
 document.getElementById("left_icon").onclick = ()=>
 {   
-bb = bb   - 0.2
+bb = Functions.roundXSteps(bb - 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
-//PARAMS SAVE BACK WALL POSITION LEFT
-Functions.addOrUpdateURLParam ("backwall_image_position_left" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_position_left" , `${bb}`)//PARAMS SAVE BACK WALL POSITION LEFT
 }
+
 document.getElementById("right_icon").onclick = ()=>
 {   
-bb = bb   + 0.2
+bb = Functions.roundXSteps(bb + 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
-//PARAMS SAVE BACK WALL POSITION RIGHT
-Functions.addOrUpdateURLParam ("backwall_image_position_right" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_position_right" , `${bb}`)//PARAMS SAVE BACK WALL POSITION RIGHT
 }
+
 document.getElementById("up_icon").onclick = ()=>
 {   
-bb = bb   + 0.2
+bb = Functions.roundXSteps(bb + 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
-//PARAMS SAVE BACK WALL POSITION UP
-Functions.addOrUpdateURLParam ("backwall_image_position_up" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_position_up" , `${bb}`)//PARAMS SAVE BACK WALL POSITION UP
 }
 document.getElementById("down_icon").onclick = ()=>
 {   
-bb = bb   - 0.2
+bb = Functions.roundXSteps(bb - 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
-//PARAMS SAVE BACK WALL POSITION DOWN
-Functions.addOrUpdateURLParam ("backwall_image_position_down" , `${bb}`)
+Functions.addOrUpdateURLParam ("backwall_image_position_down" , `${bb}`)//PARAMS SAVE BACK WALL POSITION DOWN
 }
+
 document.getElementById("apply_icon").onclick = ()=>
 { 
     backWallGraphicControl.style.visibility = "hidden"       
@@ -451,7 +495,17 @@ document.getElementById("apply_icon").onclick = ()=>
 function loadGraphicControlsRight()// FUNCTION WORKS WHEN RIGHTWALL SWITCH ON
 {
 var rightWall = scene.getObjectByName( "right_wall" )
-var rightWallGraphicControl = document.getElementById("graphics_control_icon_group_right_wall")       
+/**
+ * 
+ * HER DUVARIN GRAPHIC CONTROL ÖNCEDEN TANIMLAMAMIZ GEREKİYOR Kİ BİRİNE TIKLADIĞIMIZDA DİĞERİNİ GİZLEYEBİLELİM
+ * ÖRNEĞİN BİZ LEFT WALL'U BACK WALL'DEN SONRA TANIMLADIK AMA BROWSERDA ÖNCE LEFT WALL'I AÇTIK 
+ * BACK WALL'I AÇTIĞIMIZDA LEFT WALL GRAPHIC CONTROL'U GİZLE DERSEK HENÜZ TANIMLANMADIĞI İÇİN İŞLEM YAPILMAZ
+ * 
+ */
+var backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")   
+var rightWallGraphicControl = document.getElementById("graphics_control_icon_group_right_wall")    
+var leftWallGraphicControl = document.getElementById("graphics_control_icon_group_left_wall")   
+    
 window.addEventListener( 'mousemove', detectClickRightWall);
 function detectClickRightWall(event)
 {
@@ -464,17 +518,18 @@ function detectClickRightWall(event)
     if (intersect.length > 0)
     {   
         console.log("hovered right wall")
-        window.addEventListener( 'mousedown', onClickRightWall); //WHEN HOVERED DETECT CLICK EVENT
+        canvas.addEventListener( 'mousedown', onClickRightWall); //WHEN HOVERED DETECT CLICK EVENT
     }
     else
     {   
-        window.removeEventListener( 'mousedown', onClickRightWall);
+        canvas.removeEventListener( 'mousedown', onClickRightWall);
     }
 }
 
 function onClickRightWall()
-{
-    
+{   leftWallGraphicControl.style.visibility = "hidden"
+    backWallGraphicControl.style.visibility = "hidden"
+    setTimeout(() => {
    // console.log("clicked back wall")
     tempR = rightWall.getWorldPosition(new THREE.Vector3())
     tempR.project(camera);// get the normalized screen coordinate of world position
@@ -486,6 +541,7 @@ function onClickRightWall()
     rightWallGraphicControl.style.left = `${x}px`
     rightWallGraphicControl.style.top = `${y}px`
     rightWallGraphicControl.style.visibility = "visible"
+}, "200");
     
 }
 document.getElementById("add_icon_right").onclick = ()=>
@@ -525,34 +581,40 @@ document.getElementById("add_icon_right").onclick = ()=>
 rr=1
 document.getElementById("zoom_out_icon_right").onclick = ()=>
 {   
-rr = rr   + 0.2
+rr = Functions.roundXSteps(rr + 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
+Functions.addOrUpdateURLParam ("rightwall_image_zoom_out" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM OUT
 }
 document.getElementById("zoom_in_icon_right").onclick = ()=>
 {   
-rr = rr   - 0.2
+rr = Functions.roundXSteps(rr - 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
+Functions.addOrUpdateURLParam ("rightwall_image_zoom_in" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM IN
 }
 
 document.getElementById("left_icon_right").onclick = ()=>
 {   
-rr = rr   - 0.2
+rr = Functions.roundXSteps(rr - 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.offset.set(rr, 1)
+Functions.addOrUpdateURLParam ("rightwall_image_position_left" , `${rr}`)//PARAMS SAVE RIGHT WALL POSITION LEFT
 }
 document.getElementById("right_icon_right").onclick = ()=>
 {   
-rr = rr   + 0.2
+rr = Functions.roundXSteps(rr + 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.offset.set(rr, 1)
+Functions.addOrUpdateURLParam ("rightwall_image_position_right" , `${rr}`)//PARAMS SAVE RIGHT WALL POSITION RIGHT
 }
 document.getElementById("up_icon_right").onclick = ()=>
 {   
-rr = rr   + 0.2
+rr = Functions.roundXSteps(rr + 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, rr)
+Functions.addOrUpdateURLParam ("rightwall_image_position_up" , `${rr}`)//PARAMS SAVE RIGHT WALL POSITION UP
 }
 document.getElementById("down_icon_right").onclick = ()=>
 {   
-rr = rr   - 0.2
+rr = Functions.roundXSteps(rr - 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, rr)
+Functions.addOrUpdateURLParam ("rightwall_image_position_down" , `${rr}`)//PARAMS SAVE RIGHT WALL POSITION DOWN
 }
 
 document.getElementById("apply_icon_right").onclick = ()=>
@@ -563,7 +625,17 @@ document.getElementById("apply_icon_right").onclick = ()=>
 function loadGraphicControlsLeft()// FUNCTION WORKS WHEN LEFTWALL SWITCH ON
 {
 var leftWall = scene.getObjectByName( "left_wall" )
-var leftWallGraphicControl = document.getElementById("graphics_control_icon_group_left_wall")       
+/**
+ * 
+ * HER DUVARIN GRAPHIC CONTROL ÖNCEDEN TANIMLAMAMIZ GEREKİYOR Kİ BİRİNE TIKLADIĞIMIZDA DİĞERİNİ GİZLEYEBİLELİM
+ * ÖRNEĞİN BİZ LEFT WALL'U BACK WALL'DEN SONRA TANIMLADIK AMA BROWSERDA ÖNCE LEFT WALL'I AÇTIK 
+ * /BACK WALL'I AÇTIĞIMIZDA LEFT WALL GRAPHIC CONTROL'U GİZLE DERSEK HENÜZ TANIMLANMADIĞI İÇİN İŞLEM YAPILMAZ
+ * 
+ */
+var backWallGraphicControl = document.getElementById("graphics_control_icon_group_back_wall")   
+var rightWallGraphicControl = document.getElementById("graphics_control_icon_group_right_wall")    
+var leftWallGraphicControl = document.getElementById("graphics_control_icon_group_left_wall")   
+     
 window.addEventListener( 'mousemove', detectClickLeftWall);
 function detectClickLeftWall(event)
 {
@@ -575,17 +647,19 @@ function detectClickLeftWall(event)
     if (intersect.length > 0)
     {   
         console.log("hovered left wall")
-        window.addEventListener( 'mousedown', onClickLeftWall); //WHEN HOVERED DETECT CLICK EVENT
+        canvas.addEventListener( 'mousedown', onClickLeftWall); //WHEN HOVERED DETECT CLICK EVENT
     }
     else
     {   
-        window.removeEventListener( 'mousedown', onClickLeftWall);
+        canvas.removeEventListener( 'mousedown', onClickLeftWall);
     }
 }
 
 function onClickLeftWall()
 {
-    
+    backWallGraphicControl.style.visibility = "hidden"
+    rightWallGraphicControl.style.visibility = "hidden"
+    setTimeout(() => {
    // console.log("clicked back wall")
     tempL = leftWall.getWorldPosition(new THREE.Vector3())
     tempL.project(camera);// get the normalized screen coordinate of world position
@@ -597,7 +671,7 @@ function onClickLeftWall()
     leftWallGraphicControl.style.left = `${x}px`
     leftWallGraphicControl.style.top = `${y}px`
     leftWallGraphicControl.style.visibility = "visible"
-    
+    }, "200");
 }
 document.getElementById("add_icon_left").onclick = ()=>
 {   
@@ -636,34 +710,40 @@ document.getElementById("add_icon_left").onclick = ()=>
 ll=1
 document.getElementById("zoom_out_icon_left").onclick = ()=>
 {   
-ll = ll   + 0.2
+ll = Functions.roundXSteps(ll + 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
+Functions.addOrUpdateURLParam ("leftwall_image_zoom_out" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM OUT
 }
 document.getElementById("zoom_in_icon_left").onclick = ()=>
 {   
-ll = ll   - 0.2
+ll = Functions.roundXSteps(ll - 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
+Functions.addOrUpdateURLParam ("leftwall_image_zoom_in" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM IN
 }
 
 document.getElementById("left_icon_left").onclick = ()=>
 {   
-ll = ll   - 0.2
+ll = Functions.roundXSteps(ll - 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.offset.set(ll, 1)
+Functions.addOrUpdateURLParam ("leftwall_image_position_left" , `${ll}`)//PARAMS SAVE LEFT WALL POSITION LEFT
 }
 document.getElementById("right_icon_left").onclick = ()=>
 {   
-ll = ll   + 0.2
+ll = Functions.roundXSteps(ll + 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.offset.set(ll, 1)
+Functions.addOrUpdateURLParam ("leftwall_image_position_right" , `${ll}`)//PARAMS SAVE LEFT WALL POSITION RIGHT
 }
 document.getElementById("up_icon_left").onclick = ()=>
 {   
-ll = ll   + 0.2
+ll = Functions.roundXSteps(ll + 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, ll)
+Functions.addOrUpdateURLParam ("leftwall_image_position_up" , `${ll}`)//PARAMS SAVE LEFT WALL POSITION UP
 }
 document.getElementById("down_icon_left").onclick = ()=>
 {   
-ll = ll   - 0.2
+ll = Functions.roundXSteps(ll - 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, ll)
+Functions.addOrUpdateURLParam ("leftwall_image_position_down" , `${ll}`)//PARAMS SAVE LEFT WALL POSITION DOWN
 }
 
 document.getElementById("apply_icon_left").onclick = ()=>
@@ -708,7 +788,7 @@ function switchesLoaded()
     document.getElementById("stand_info_text").style.left = "330px";
     document.getElementById("stand_info_text").style.bottom = "20px";
     standSize = standWidth + "m" + " x " + standDepth + "m"
-    document.getElementById("stand_info_text").innerHTML = standInfo + " " + " " + standSize
+    document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
 
 //CHECK BACK WALL
         switchBack.addEventListener('change', function () {
@@ -716,12 +796,20 @@ function switchesLoaded()
         {
             scene.getObjectByName( "back_wall_1" ).visible = true;
             scene.getObjectByName( "back_wall_2" ).visible = true;
+
+/**
+ *  DRAG'LER VISIBLE OLMADIĞINDA DRAG CONTROLLERİ AÇIK OLUYORDU VE KAPATAMIYORDUK
+ *   AMA BU SİSTEMİ KULLANARAK DRAG FRONTU KULLANILAMAYACAK BİR ALANA KAYDIRIYORUZ VE BİR TÜR TRICK YAPIYORUZ.
+ *   AYNI SİSTEM LEFT VE RIGHT İÇİN DE GEÇERLİ  
+ */
+            scene.getObjectByName( "back_wall" ).position.y=1.6
+            
             loadGraphicControlsBack()
             
             var standInfo = "peninsula"
             document.getElementById("stand_info_text").style.left = "315px";
             document.getElementById("stand_info_text").style.bottom = "22px";
-            document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
 //PARAMS SAVE BACK WALL
             Functions.addOrUpdateURLParam ("backwall" , "visible")
 
@@ -739,12 +827,16 @@ function switchesLoaded()
             scene.getObjectByName( "left_wall_2" ).visible = false;
             scene.getObjectByName( "right_wall_1" ).visible = false;
             scene.getObjectByName( "right_wall_2" ).visible = false;
+
+            scene.getObjectByName( "back_wall" ).position.y=-20
+            scene.getObjectByName( "right_wall" ).position.y=-20
+            scene.getObjectByName( "left_wall" ).position.y=-20
             console.log('Island');
 
             var standInfo = "island"
             document.getElementById("stand_info_text").style.left = "330px";
             document.getElementById("stand_info_text").style.bottom = "22px";
-            document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
             
             //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
             //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
@@ -767,17 +859,53 @@ function switchesLoaded()
 switchLeft.addEventListener('change', function () {
     if (switchLeft.checked ) 
     {
+      
+       if (scene.getObjectByName( "right_wall_1" ).visible)
+       {
+            scene.getObjectByName( "left_wall_1" ).visible = true;
+            scene.getObjectByName( "left_wall_2" ).visible = true;
+            scene.getObjectByName( "back_wall_1" ).visible = true;
+            scene.getObjectByName( "back_wall_2" ).visible = true;
+
+            scene.getObjectByName( "back_wall" ).position.y=1.6
+            scene.getObjectByName( "left_wall" ).position.y=1.6
+
+
+            loadGraphicControlsBack()
+            loadGraphicControlsLeft()
+           var standInfo = "row"
+           document.getElementById("stand_info_text").style.left = "350px";
+           document.getElementById("stand_info_text").style.bottom = "22px";
+           document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+           //PARAMS SAVE LEFT WALL
+            Functions.addOrUpdateURLParam ("leftwall" , "visible")
+            Functions.addOrUpdateURLParam ("backwall" , "visible")
+
+            //SEND CURRENT URL TO FILESTACK
+            var currentUrl = window.location.href    
+          // Functions.sendData(currentUrl)       
+          switchBack.checked = true 
+       }
+       else
+       {
         scene.getObjectByName( "left_wall_1" ).visible = true;
         scene.getObjectByName( "left_wall_2" ).visible = true;
         scene.getObjectByName( "back_wall_1" ).visible = true;
         scene.getObjectByName( "back_wall_2" ).visible = true;
+
+        scene.getObjectByName( "back_wall" ).position.y=1.6
+        scene.getObjectByName( "left_wall" ).position.y=1.6
+
         loadGraphicControlsBack()
         loadGraphicControlsLeft()
         
-        var standInfo = "corner left"
+        var standInfo = 
+        "&nbspCorner" + 
+        "<br></br>"+
+        "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspLeft"
         document.getElementById("stand_info_text").style.left = "315px";
-        document.getElementById("stand_info_text").style.bottom = "22px";
-        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+        document.getElementById("stand_info_text").style.bottom = "15px";
+        document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
 //PARAMS SAVE LEFT WALL
         Functions.addOrUpdateURLParam ("leftwall" , "visible")
         Functions.addOrUpdateURLParam ("backwall" , "visible")
@@ -785,25 +913,51 @@ switchLeft.addEventListener('change', function () {
         //SEND CURRENT URL TO FILESTACK
         var currentUrl = window.location.href    
        // Functions.sendData(currentUrl)       
-       switchBack.checked = true  
+       switchBack.checked = true 
+       } 
 
     } 
         
     else 
     {
-        scene.getObjectByName( "left_wall_1" ).visible = false;
-        scene.getObjectByName( "left_wall_2" ).visible = false;
+        if (scene.getObjectByName( "right_wall_1" ).visible)
+        {
+            scene.getObjectByName( "left_wall_1" ).visible = false;
+            scene.getObjectByName( "left_wall_2" ).visible = false;
 
-        var standInfo = "peninsula"
-        document.getElementById("stand_info_text").style.left = "330px";
-        document.getElementById("stand_info_text").style.bottom = "22px";
-        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
-        
-        //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
-        //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
-        switchLeft.checked = false
-        Functions.removeURLParameters(['leftwall'])
-        Functions.removeURLParameters(['leftwall_image'])
+            scene.getObjectByName( "back_wall" ).position.y=-20
+            scene.getObjectByName( "left_wall" ).position.y=-20
+
+            var standInfo = 
+            "&nbspCorner" + 
+            "<br></br>"+
+            "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspRight"
+           
+            document.getElementById("stand_info_text").style.left = "325px";
+            document.getElementById("stand_info_text").style.bottom = "15px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+            switchLeft.checked = false
+            Functions.removeURLParameters(['leftwall'])
+            Functions.removeURLParameters(['leftwall_image'])
+        }
+        else
+        {
+            scene.getObjectByName( "left_wall_1" ).visible = false;
+            scene.getObjectByName( "left_wall_2" ).visible = false;
+
+            scene.getObjectByName( "left_wall" ).position.y=-20
+    
+            var standInfo = "peninsula"
+            document.getElementById("stand_info_text").style.left = "330px";
+            document.getElementById("stand_info_text").style.bottom = "22px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+            
+            //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
+            //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
+            switchLeft.checked = false
+            Functions.removeURLParameters(['leftwall'])
+            Functions.removeURLParameters(['leftwall_image'])
+        }
         
     }
 })
@@ -811,43 +965,105 @@ switchLeft.addEventListener('change', function () {
 switchRight.addEventListener('change', function () {
     if (switchRight.checked ) 
     {
-        scene.getObjectByName( "right_wall_1" ).visible = true;
-        scene.getObjectByName( "right_wall_2" ).visible = true;
-        scene.getObjectByName( "back_wall_1" ).visible = true;
-        scene.getObjectByName( "back_wall_2" ).visible = true;
-        loadGraphicControlsBack()
-        loadGraphicControlsRight()
-        
-        var standInfo = "corner right"
-        document.getElementById("stand_info_text").style.left = "315px";
-        document.getElementById("stand_info_text").style.bottom = "22px";
-        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
-//PARAMS SAVE BACK WALL
-        Functions.addOrUpdateURLParam ("rightwall" , "visible")
-        Functions.addOrUpdateURLParam ("backwall" , "visible")
+        if (scene.getObjectByName( "left_wall_1" ).visible)
+        {
+            scene.getObjectByName( "right_wall_1" ).visible = true;
+            scene.getObjectByName( "right_wall_2" ).visible = true;
+            scene.getObjectByName( "back_wall_1" ).visible = true;
+            scene.getObjectByName( "back_wall_2" ).visible = true;
 
-        //SEND CURRENT URL TO FILESTACK
-        var currentUrl = window.location.href    
-       // Functions.sendData(currentUrl)          
-       switchBack.checked = true  
+            scene.getObjectByName( "back_wall" ).position.y=1.6
+            scene.getObjectByName( "right_wall" ).position.y=1.6
+
+            loadGraphicControlsBack()
+            loadGraphicControlsRight()
+
+            var standInfo = "row"
+            document.getElementById("stand_info_text").style.left = "350px";
+            document.getElementById("stand_info_text").style.bottom = "22px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+             //PARAMS SAVE BACK WALL
+             Functions.addOrUpdateURLParam ("rightwall" , "visible")
+             Functions.addOrUpdateURLParam ("backwall" , "visible")
+     
+             //SEND CURRENT URL TO FILESTACK
+             var currentUrl = window.location.href    
+            // Functions.sendData(currentUrl)          
+            switchBack.checked = true  
+        }
+        else
+        {
+            scene.getObjectByName( "right_wall_1" ).visible = true;
+            scene.getObjectByName( "right_wall_2" ).visible = true;
+            scene.getObjectByName( "back_wall_1" ).visible = true;
+            scene.getObjectByName( "back_wall_2" ).visible = true;
+
+            scene.getObjectByName( "back_wall" ).position.y=1.6
+            scene.getObjectByName( "right_wall" ).position.y=1.6
+
+            loadGraphicControlsBack()
+            loadGraphicControlsRight()
+            
+            var standInfo =
+            "&nbspCorner" + 
+            "<br></br>"+
+            "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspRight"
+            document.getElementById("stand_info_text").style.left = "315px";
+            document.getElementById("stand_info_text").style.bottom = "15px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+    //PARAMS SAVE BACK WALL
+            Functions.addOrUpdateURLParam ("rightwall" , "visible")
+            Functions.addOrUpdateURLParam ("backwall" , "visible")
+    
+            //SEND CURRENT URL TO FILESTACK
+            var currentUrl = window.location.href    
+           // Functions.sendData(currentUrl)          
+           switchBack.checked = true  
+        }
+      
     } 
         
     else 
     {
-        scene.getObjectByName( "right_wall_1" ).visible = false;
-        scene.getObjectByName( "right_wall_2" ).visible = false;
+        if (scene.getObjectByName( "left_wall_1" ).visible)
+        {
+            scene.getObjectByName( "right_wall_1" ).visible = false;
+            scene.getObjectByName( "right_wall_2" ).visible = false;
 
-        var standInfo = "peninsula"
-        document.getElementById("stand_info_text").style.left = "330px";
-        document.getElementById("stand_info_text").style.bottom = "22px";
-        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
-        
-        //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
-        //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
-        switchRight.checked = false
-        Functions.removeURLParameters(['rightwall'])
-        Functions.removeURLParameters(['rightwall_image'])
-        
+            scene.getObjectByName( "right_wall" ).position.y=1.6
+
+            var standInfo = 
+            "&nbspCorner" + 
+            "<br></br>"+
+            "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspLeft"
+            document.getElementById("stand_info_text").style.left = "330px";
+            document.getElementById("stand_info_text").style.bottom = "15px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+
+             //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
+            //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
+            switchRight.checked = false
+            Functions.removeURLParameters(['rightwall'])
+            Functions.removeURLParameters(['rightwall_image'])
+        }
+        else
+        {
+            scene.getObjectByName( "right_wall_1" ).visible = false;
+            scene.getObjectByName( "right_wall_2" ).visible = false;
+
+            scene.getObjectByName( "right_wall" ).position.y=-20
+    
+            var standInfo = "peninsula"
+            document.getElementById("stand_info_text").style.left = "330px";
+            document.getElementById("stand_info_text").style.bottom = "22px";
+            document.getElementById("stand_info_text").innerHTML = standSize +"&nbsp"+"&nbsp"+ standInfo
+            
+            //switchLeft.setAttribute("checked" , false) bu şekilde kullanım kabul etmiyor.
+            //IF LEFT AND RIGHT SWITCHES ARE CHECKED UNCHECK THEM
+            switchRight.checked = false
+            Functions.removeURLParameters(['rightwall'])
+            Functions.removeURLParameters(['rightwall_image'])
+        }
     }
 })
 //RAISED FLOOR SWITCH
@@ -857,14 +1073,21 @@ switchRight.addEventListener('change', function () {
     checkbox4.addEventListener('change', function () {
     if (checkbox4.checked)
     {
-        scene.getObjectByName( "stand_1" ).morphTargetInfluences[5]=1
-        scene.getObjectByName( "stand_2" ).morphTargetInfluences[5]=1
+        scene.getObjectByName( "stand_1" ).scale.y = 0.1
+        scene.getObjectByName( "stand_2" ).scale.y = 0.1
+        scene.getObjectByName( "back_wall" ).position.y = 1.5
+        scene.getObjectByName( "right_wall" ).position.y = 1.5
+        scene.getObjectByName( "left_wall" ).position.y = 1.5
+
         console.log('Checked');
     } 
     else
     {
-        scene.getObjectByName( "stand_1" ).morphTargetInfluences[5]=0
-        scene.getObjectByName( "stand_2" ).morphTargetInfluences[5]=0
+        scene.getObjectByName( "stand_1" ).scale.y = 1
+        scene.getObjectByName( "stand_2" ).scale.y = 1
+        scene.getObjectByName( "back_wall" ).position.y = 1.6
+        scene.getObjectByName( "right_wall" ).position.y = 1.6
+        scene.getObjectByName( "left_wall" ).position.y = 1.6
         console.log('Not Checked');
     }
     });
@@ -872,16 +1095,13 @@ switchRight.addEventListener('change', function () {
     
 //FLOOR LIGHT SWITCH
    var checkbox5 = document.getElementById("toogle_switch_floor_light_switch")
-
+   scene.getObjectByName( "stand_2" ).material.emissive.setStyle("#000000")
     checkbox5.addEventListener('change', function () {
     if (checkbox5.checked)
     {
-
         console.log(scene.getObjectByName( "stand_2" ).material);
-        
         scene.getObjectByName( "stand_2" ).material.emissive.setStyle("#FFFAF0")
-        
-    console.log('Checked');
+        console.log('Checked');
     } 
     else
     {
@@ -889,7 +1109,6 @@ switchRight.addEventListener('change', function () {
         console.log('Not Checked');
     }
     });
-  
 
 //DARK MODE SWITCH
     var checkbox6 = document.getElementById("toogle_switch_dark_theme_switch")
@@ -897,13 +1116,27 @@ switchRight.addEventListener('change', function () {
     checkbox6.addEventListener('change', function () {
     if (checkbox6.checked)
     {
-    global.envMapIntensity = 2
-    console.log('Checked');
+        scene.traverse(
+            (child) =>
+        {
+            if(child.isMesh && child.material.isMeshStandardMaterial)
+            {
+                child.material.envMapIntensity = global.envMapIntensity
+                global.envMapIntensity = 0.2
+            }
+        })
     } 
     else
     {
-    global.envMapIntensity = 0.5
-    console.log('Not Checked');
+        scene.traverse(
+            (child) =>
+        {
+            if(child.isMesh && child.material.isMeshStandardMaterial)
+            {
+                child.material.envMapIntensity = global.envMapIntensity
+                global.envMapIntensity = 1.2
+            }
+        })
     }
     });
    
@@ -923,7 +1156,7 @@ switchRight.addEventListener('change', function () {
     switchStorage.addEventListener('change', function () {
     if (switchStorage.checked)
     {
-        switchOnStorage()
+      //  switchOnStorage()
         console.log('Checked');
         var storageWidth = 1
         var storageDepth = 1
@@ -933,11 +1166,45 @@ switchRight.addEventListener('change', function () {
     } 
     else
     {
-        switchOffStorage()
+      //  switchOffStorage()
         console.log('Not Checked');
         document.getElementById("storage_size_text").style.left = "552px";
         var storageSize = "N/A"
         document.getElementById("storage_size_text").innerHTML = "Storage" + "" + " " + storageSize
+        
+    }
+    });
+
+    //CONTROLS SWITCH
+    var checkbox7 = document.getElementById("toogle_switch_controllers_switch")
+    checkbox7.checked = true
+    checkbox7.addEventListener('change', function () {
+    if (checkbox7.checked)
+    {
+        scene.getObjectByName( "drag_front" ).visible = true
+        scene.getObjectByName( "drag_right" ).visible = true
+        scene.getObjectByName( "drag_left" ).visible = true
+/**
+ *  DRAG'LER VISIBLE OLMADIĞINDA DRAG CONTROLLERİ AÇIK OLUYORDU VE KAPATAMIYORDUK
+ *  AMA BU SİSTEMİ KULLANARAK DRAG FRONTU KULLANILAMAYACAK BİR ALANA KAYDIRIYORUZ VE BİR TÜR TRICK YAPIYORUZ.
+ *  AYNI SİSTEM LEFT VE RIGHT İÇİN DE GEÇERLİ  
+ */
+     
+        scene.getObjectByName( "drag_front" ).position.y = 0
+        scene.getObjectByName( "drag_right" ).position.y = 0
+        scene.getObjectByName( "drag_left" ).position.y = 0
+       
+        
+    } 
+    else
+    {
+        scene.getObjectByName( "drag_front" ).visible = false
+        scene.getObjectByName( "drag_right" ).visible = false
+        scene.getObjectByName( "drag_left" ).visible = false
+
+        scene.getObjectByName( "drag_front" ).position.y = -20
+        scene.getObjectByName( "drag_right" ).position.y = -20
+        scene.getObjectByName( "drag_left" ).position.y = -20
         
     }
     });
@@ -962,7 +1229,7 @@ function loadDrags()
  *  DEFAULTS
  */ 
     
-    var getScaleFront=1 , getScaleLeft=1
+    var getScaleFront=1 ; var getScaleLeft=1    //LOAD PARAMETERS DA BU DEĞERLERİ ÖNCEDEN OKUTUYORUZ O YÜZDEN "1" VEREREK BAŞLAMIYORUZ.ŞU AN LOAD PARAMS'I KAPATTIĞIMIZ İÇİN YENİDEN 1 VERDİK.
     /**
      * SCALE FRONT VE SCALE LEFT(VE RIGHT) DEĞİŞKENLERİNE NEDEN İLK DEĞERLER VERİYORUZ?
      * ÇÜNKÜ EĞER BU İLK DEĞERLERİ VERMEZSEK, DRAG FRONTU KULLANDIĞIMIZDA SCALE LEFT HENÜZ YAPILMIŞSA SLAE LEFT DEĞERİ HİÇ TANIMLANMAMIŞ OLUR VE 
@@ -980,10 +1247,12 @@ function loadDrags()
     var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
     var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+    
 
 /**
  *  DRAG FRONT
  */ 
+ 
     var objectsDragFront = []
     objectsDragFront.push(dragFront)
     var dragDragFront = new DragControls(objectsDragFront, camera, renderer.domElement)
@@ -995,7 +1264,6 @@ function loadDrags()
     {
     controls.enabled = false    
     })
-
     dragDragFront.addEventListener ( 'drag', onDragEventDragFront)
     
     function onDragEventDragFront() {
@@ -1017,97 +1285,136 @@ function loadDrags()
             dragFront.position.z = 3
         }
         //CONSTRAINTS
-
+        /**
+         * standTexture = standBase.material.map NEDEN HER STAIRA EKLİYORUZ?
+         * ÇÜNKÜ TEXTURE'I HERHANGİ BİR ANDA DEĞİŞTİRDİĞİMİZDE STANDTEXTURE VARIABLE'I İLK TEXTURE'A TANIMLANMIŞ OLARAK KALACAK
+         */
         if (dragFront.position.z < 0.25)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 0
-                backWall.position.z = -1.9//scale.set(width,height,depth)
+                backWall.position.z = -1.9  //scale.set(width,height,depth)
                 standBase.scale.set(getScaleLeft, 1, 1)
                 standSides.scale.set(getScaleLeft, 1, 1)
-                standTexture.repeat.set(1, 1);
+                standTexture.repeat.set(getScaleLeft, 1);
                 rightWallTexture.repeat.set(1, 1);
                 leftWallTexture.repeat.set(1, 1);
                 rightWall.scale.set(1,1,1)
                 leftWall.scale.set(1,1,1)
                 getScaleFront = 1
+                Functions.addOrUpdateURLParam ("depth", "1")
             } 
             else if (dragFront.position.z >= 0.25 && dragFront.position.z < 0.75)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 0.6
                 backWall.position.z = -2.4
                 standBase.scale.set(getScaleLeft, 1, 1.25)
                 standSides.scale.set(getScaleLeft,1, 1.25)
-                standTexture.repeat.set(1, 1.25);
+                standTexture.repeat.set(getScaleLeft, 1.25);
                 rightWallTexture.repeat.set(1, 1.25);
                 leftWallTexture.repeat.set(1, 1.25);
-                rightWall.scale.set(1,1,1.25)
-                leftWall.scale.set(1,1,1.25)
+                rightWall.scale.set(1,1,1.26)
+                leftWall.scale.set(1,1,1.26)
                 getScaleFront = 1.25
+                Functions.addOrUpdateURLParam ("depth", "1.25")
             }
             else if (dragFront.position.z >= 0.75 && dragFront.position.z < 1.25)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 1.0023
                 backWall.position.z = -2.9
                 standBase.scale.set(getScaleLeft, 1, 1.5)
                 standSides.scale.set(getScaleLeft, 1, 1.5)
-                standTexture.repeat.set(1, 1.5);
+                standTexture.repeat.set(getScaleLeft, 1.5);
                 rightWallTexture.repeat.set(1, 1.5);
                 leftWallTexture.repeat.set(1,1.5);
-                rightWall.scale.set(1,1,1.5)
-                leftWall.scale.set(1,1,1.5)
+                rightWall.scale.set(1,1,1.52)
+                leftWall.scale.set(1,1,1.52)
                 getScaleFront = 1.5
+                Functions.addOrUpdateURLParam ("depth", "1.5")
             } 
             else if (dragFront.position.z >= 1.25 && dragFront.position.z < 1.75)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 1.5
                 backWall.position.z = -3.4
                 standBase.scale.set(getScaleLeft, 1, 1.75)
                 standSides.scale.set(getScaleLeft, 1, 1.75)
-                standTexture.repeat.set(1, 1.75);
+                standTexture.repeat.set(getScaleLeft, 1.75);
                 rightWallTexture.repeat.set(1, 1.75);
                 leftWallTexture.repeat.set(1,1.75);
-                rightWall.scale.set(1,1,1.75)
-                leftWall.scale.set(1,1,1.75)
+                rightWall.scale.set(1,1,1.775)
+                leftWall.scale.set(1,1,1.775)
                 getScaleFront = 1.75
+                Functions.addOrUpdateURLParam ("depth", "1.75")
             } 
             else if (dragFront.position.z >= 1.75 && dragFront.position.z < 2.25)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 1.998
                 backWall.position.z = -3.9
                 standBase.scale.set(getScaleLeft, 1, 2)
                 standSides.scale.set(getScaleLeft, 1, 2)
-                standTexture.repeat.set(1, 2);
+                standTexture.repeat.set(getScaleLeft, 2);
                 rightWallTexture.repeat.set(1, 2);
                 leftWallTexture.repeat.set(1,2);
-                rightWall.scale.set(1,1,2)
-                leftWall.scale.set(1,1,2)
+                rightWall.scale.set(1,1,2.03)
+                leftWall.scale.set(1,1,2.03)
                 getScaleFront = 2
+                Functions.addOrUpdateURLParam ("depth", "2")
             } 
             else if (dragFront.position.z >= 2.25 && dragFront.position.z < 2.75)
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 2.499
                 backWall.position.z = -4.4
                 standBase.scale.set(getScaleLeft, 1, 2.25)
                 standSides.scale.set(getScaleLeft, 1, 2.25)
-                standTexture.repeat.set(1, 2.25);
+                standTexture.repeat.set(getScaleLeft, 2.25);
                 rightWallTexture.repeat.set(1, 2.25);
                 leftWallTexture.repeat.set(1,2.25);
-                rightWall.scale.set(1,1,2.25)
-                leftWall.scale.set(1,1,2.25)
+                rightWall.scale.set(1,1,2.28)
+                leftWall.scale.set(1,1,2.28)
                 getScaleFront = 2.25
+                Functions.addOrUpdateURLParam ("depth", "2.25")
             }
             else if (dragFront.position.z >= 2.75 )
             {
+                standTexture = standBase.material.map
+                backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+                rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+                leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 3
                 backWall.position.z = -4.9
                 standBase.scale.set(getScaleLeft, 1, 2.5)
                 standSides.scale.set(getScaleLeft, 1, 2.5)
-                standTexture.repeat.set(1, 2.5);
+                standTexture.repeat.set(getScaleLeft, 2.5);
                 rightWallTexture.repeat.set(1, 2.5);
                 leftWallTexture.repeat.set(1,2.5);
-                rightWall.scale.set(1,1,2.5)
-                leftWall.scale.set(1,1,2.5)
+                rightWall.scale.set(1,1,2.54)
+                leftWall.scale.set(1,1,2.54)
                 getScaleFront = 2.5
+                Functions.addOrUpdateURLParam ("depth", "2.5")
             }  
     }
     dragDragFront.addEventListener( 'dragend', ()=> 
@@ -1150,6 +1457,7 @@ else if (dragRight.position.x > 3)
 
 if (dragRight.position.x < 0.25)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 0
         dragLeft.position.x = 0
     
@@ -1161,110 +1469,123 @@ if (dragRight.position.x < 0.25)
         backWall.scale.set(1,1,1)
         getScaleLeft = 1
 
-        standTexture.repeat.set(1, 1);
+        standTexture.repeat.set(1, getScaleFront);
         backWallTexture.repeat.set(1, 1);
+        Functions.addOrUpdateURLParam ("width", "1")
         
     } 
     else if (dragRight.position.x >= 0.25 && dragRight.position.x < 0.75)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 0.6
         dragLeft.position.x = -0.6
         
-        rightWall.position.x = 2.5
-        leftWall.position.x = -2.5
+        rightWall.position.x = 2.45
+        leftWall.position.x = -2.45
 
         standBase.scale.set(1.25, 1, getScaleFront)
         standSides.scale.set(1.25, 1, getScaleFront)
         backWall.scale.set(1.25,1,1)
         getScaleLeft = 1.25
 
-        standTexture.repeat.set(1.25, 1);
+        standTexture.repeat.set(1.25, getScaleFront);
         backWallTexture.repeat.set(1, 1.25);
+        Functions.addOrUpdateURLParam ("width", "1.25")
         
     }
     else if (dragRight.position.x >= 0.75 && dragRight.position.x < 1.25)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 1.0023
         dragLeft.position.x = -1.0023
 
-        rightWall.position.x = 3
-        leftWall.position.x = -3
+        rightWall.position.x = 2.95
+        leftWall.position.x = -2.95
         
         standBase.scale.set(1.5, 1, getScaleFront)
         standSides.scale.set(1.5, 1, getScaleFront)
         backWall.scale.set(1.5,1,1)
         getScaleLeft = 1.5
 
-        standTexture.repeat.set(1.5, 1);
+        standTexture.repeat.set(1.5, getScaleFront);
         backWallTexture.repeat.set(1, 1.5);
+        Functions.addOrUpdateURLParam ("width", "1.5")
         
     }
     else if (dragRight.position.x >= 1.25 && dragRight.position.x < 1.75)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 1.5
         dragLeft.position.x = -1.5
 
-        rightWall.position.x = 3.5
-        leftWall.position.x = -3.5
+        rightWall.position.x = 3.45
+        leftWall.position.x = -3.45
         
         standBase.scale.set(1.75, 1, getScaleFront)
         standSides.scale.set(1.75, 1, getScaleFront)
         backWall.scale.set(1.75,1,1)
         getScaleLeft = 1.75
 
-        standTexture.repeat.set(1.75, 1);
+        standTexture.repeat.set(1.75, getScaleFront);
         backWallTexture.repeat.set(1, 1.75);
+        Functions.addOrUpdateURLParam ("width", "1.75")
         
     } 
     else if (dragRight.position.x >= 1.75 && dragRight.position.x < 2.25)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 1.998
         dragLeft.position.x = -1.998
 
-        rightWall.position.x = 4
-        leftWall.position.x = -4
+        rightWall.position.x = 3.95
+        leftWall.position.x = -3.95
         
         standBase.scale.set(2, 1, getScaleFront)
         standSides.scale.set(2, 1, getScaleFront)
         backWall.scale.set(2,1,1)
         getScaleLeft = 2
 
-        standTexture.repeat.set(2, 1);
+        standTexture.repeat.set(2, getScaleFront);
         backWallTexture.repeat.set(1, 2);
+        Functions.addOrUpdateURLParam ("width", "2")
         
     }
     else if (dragRight.position.x >= 2.25 && dragRight.position.x < 2.75)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 2.499
         dragLeft.position.x = -2.499
 
-        rightWall.position.x = 4.5
-        leftWall.position.x = -4.5
+        rightWall.position.x = 4.45
+        leftWall.position.x = -4.45
         
         standBase.scale.set(2.25, 1, getScaleFront)
         standSides.scale.set(2.25, 1, getScaleFront)
         backWall.scale.set(2.25,1,1)
         getScaleLeft = 2.25
 
-        standTexture.repeat.set(2.25, 1);
+        standTexture.repeat.set(2.25, getScaleFront);
         backWallTexture.repeat.set(1, 2.25);
+        Functions.addOrUpdateURLParam ("width", "2.25")
         
     }
     else if (dragRight.position.x >= 2.75)
     {
+        standTexture = standBase.material.map
         dragRight.position.x = 3
         dragLeft.position.x = -3
 
-        rightWall.position.x = 5
-        leftWall.position.x = -5
+        rightWall.position.x = 4.95
+        leftWall.position.x = -4.95
         
         standBase.scale.set(2.5, 1, getScaleFront)
         standSides.scale.set(2.5, 1, getScaleFront)
         backWall.scale.set(2.5,1,1)
         getScaleLeft = 2.5
 
-        standTexture.repeat.set(2.5, 1);
+        standTexture.repeat.set(2.5, getScaleFront);
         backWallTexture.repeat.set(1, 2.5);
+        Functions.addOrUpdateURLParam ("width", "2.5")
         
     }  
 }
@@ -1308,11 +1629,12 @@ dragLeft.position.x = -3
 
 if (dragLeft.position.x > -0.25)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = 0
     dragRight.position.x = 0
 
-    leftWall.position.x = -1.9
-    rightWall.position.x = 1.9
+    leftWall.position.x = -1.95
+    rightWall.position.x = 1.95
      //scale.set(width,height,depth)           
     standBase.scale.set(1, 1, getScaleFront)
     standSides.scale.set(1, 1, getScaleFront)
@@ -1324,98 +1646,104 @@ if (dragLeft.position.x > -0.25)
 } 
 else if (dragLeft.position.x <= -0.25 && dragLeft.position.x > -0.75)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -0.6
     dragRight.position.x = 0.6
     
-    leftWall.position.x = -2.4
-    rightWall.position.x = 2.4
+    leftWall.position.x = -2.45
+    rightWall.position.x = 2.45
 
     standBase.scale.set(1.25, 1, getScaleFront)
     standSides.scale.set(1.25, 1, getScaleFront)
     backWall.scale.set(1.25,1,1)
     getScaleLeft = 1.25
 
-    standTexture.repeat.set(1.25, 1);
+    standTexture.repeat.set(1.25, getScaleFront);
     backWallTexture.repeat.set(1, 1.25);
 }
 else if (dragLeft.position.x <= -0.75 && dragLeft.position.x > -1.25)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -1.0023
     dragRight.position.x = 1.0023
 
-    leftWall.position.x = -2.9
-    rightWall.position.x = 2.9
+    leftWall.position.x = -2.95
+    rightWall.position.x = 2.95
     
     standBase.scale.set(1.5, 1, getScaleFront)
     standSides.scale.set(1.5, 1, getScaleFront)
     backWall.scale.set(1.5,1,1)
     getScaleLeft = 1.5
 
-    standTexture.repeat.set(1.5, 1);
+    standTexture.repeat.set(1.5, getScaleFront);
     backWallTexture.repeat.set(1, 1.5);
 } 
 else if (dragLeft.position.x <= -1.25 && dragLeft.position.x > -1.75)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -1.5
     dragRight.position.x = 1.5
 
-    leftWall.position.x = -3.4
-    rightWall.position.x = 3.4
+    leftWall.position.x = -3.45
+    rightWall.position.x = 3.45
     
     standBase.scale.set(1.75, 1, getScaleFront)
     standSides.scale.set(1.75, 1, getScaleFront)
     backWall.scale.set(1.75,1,1)
     getScaleLeft = 1.75
 
-    standTexture.repeat.set(1.5, 1);
+    standTexture.repeat.set(1.5, getScaleFront);
     backWallTexture.repeat.set(1, 1.5);
 } 
 else if (dragLeft.position.x <= -1.75 && dragLeft.position.x > -2.25)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -1.998
     dragRight.position.x = 1.998
 
-    leftWall.position.x = -3.9
-    rightWall.position.x = 3.9
+    leftWall.position.x = -3.95
+    rightWall.position.x = 3.95
     
     standBase.scale.set(2, 1, getScaleFront)
     standSides.scale.set(2, 1, getScaleFront)
     backWall.scale.set(2,1,1)
     getScaleLeft = 2
 
-    standTexture.repeat.set(2, 1);
+    standTexture.repeat.set(2, getScaleFront);
     backWallTexture.repeat.set(1, 2);
 } 
 else if (dragLeft.position.x <= -2.25 && dragLeft.position.x > -2.75)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -2.499
     dragRight.position.x = 2.499
 
-    leftWall.position.x = -4.4
-    rightWall.position.x = 4.4
+    leftWall.position.x = -4.45
+    rightWall.position.x = 4.45
     
     standBase.scale.set(2.25, 1, getScaleFront)
     standSides.scale.set(2.25, 1, getScaleFront)
     backWall.scale.set(2.25,1,1)
     getScaleLeft = 2.25
 
-    standTexture.repeat.set(2.25, 1);
+    standTexture.repeat.set(2.25, getScaleFront);
     backWallTexture.repeat.set(1, 2.25);
 } 
 else if (dragLeft.position.x <= -2.75)
 {
+    standTexture = standBase.material.map
     dragLeft.position.x = -3
     dragRight.position.x = 3
 
-    leftWall.position.x = -4.9
-    rightWall.position.x = 4.9
+    leftWall.position.x = -4.95
+    rightWall.position.x = 4.95
     
     standBase.scale.set(2.5, 1, getScaleFront)
     standSides.scale.set(2.5, 1, getScaleFront)
     backWall.scale.set(2.5,1,1)
     getScaleLeft = 2.5
 
-    standTexture.repeat.set(2.5, 1);
+    standTexture.repeat.set(2.5, getScaleFront);
     backWallTexture.repeat.set(1, 2.5);
 } 
 }
@@ -1546,18 +1874,25 @@ element17.innerHTML = priceTrashCan + "$"
   ####   #######  #####    ####   
 */                                
 
-
-document.getElementById("button").onclick = ()=>
-{
-    console.log(camera.position)
-}
-
-
-document.getElementById("button2").onclick = ()=>
-{
-
+setTimeout(loadTest, 5000)
+ function loadTest()
+ {
+    document.getElementById("button").onclick = ()=>
+    {
+        console.log(Functions.roundXSteps(3.24342342423 , 3) )
+    }
     
-}
+    
+    document.getElementById("button2").onclick = ()=>
+    {
+      
+        
+        
+    }
+    
+   
+ }
+
 
 /*
 #####    #### ######   #####   ##### ####     
@@ -1634,6 +1969,7 @@ function leftPanel()
 {   var amountShelves = 0
     var textnode
     var shelvesIcon = document.getElementById("shelves_icon")
+    document.getElementById("add_tab").style.color = "cyan"
         /**
          * Storage Icons
          */
@@ -1670,6 +2006,7 @@ function leftPanel()
 rightPanel()
 function rightPanel()
 {
+    document.getElementById("carpet_tab").style.color = "#7CFC00";
         /**
          * Carpet Icons
          */
@@ -1905,10 +2242,16 @@ function loadTextures()
 
     document.getElementById("carpet0_icon").addEventListener("click", function()
     {
+    
     var texture = new THREE.TextureLoader().load( "./media/carpet0_icon.jpg" );
     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
-    
     texture.colorSpace = THREE.SRGBColorSpace;
+   
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     })
@@ -1919,51 +2262,256 @@ function loadTextures()
     {
     var texture = new THREE.TextureLoader().load( "./media/carpet1_icon.jpg" );
     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
     texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     })
 
-    // Parquet 1
+    // Carpet 2
 
+    document.getElementById("carpet2_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/carpet2_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Carpet 3
+
+    document.getElementById("carpet3_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/carpet3_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Carpet 4
+
+    document.getElementById("carpet4_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/carpet4_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+      // Carpet 5
+
+    document.getElementById("carpet5_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/carpet5_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+
+    // Parquet 
     document.getElementById("parquet0_icon").addEventListener("click", function()
     {
     var texture = new THREE.TextureLoader().load( "./media/parquet0_icon.jpg" );
     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
     texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     })
-
-    
-    // Parquet 2
-
+    // Parquet 1
     document.getElementById("parquet1_icon").addEventListener("click", function()
     {
     var texture = new THREE.TextureLoader().load( "./media/parquet1_icon.jpg" );
     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
     texture.colorSpace = THREE.SRGBColorSpace;
-    scene.getObjectByName( "stand_1" ).material.map = texture
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Parquet 2
+    document.getElementById("parquet2_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/parquet2_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Parquet 3
+    document.getElementById("parquet3_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/parquet3_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Parquet 4
+    document.getElementById("parquet4_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/parquet4_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    })
+    // Parquet 5
+    document.getElementById("parquet5_icon").addEventListener("click", function()
+    {
+    var texture = new THREE.TextureLoader().load( "./media/parquet5_icon.jpg" );
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({map :  texture})
+   
+    texture.colorSpace = THREE.SRGBColorSpace;
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    texture.repeat.set(dimWidthStandBase/4, dimDepthStandBase/4);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     })
 
 
      // Laminate 0
-
      document.getElementById("laminate0_icon").addEventListener("click", function()
      {
      scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: 'white'});
      })
-
     // Laminate 1
-
     document.getElementById("laminate1_icon").addEventListener("click", function()
     {
     scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#C0C0C0'});
     })
+    // Laminate 2
+    document.getElementById("laminate2_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#808080'});
+    })
+    // Laminate 3
+    document.getElementById("laminate3_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#000000'});
+    })
+    // Laminate 4
+    document.getElementById("laminate4_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#FF0000'});
+    })
+    // Laminate 5
+    document.getElementById("laminate5_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#800000'});
+    })
+    // Laminate 6
+    document.getElementById("laminate6_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#FFFF00'});
+    })
+    // Laminate 7
+    document.getElementById("laminate7_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#808000'});
+    })
+    // Laminate 8
+    document.getElementById("laminate8_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#00FF00'});
+    })
+    // Laminate 9
+    document.getElementById("laminate9_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#008000'});
+    })
+    // Laminate 10
+    document.getElementById("laminate10_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#00FFFF'});
+    })
+    // Laminate 11
+    document.getElementById("laminate11_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#008080'});
+    })
+    // Laminate 12
+    document.getElementById("laminate12_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#0000FF'});
+    })
+    // Laminate 13
+    document.getElementById("laminate13_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#000080'});
+    })
+    // Laminate 14
+    document.getElementById("laminate14_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#FF00FF'});
+    })
+    // Laminate 15
+    document.getElementById("laminate15_icon").addEventListener("click", function()
+    {
+    scene.getObjectByName( "stand_1" ).material = new THREE.MeshBasicMaterial({color: '#800080'});
+    })
+      
+    
 }
 
 /*
@@ -2099,7 +2647,18 @@ function loginPanel()
  ##     ##   ## ##   ##  ##  ##  
  ##     ##   ## #######  ##  ##  
  ##  ## ### ### ##   ##  ## ##   
-#######  #####  ##   ## #####    
+#######  #####  ##   ## #####  
+
+
+######    ###   ######    ###   ##   ##  
+ ##  ##  ## ##   ##  ##  ## ##  ### ###  
+ ##  ## ##   ##  ##  ## ##   ## #######  
+ #####  ##   ##  #####  ##   ## ## # ##  
+ ##     #######  ## ##  ####### ##   ##  
+ ##     ##   ##  ## ##  ##   ## ##   ##  
+####    ##   ## #### ## ##   ## ### ###  
+                                         
+
 */  
 
 
@@ -2109,19 +2668,129 @@ function loadParameters()
     var switchLeft = document.getElementById("toogle_switch_left_wall_switch")
     var switchBack = document.getElementById("toogle_switch_back_wall_switch")
     var switchRight = document.getElementById("toogle_switch_right_wall_switch")
+
+    var standBase = scene.getObjectByName( "stand_1" )
+    var standSides = scene.getObjectByName( "stand_2" )
+    var rightWall = scene.getObjectByName( "right_wall" )
+    var backWall = scene.getObjectByName( "back_wall" )
+    var leftWall = scene.getObjectByName( "left_wall" )
+    var dragFront = scene.getObjectByName( "drag_front" )
+    var dragRight = scene.getObjectByName( "drag_right" )
+    var dragLeft = scene.getObjectByName( "drag_left" )
+    var standTexture = standBase.material.map
+    var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+    var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+    var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+
+    var currentWidth = Functions.getQueryVariable("width")
+    var currentDepth = Functions.getQueryVariable("depth")
+    var getScaleFront , getScaleLeft
+
+/**
+ * 
+ * 
+ * STAND 
+ * 
+ * 
+ */      
     
-//BACKWALL VISIBILITY
+   /*  if (currentWidth = 1.25)
+    {
+        standTexture = standBase.material.map
+        dragRight.position.x = 0.6
+        dragLeft.position.x = -0.6
+
+        rightWall.position.x = 2.45
+        leftWall.position.x = -2.45
+
+        standBase.scale.set(1.25, 1, getScaleFront)
+        standSides.scale.set(1.25, 1, getScaleFront)
+        backWall.scale.set(1.25,1,1)
+        getScaleLeft = 1.25
+
+        standTexture.repeat.set(1.25, getScaleFront);
+        backWallTexture.repeat.set(1, 1.25);
+    }
+    if (currentWidth = 1.5)
+    {
+        standTexture = standBase.material.map
+        dragRight.position.x = 1.0023
+        dragLeft.position.x = -1.0023
+
+        rightWall.position.x = 2.95
+        leftWall.position.x = -2.95
+        
+        standBase.scale.set(1.5, 1, getScaleFront)
+        standSides.scale.set(1.5, 1, getScaleFront)
+        backWall.scale.set(1.5,1,1)
+        getScaleLeft = 1.5
+
+        standTexture.repeat.set(1.5, getScaleFront);
+        backWallTexture.repeat.set(1, 1.5);
+    }
+       
+    if (currentDepth = 1.25)
+    {
+        standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+        rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+        leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+        dragFront.position.z = 0.6
+        backWall.position.z = -2.4
+        standBase.scale.set(getScaleLeft, 1, 1.25)
+        standSides.scale.set(getScaleLeft,1, 1.25)
+        standTexture.repeat.set(getScaleLeft, 1.25)
+        rightWallTexture.repeat.set(1, 1.25)
+        leftWallTexture.repeat.set(1, 1.25)
+        rightWall.scale.set(1,1,1.26)
+        leftWall.scale.set(1,1,1.26)
+        getScaleFront = 1.25
+    }
+    if (currentDepth = 1.5)
+    {
+        standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+        rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+        leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+        dragFront.position.z = 1.0023
+        backWall.position.z = -2.9
+        standBase.scale.set(getScaleLeft, 1, 1.5)
+        standSides.scale.set(getScaleLeft, 1, 1.5)
+        standTexture.repeat.set(getScaleLeft, 1.5);
+        rightWallTexture.repeat.set(1, 1.5);
+        leftWallTexture.repeat.set(1,1.5);
+        rightWall.scale.set(1,1,1.52)
+        leftWall.scale.set(1,1,1.52)
+        getScaleFront = 1.5
+    } */
+
+/**
+ * 
+ * 
+ * BACK WALL
+ * 
+ * 
+ */    
+    //BACKWALL VISIBILITY
         if (Functions.getQueryVariable("backwall"))
         {
             switchBack.checked = true
-            scene.getObjectByName( "back_wall_1" ).visible = true;
-            scene.getObjectByName( "back_wall_2" ).visible = true;
+            scene.getObjectByName("back_wall_1" ).visible = true;
+            scene.getObjectByName("back_wall_2" ).visible = true;
             loadGraphicControlsBack()
                 
             var standInfo = "peninsula"
             document.getElementById("stand_info_text").style.left = "315px";
             document.getElementById("stand_info_text").style.bottom = "22px";
             document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+                 if (Functions.getQueryVariable("rightwall")){
+                    if (Functions.getQueryVariable("leftwall")){
+                        var standInfo = "row"
+                        document.getElementById("stand_info_text").style.left = "350px";
+                        document.getElementById("stand_info_text").style.bottom = "22px";
+                        document.getElementById("stand_info_text").innerHTML = standInfo + standSize
+                    }
+                 }
         }
 //BACKWALL CUSTOM IMAGE
         if (Functions.getQueryVariable("backwall_image"))
@@ -2137,7 +2806,10 @@ function loadParameters()
                 {
                     var textureLoaderBw = new THREE.TextureLoader().load(mapUrlBw)
                     scene.getObjectByName( "back_wall_1" ).material.map = textureLoaderBw
+                    textureLoaderBw.rotation = THREE.MathUtils.degToRad(90);
                     textureLoaderBw.colorSpace = THREE.SRGBColorSpace;
+                    textureLoaderBw.wrapS = THREE.RepeatWrapping;
+                    textureLoaderBw.wrapT = THREE.RepeatWrapping;
                 }
             )
         }
@@ -2177,6 +2849,13 @@ if (Functions.getQueryVariable("backwall_image_zoom_out"))
     var zoomOutBackWall = Functions.getQueryVariable("backwall_image_zoom_out")
     scene.getObjectByName( "back_wall_1" ).material.map.offset.set(zoomOutBackWall, zoomOutBackWall)
 }
+/**
+ * 
+ * 
+ * RIGHT WALL
+ * 
+ * 
+ */
 //RIGHTWALL VISIBILITY
         if (Functions.getQueryVariable("rightwall"))
         {
@@ -2204,10 +2883,57 @@ if (Functions.getQueryVariable("backwall_image_zoom_out"))
                 {
                     var textureLoaderRw = new THREE.TextureLoader().load(mapUrlRw)
                     scene.getObjectByName( "right_wall_1" ).material.map = textureLoaderRw
+                    textureLoaderRw.rotation = THREE.MathUtils.degToRad(90);
                     textureLoaderRw.colorSpace = THREE.SRGBColorSpace;
+                    textureLoaderRw.wrapS = THREE.RepeatWrapping;
+                    textureLoaderRw.wrapT = THREE.RepeatWrapping;
                 }
             )
         }
+
+//RIGHTWALL CUSTOM IMAGE POSITION RIGHT
+if (Functions.getQueryVariable("rightwall_image_position_right"))
+{
+    var posRightRightWall = Functions.getQueryVariable("rightwall_image_position_right")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posRightRightWall, 1)
+}
+//RIGHTWALL CUSTOM IMAGE POSITION LEFT
+if (Functions.getQueryVariable("rightwall_image_position_left"))
+{
+    var posLeftRightWall = Functions.getQueryVariable("rightwall_image_position_left")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posLeftRightWall, 1)
+}
+//RIGHTWALL CUSTOM IMAGE POSITION UP
+if (Functions.getQueryVariable("rightwall_image_position_up"))
+{
+    var posUpRightWall = Functions.getQueryVariable("rightwall_image_position_up")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posUpRightWall)
+}
+//RIGHTWALL CUSTOM IMAGE POSITION DOWN
+if (Functions.getQueryVariable("rightwall_image_position_down"))
+{
+    var posDownRightWall = Functions.getQueryVariable("rightwall_image_position_down")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posDownRightWall)
+}
+//RIGHTWALL CUSTOM IMAGE ZOOM ++
+if (Functions.getQueryVariable("rightwall_image_zoom_in"))
+{
+    var zoomInRightWall = Functions.getQueryVariable("rightwall_image_zoom_in")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(zoomInRightWall, zoomInRightWall)
+}
+//RIGHTWALL CUSTOM IMAGE ZOOM --
+if (Functions.getQueryVariable("rightwall_image_zoom_out"))
+{
+    var zoomOutRightWall = Functions.getQueryVariable("rightwall_image_zoom_out")
+    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(zoomOutRightWall, zoomOutRightWall)
+}
+/**
+ * 
+ * 
+ * LEFT WALL
+ * 
+ * 
+ */
 //LEFTWALL VISIBILITY
 if (Functions.getQueryVariable("leftwall"))
 {
@@ -2239,6 +2965,42 @@ if (Functions.getQueryVariable("leftwall_image"))
         }
     )
 }
+//LEFTWALL CUSTOM IMAGE POSITION RIGHT
+if (Functions.getQueryVariable("leftwall_image_position_right"))
+{
+    var posRightLeftWall = Functions.getQueryVariable("leftwall_image_position_right")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posRightLeftWall, 1)
+}
+//LEFTWALL CUSTOM IMAGE POSITION LEFT
+if (Functions.getQueryVariable("leftwall_image_position_left"))
+{
+    var posLeftLeftWall = Functions.getQueryVariable("leftwall_image_position_right")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posLeftLeftWall, 1)
+}
+//LEFTWALL CUSTOM IMAGE POSITION UP
+if (Functions.getQueryVariable("leftwall_image_position_up"))
+{
+    var posUpLeftWall = Functions.getQueryVariable("leftwall_image_position_up")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posUpLeftWall)
+}
+//LEFTWALL CUSTOM IMAGE POSITION DOWN
+if (Functions.getQueryVariable("leftwall_image_position_down"))
+{
+    var posDownLeftWall = Functions.getQueryVariable("leftwall_image_position_down")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posDownLeftWall)
+}
+//LEFTWALL CUSTOM IMAGE ZOOM ++
+if (Functions.getQueryVariable("leftwall_image_zoom_in"))
+{
+    var zoomInLeftWall = Functions.getQueryVariable("leftwall_image_zoom_in")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(zoomInLeftWall, zoomInLeftWall)
+}
+//LEFTWALL CUSTOM IMAGE ZOOM --
+if (Functions.getQueryVariable("leftwall_image_zoom_out"))
+{
+    var zoomOutLeftWall = Functions.getQueryVariable("leftwall_image_zoom_out")
+    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(zoomOutLeftWall, zoomOutLeftWall)
+}
 
 }
 
@@ -2259,3 +3021,242 @@ if (Functions.getQueryVariable("leftwall_image"))
 
        
          
+/*
+ ###### ##   ## #######  #####   
+   ##   ###  ##  ##   # ### ###  
+   ##   #### ##  ##     ##   ##  
+   ##   #######  ####   ##   ##  
+   ##   ## ####  ##     ##   ##  
+   ##   ##  ###  ##     ### ###  
+ ###### ##   ## ####     #####   
+                                 
+
+#####  #######  ##### ### ###  
+ ## ##  ##   # ##   ## ## ##   
+ ##  ## ##     ##      ####    
+ ##  ## ####    #####  ###     
+ ##  ## ##          ## ####    
+ ## ##  ##   # ##   ## ## ##   
+#####  #######  ##### ### ###  
+*/    
+
+/**
+*  ON EVENT OF CLICK INFO DESK ICON
+*/
+
+
+setTimeout(loadInfoDesk, 5000)      
+function loadInfoDesk() 
+{
+    var intersectInfoDeskPoster = new THREE.Vector3();
+    var intersectInfoDeskSides = new THREE.Vector3();
+    var standBase = scene.getObjectByName( "stand_1" )
+    var envFloor = scene.getObjectByName( "environment_floor")
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+    
+    var infoDeskFurnitureControl = document.getElementById("furniture_icon_group_info_desk")
+    var infoDeskGraphicControl =  document.getElementById("graphics_control_icon_group_info_desk")
+
+    var infoDesk = scene.getObjectByName( "info_desk")
+    var infoDeskPoster = scene.getObjectByName( "info_desk_2")
+    var infoDeskSides = scene.getObjectByName( "info_desk_1")
+    var switchInfoDesk = document.getElementById("toogle_switch_info_desk_switch")   
+
+    var dimInfoDesk = new THREE.Box3().setFromObject(infoDesk);
+    var dimWidthInfoDesk = Math.abs(dimInfoDesk.max.x)+Math.abs(dimInfoDesk.min.x)
+    var dimDepthInfoDesk = Math.abs(dimInfoDesk.max.z)+Math.abs(dimInfoDesk.min.z)
+    var dimHeightInfoDesk = Math.abs(dimInfoDesk.max.y)+Math.abs(dimInfoDesk.min.y)
+
+    var limiterPlaneGeoInfoDesk = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
+    var limiterPlaneMatInfoDesk = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+    var limiterPlaneInfoDesk = new THREE.Mesh( limiterPlaneGeoInfoDesk, limiterPlaneMatInfoDesk );
+    scene.add(limiterPlaneInfoDesk)
+    limiterPlaneInfoDesk.rotation.x = THREE.MathUtils.degToRad(90)
+    limiterPlaneInfoDesk.position.y = 0.11
+    limiterPlaneInfoDesk.visible = false
+
+/**
+ *  INIT TEXTURE SETTINGS
+ */
+    var textureInfoDesk = new THREE.TextureLoader().load( "./media/info_desk.jpg" );
+    scene.getObjectByName( "info_desk_2" ).material = new THREE.MeshBasicMaterial({map :  textureInfoDesk})
+    
+    textureInfoDesk.colorSpace = THREE.SRGBColorSpace;
+    textureInfoDesk.wrapS = THREE.RepeatWrapping;
+    textureInfoDesk.wrapT = THREE.RepeatWrapping;
+    textureInfoDesk.repeat.set( 8, 8 )
+    
+    switchInfoDesk.addEventListener('change', function () 
+    {
+        if (switchInfoDesk.checked)
+        {
+            var standBase = scene.getObjectByName( "stand_1" )
+            var envFloor = scene.getObjectByName( "environment_floor")
+            var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+            var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+            var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+            scene.getObjectByName( "info_desk_1").visible = true
+            scene.getObjectByName( "info_desk_2").visible = true
+            console.log("info desk switch checked")
+            window.addEventListener( 'mousemove', onMouseMoveInfoDesk);
+
+
+    function onClickInfoDeskPoster()
+    {
+        setTimeout(() =>
+        {
+            infoDeskGraphicControl.style.visibility = "visible" 
+            infoDeskFurnitureControl.style.visibility = "hidden" 
+            
+            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
+            getPositionInfoDesk.project(camera);
+
+            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
+            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
+
+            infoDeskGraphicControl.style.left = `${x}px`
+            infoDeskGraphicControl.style.top = `${y}px`
+        }, "200");
+    }
+
+    function onClickInfoDeskSides()
+    {
+        setTimeout(() =>
+        {
+           
+            infoDeskFurnitureControl.style.visibility = "visible" 
+            infoDeskGraphicControl.style.visibility = "hidden"
+            
+            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
+            getPositionInfoDesk.project(camera);
+
+            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
+            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
+
+            infoDeskFurnitureControl.style.left = `${x}px`
+            infoDeskFurnitureControl.style.top = `${y}px`
+        }, "200");
+    }
+
+/**
+ *  CLICK FOLLOW CURSOR
+ */
+        
+        function onMouseMoveInfoDesk(event)
+        {
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
+            controls.enabled = false; 
+
+            if(intersect.length>0)
+            {
+                // console.log("intersection true")
+                for ( var i = 0; i < intersect.length; i ++ )
+                {
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z  
+                    infoDesk.position.set(a,0.902,c)
+                   
+                } 
+            }
+            else        
+            {
+                intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                for ( var i = 0; i < intersect.length; i ++ )
+                {
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z  
+
+                    if (Math.abs(a)<= dimWidthStandBase/2-dimWidthInfoDesk/2)
+                    {
+                        if(c<0){infoDesk.position.x=a}
+                        else if(c>0){infoDesk.position.x=a}
+                    }
+
+                    if (Math.abs(c)<= dimDepthStandBase/2-dimDepthInfoDesk/2)
+                    {
+                        if(a<0){infoDesk.position.z=c }
+                        else if(a>0){infoDesk.position.z=c}
+                    }
+
+                }
+
+            } 
+            
+            window.addEventListener( 'click', function()
+            {
+                console.log("first drop action")
+                controls.enabled = true;
+                window.removeEventListener( 'mousemove', onMouseMoveInfoDesk);
+            })
+            
+        }
+
+        window.addEventListener( 'click', function(event)
+        {
+            console.log("second click event")
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            
+            intersectInfoDeskPoster = raycaster.intersectObject(infoDeskPoster)
+            intersectInfoDeskSides = raycaster.intersectObject(infoDeskSides)
+
+            if(intersectInfoDeskPoster.length>0)
+            {
+                console.log("clicked poster")
+               onClickInfoDeskPoster()
+                
+            }
+            else if (intersectInfoDeskSides.length>0)
+            {
+                console.log("clicked sides")
+               onClickInfoDeskSides()
+                
+            }
+            else
+            {
+                infoDeskFurnitureControl.style.visibility = "hidden" 
+                infoDeskGraphicControl.style.visibility = "hidden"
+            }
+          
+           
+        })  
+        
+
+/**
+ *  FURNITURE CONTROL ICONS
+ */
+    
+    document.getElementById("rotate_icon_info_desk").onclick = ()=>
+    {
+        
+        infoDesk.rotateY(THREE.MathUtils.degToRad(15))
+        
+    }
+    document.getElementById("trash_icon_info_desk").onclick = ()=>
+    {
+        console.log("clicked trash icon info desk")
+        scene.getObjectByName( "info_desk_1").visible = false
+        scene.getObjectByName( "info_desk_2").visible = false
+        infoDeskFurnitureControl.style.visibility = "hidden" 
+        infoDeskGraphicControl.style.visibility = "hidden" 
+       
+        switchInfoDesk.checked = false
+    }
+
+
+    }
+   
+
+    })  //      END OF        //        checkbox.addEventListener('change', function () 
+    
+}   //      END OF        //        setTimeout(loadInfoDesk, 5000)    
+
+

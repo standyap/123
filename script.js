@@ -450,46 +450,51 @@ document.getElementById("zoom_out_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb + 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
-Functions.addOrUpdateURLParam ("backwall_image_zoom_out" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM OUT
+Functions.addOrUpdateURLParam ("backwall_image_zoom" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM OUT
 }
 
 document.getElementById("zoom_in_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb - 0.2 , 2) 
 scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( bb, bb );
-Functions.addOrUpdateURLParam ("backwall_image_zoom_in" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM IN
+Functions.addOrUpdateURLParam ("backwall_image_zoom" , `${bb}`)//PARAMS SAVE BACK WALL ZOOM IN
 }
 
 document.getElementById("left_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb - 0.2 , 2) 
-scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
-Functions.addOrUpdateURLParam ("backwall_image_position_left" , `${bb}`)//PARAMS SAVE BACK WALL POSITION LEFT
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, Functions.getQueryVariable("backwall_image_position_ver"))
+Functions.addOrUpdateURLParam ("backwall_image_position_hor" , `${bb}`)//PARAMS SAVE BACK WALL POSITION LEFT
 }
 
 document.getElementById("right_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb + 0.2 , 2) 
-scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
-Functions.addOrUpdateURLParam ("backwall_image_position_right" , `${bb}`)//PARAMS SAVE BACK WALL POSITION RIGHT
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, Functions.getQueryVariable("backwall_image_position_ver"))
+Functions.addOrUpdateURLParam ("backwall_image_position_hor" , `${bb}`)//PARAMS SAVE BACK WALL POSITION RIGHT
 }
 
 document.getElementById("up_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb + 0.2 , 2) 
-scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
-Functions.addOrUpdateURLParam ("backwall_image_position_up" , `${bb}`)//PARAMS SAVE BACK WALL POSITION UP
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(Functions.getQueryVariable("backwall_image_position_hor"), bb)
+Functions.addOrUpdateURLParam ("backwall_image_position_ver" , `${bb}`)//PARAMS SAVE BACK WALL POSITION UP
 }
 document.getElementById("down_icon").onclick = ()=>
 {   
 bb = Functions.roundXSteps(bb - 0.2 , 2) 
-scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, bb)
-Functions.addOrUpdateURLParam ("backwall_image_position_down" , `${bb}`)//PARAMS SAVE BACK WALL POSITION DOWN
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(Functions.getQueryVariable("backwall_image_position_hor"), bb)
+Functions.addOrUpdateURLParam ("backwall_image_position_ver" , `${bb}`)//PARAMS SAVE BACK WALL POSITION DOWN
 }
 
 document.getElementById("apply_icon").onclick = ()=>
 { 
     backWallGraphicControl.style.visibility = "hidden"       
+}
+document.getElementById("refresh_icon").onclick = ()=>
+{ 
+    scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( 1, 1 );
+    Functions.addOrUpdateURLParam ("backwall_image_zoom" , "1")
 }
 }
 function loadGraphicControlsRight()// FUNCTION WORKS WHEN RIGHTWALL SWITCH ON
@@ -563,7 +568,6 @@ document.getElementById("add_icon_right").onclick = ()=>
        readerRight.onload = readerEvent => 
        {
         var contentRight = readerEvent.target.result; // this is the content!
-        
         var textureRight = new THREE.TextureLoader().load(contentRight);
         
         Functions.sendDataParams(contentRight , rightWallUploadResponseUrl , "rightwall_image" )
@@ -583,13 +587,13 @@ document.getElementById("zoom_out_icon_right").onclick = ()=>
 {   
 rr = Functions.roundXSteps(rr + 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
-Functions.addOrUpdateURLParam ("rightwall_image_zoom_out" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM OUT
+Functions.addOrUpdateURLParam ("rightwall_image_zoom" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM OUT
 }
 document.getElementById("zoom_in_icon_right").onclick = ()=>
 {   
 rr = Functions.roundXSteps(rr - 0.2 , 2) 
 scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( rr, rr );
-Functions.addOrUpdateURLParam ("rightwall_image_zoom_in" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM IN
+Functions.addOrUpdateURLParam ("rightwall_image_zoom" , `${rr}`)//PARAMS SAVE RIGHT WALL ZOOM IN
 }
 
 document.getElementById("left_icon_right").onclick = ()=>
@@ -620,6 +624,11 @@ Functions.addOrUpdateURLParam ("rightwall_image_position_down" , `${rr}`)//PARAM
 document.getElementById("apply_icon_right").onclick = ()=>
 { 
     rightWallGraphicControl.style.visibility = "hidden"       
+}
+document.getElementById("refresh_icon_right").onclick = ()=>
+{ 
+    scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( 1, 1 );
+    Functions.addOrUpdateURLParam ("rightwall_image_zoom" , "1")
 }
 }
 function loadGraphicControlsLeft()// FUNCTION WORKS WHEN LEFTWALL SWITCH ON
@@ -697,28 +706,32 @@ document.getElementById("add_icon_left").onclick = ()=>
         
         Functions.sendDataParams(contentLeft , leftWallUploadResponseUrl , "leftwall_image" )
         scene.getObjectByName( "left_wall_1" ).material.map = textureLeft
-        textureLeft.rotation = THREE.MathUtils.degToRad(90);
+        textureLeft.rotation = THREE.MathUtils.degToRad(180);
         textureLeft.colorSpace = THREE.SRGBColorSpace;
         textureLeft.wrapS = THREE.RepeatWrapping;
         textureLeft.wrapT = THREE.RepeatWrapping;
         textureLeft.repeat.set( 1, 1 );
-   
        }
     }
     inputLeft.click();
+}
+document.getElementById("refresh_icon_left").onclick = ()=>
+{   
+scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( 1, 1 );
+Functions.removeURLParameters (['leftwall_image_zoom'])
 }
 ll=1
 document.getElementById("zoom_out_icon_left").onclick = ()=>
 {   
 ll = Functions.roundXSteps(ll + 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
-Functions.addOrUpdateURLParam ("leftwall_image_zoom_out" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM OUT
+Functions.addOrUpdateURLParam ("leftwall_image_zoom" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM OUT
 }
 document.getElementById("zoom_in_icon_left").onclick = ()=>
 {   
 ll = Functions.roundXSteps(ll - 0.2 , 2) 
 scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( ll, ll );
-Functions.addOrUpdateURLParam ("leftwall_image_zoom_in" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM IN
+Functions.addOrUpdateURLParam ("leftwall_image_zoom" , `${ll}`)//PARAMS SAVE LEFT WALL ZOOM IN
 }
 
 document.getElementById("left_icon_left").onclick = ()=>
@@ -750,6 +763,7 @@ document.getElementById("apply_icon_left").onclick = ()=>
 { 
     leftWallGraphicControl.style.visibility = "hidden"       
 }
+
 }
 
 /*
@@ -796,6 +810,11 @@ function switchesLoaded()
         {
             scene.getObjectByName( "back_wall_1" ).visible = true;
             scene.getObjectByName( "back_wall_2" ).visible = true;
+           scene.getObjectByName( "back_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+           scene.getObjectByName( "back_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+           scene.getObjectByName( "back_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+           scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( 1, 1 );
+           scene.getObjectByName( "back_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
 
 /**
  *  DRAG'LER VISIBLE OLMADIĞINDA DRAG CONTROLLERİ AÇIK OLUYORDU VE KAPATAMIYORDUK
@@ -870,6 +889,12 @@ switchLeft.addEventListener('change', function () {
             scene.getObjectByName( "back_wall" ).position.y=1.6
             scene.getObjectByName( "left_wall" ).position.y=1.6
 
+            scene.getObjectByName( "left_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+            scene.getObjectByName( "left_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+            scene.getObjectByName( "left_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+            scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( 1, 1 );
+            scene.getObjectByName( "left_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+
 
             loadGraphicControlsBack()
             loadGraphicControlsLeft()
@@ -895,6 +920,12 @@ switchLeft.addEventListener('change', function () {
 
         scene.getObjectByName( "back_wall" ).position.y=1.6
         scene.getObjectByName( "left_wall" ).position.y=1.6
+
+        scene.getObjectByName( "left_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+        scene.getObjectByName( "left_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+        scene.getObjectByName( "left_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+        scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( 1, 1 );
+        scene.getObjectByName( "left_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
 
         loadGraphicControlsBack()
         loadGraphicControlsLeft()
@@ -975,6 +1006,12 @@ switchRight.addEventListener('change', function () {
             scene.getObjectByName( "back_wall" ).position.y=1.6
             scene.getObjectByName( "right_wall" ).position.y=1.6
 
+            scene.getObjectByName( "right_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+            scene.getObjectByName( "right_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+            scene.getObjectByName( "right_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+            scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( 1, 1 );
+            scene.getObjectByName( "right_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+
             loadGraphicControlsBack()
             loadGraphicControlsRight()
 
@@ -1000,6 +1037,12 @@ switchRight.addEventListener('change', function () {
 
             scene.getObjectByName( "back_wall" ).position.y=1.6
             scene.getObjectByName( "right_wall" ).position.y=1.6
+
+            scene.getObjectByName( "right_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+            scene.getObjectByName( "right_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+            scene.getObjectByName( "right_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+            scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( 1, 1 );
+            scene.getObjectByName( "right_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
 
             loadGraphicControlsBack()
             loadGraphicControlsRight()
@@ -1030,7 +1073,7 @@ switchRight.addEventListener('change', function () {
             scene.getObjectByName( "right_wall_1" ).visible = false;
             scene.getObjectByName( "right_wall_2" ).visible = false;
 
-            scene.getObjectByName( "right_wall" ).position.y=1.6
+            scene.getObjectByName( "right_wall" ).position.y=-20
 
             var standInfo = 
             "&nbspCorner" + 
@@ -1075,20 +1118,37 @@ switchRight.addEventListener('change', function () {
     {
         scene.getObjectByName( "stand_1" ).scale.y = 0.1
         scene.getObjectByName( "stand_2" ).scale.y = 0.1
-        scene.getObjectByName( "back_wall" ).position.y = 1.5
-        scene.getObjectByName( "right_wall" ).position.y = 1.5
-        scene.getObjectByName( "left_wall" ).position.y = 1.5
 
-        console.log('Checked');
+        if ( scene.getObjectByName( "back_wall" ).visible==true)
+        {
+            scene.getObjectByName( "back_wall" ).position.y = 1.5
+        }
+        if ( scene.getObjectByName( "right_wall" ).visible==true)
+        {
+            scene.getObjectByName( "right_wall" ).position.y = 1.5
+        }
+        if ( scene.getObjectByName( "left_wall" ).visible==true)
+        {
+            scene.getObjectByName( "left_wall" ).position.y = 1.5
+        }
+
     } 
     else
     {
         scene.getObjectByName( "stand_1" ).scale.y = 1
         scene.getObjectByName( "stand_2" ).scale.y = 1
-        scene.getObjectByName( "back_wall" ).position.y = 1.6
-        scene.getObjectByName( "right_wall" ).position.y = 1.6
-        scene.getObjectByName( "left_wall" ).position.y = 1.6
-        console.log('Not Checked');
+        if ( scene.getObjectByName( "back_wall" ).visible==true)
+        {
+            scene.getObjectByName( "back_wall" ).position.y = 1.6
+        }
+        if ( scene.getObjectByName( "right_wall" ).visible==true)
+        {
+            scene.getObjectByName( "right_wall" ).position.y = 1.6
+        }
+        if ( scene.getObjectByName( "left_wall" ).visible==true)
+        {
+            scene.getObjectByName( "left_wall" ).position.y = 1.6
+        }
     }
     });
    
@@ -1149,7 +1209,7 @@ switchRight.addEventListener('change', function () {
     var storageSize = "N/A"
     document.getElementById("storage_size_text").style.left = "552px";
     //var storageSize = storageWidth + "m" + storageDepth + "m"
-    document.getElementById("storage_size_text").innerHTML = "Storage" + "" + " " + storageSize
+    document.getElementById("storage_size_text").innerHTML = "Storage" + "" + "" + storageSize
 
     var switchStorage = document.getElementById("toogle_switch_storage_switch")
     
@@ -1228,8 +1288,25 @@ function loadDrags()
 /**
  *  DEFAULTS
  */ 
-    
-    var getScaleFront=1 ; var getScaleLeft=1    //LOAD PARAMETERS DA BU DEĞERLERİ ÖNCEDEN OKUTUYORUZ O YÜZDEN "1" VEREREK BAŞLAMIYORUZ.ŞU AN LOAD PARAMS'I KAPATTIĞIMIZ İÇİN YENİDEN 1 VERDİK.
+var getScaleFront , getScaleLeft
+
+if (Functions.getQueryVariable("depth"))
+{
+    getScaleFront = Functions.getQueryVariable("depth")
+}
+else
+{
+    getScaleFront = 1
+}
+if (Functions.getQueryVariable("width"))
+{
+    getScaleLeft = Functions.getQueryVariable("width")
+}
+else
+{
+    getScaleLeft = 1
+}
+
     /**
      * SCALE FRONT VE SCALE LEFT(VE RIGHT) DEĞİŞKENLERİNE NEDEN İLK DEĞERLER VERİYORUZ?
      * ÇÜNKÜ EĞER BU İLK DEĞERLERİ VERMEZSEK, DRAG FRONTU KULLANDIĞIMIZDA SCALE LEFT HENÜZ YAPILMIŞSA SLAE LEFT DEĞERİ HİÇ TANIMLANMAMIŞ OLUR VE 
@@ -1247,8 +1324,6 @@ function loadDrags()
     var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
     var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
-    
-
 /**
  *  DRAG FRONT
  */ 
@@ -1256,17 +1331,29 @@ function loadDrags()
     var objectsDragFront = []
     objectsDragFront.push(dragFront)
     var dragDragFront = new DragControls(objectsDragFront, camera, renderer.domElement)
-   
 /**
  *  DRAG FRONT EVENT LISTENERS
  */ 
+
     dragDragFront.addEventListener( 'dragstart', ()=> 
     {
-    controls.enabled = false    
+    controls.enabled = false   
+    scene.getObjectByName( "right_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+    scene.getObjectByName( "right_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+    scene.getObjectByName( "right_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+    scene.getObjectByName( "right_wall_1" ).material.map.repeat.set( 1, 1 ); 
+    scene.getObjectByName( "right_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+    scene.getObjectByName( "left_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+    scene.getObjectByName( "left_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+    scene.getObjectByName( "left_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+    scene.getObjectByName( "left_wall_1" ).material.map.repeat.set( 1, 1 ); 
+    scene.getObjectByName( "left_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+
     })
+    
     dragDragFront.addEventListener ( 'drag', onDragEventDragFront)
     
-    function onDragEventDragFront() {
+    function onDragEventDragFront() {   
         //CONSTRAINTS
         /**
          * CONSTRAINTS'İ DRAG START'A KOYMAYALIM.
@@ -1294,7 +1381,6 @@ function loadDrags()
                 standTexture = standBase.material.map
                 backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
                 rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
-
                 leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
                 dragFront.position.z = 0
                 backWall.position.z = -1.9  //scale.set(width,height,depth)
@@ -1306,7 +1392,6 @@ function loadDrags()
                 rightWall.scale.set(1,1,1)
                 leftWall.scale.set(1,1,1)
                 getScaleFront = 1
-                Functions.addOrUpdateURLParam ("depth", "1")
             } 
             else if (dragFront.position.z >= 0.25 && dragFront.position.z < 0.75)
             {
@@ -1319,12 +1404,11 @@ function loadDrags()
                 standBase.scale.set(getScaleLeft, 1, 1.25)
                 standSides.scale.set(getScaleLeft,1, 1.25)
                 standTexture.repeat.set(getScaleLeft, 1.25);
-                rightWallTexture.repeat.set(1, 1.25);
-                leftWallTexture.repeat.set(1, 1.25);
+                rightWallTexture.repeat.set(1.25,1);
+                leftWallTexture.repeat.set(1.25,1);
                 rightWall.scale.set(1,1,1.26)
                 leftWall.scale.set(1,1,1.26)
                 getScaleFront = 1.25
-                Functions.addOrUpdateURLParam ("depth", "1.25")
             }
             else if (dragFront.position.z >= 0.75 && dragFront.position.z < 1.25)
             {
@@ -1337,12 +1421,11 @@ function loadDrags()
                 standBase.scale.set(getScaleLeft, 1, 1.5)
                 standSides.scale.set(getScaleLeft, 1, 1.5)
                 standTexture.repeat.set(getScaleLeft, 1.5);
-                rightWallTexture.repeat.set(1, 1.5);
-                leftWallTexture.repeat.set(1,1.5);
+                rightWallTexture.repeat.set(1.5,1);
+                leftWallTexture.repeat.set(1.5,1);
                 rightWall.scale.set(1,1,1.52)
                 leftWall.scale.set(1,1,1.52)
                 getScaleFront = 1.5
-                Functions.addOrUpdateURLParam ("depth", "1.5")
             } 
             else if (dragFront.position.z >= 1.25 && dragFront.position.z < 1.75)
             {
@@ -1355,12 +1438,13 @@ function loadDrags()
                 standBase.scale.set(getScaleLeft, 1, 1.75)
                 standSides.scale.set(getScaleLeft, 1, 1.75)
                 standTexture.repeat.set(getScaleLeft, 1.75);
-                rightWallTexture.repeat.set(1, 1.75);
-                leftWallTexture.repeat.set(1,1.75);
+                rightWallTexture.repeat.set(1.75,1);
+                leftWallTexture.repeat.set(1.75,1);
                 rightWall.scale.set(1,1,1.775)
                 leftWall.scale.set(1,1,1.775)
                 getScaleFront = 1.75
-                Functions.addOrUpdateURLParam ("depth", "1.75")
+                
+                
             } 
             else if (dragFront.position.z >= 1.75 && dragFront.position.z < 2.25)
             {
@@ -1373,12 +1457,13 @@ function loadDrags()
                 standBase.scale.set(getScaleLeft, 1, 2)
                 standSides.scale.set(getScaleLeft, 1, 2)
                 standTexture.repeat.set(getScaleLeft, 2);
-                rightWallTexture.repeat.set(1, 2);
-                leftWallTexture.repeat.set(1,2);
+                rightWallTexture.repeat.set(2,1);
+                leftWallTexture.repeat.set(2,1);
                 rightWall.scale.set(1,1,2.03)
                 leftWall.scale.set(1,1,2.03)
                 getScaleFront = 2
-                Functions.addOrUpdateURLParam ("depth", "2")
+                
+                
             } 
             else if (dragFront.position.z >= 2.25 && dragFront.position.z < 2.75)
             {
@@ -1391,14 +1476,15 @@ function loadDrags()
                 standBase.scale.set(getScaleLeft, 1, 2.25)
                 standSides.scale.set(getScaleLeft, 1, 2.25)
                 standTexture.repeat.set(getScaleLeft, 2.25);
-                rightWallTexture.repeat.set(1, 2.25);
-                leftWallTexture.repeat.set(1,2.25);
+                rightWallTexture.repeat.set(2.25,1);
+                leftWallTexture.repeat.set(2.25,1);
                 rightWall.scale.set(1,1,2.28)
                 leftWall.scale.set(1,1,2.28)
                 getScaleFront = 2.25
-                Functions.addOrUpdateURLParam ("depth", "2.25")
+                
+                
             }
-            else if (dragFront.position.z >= 2.75 )
+            else if (dragFront.position.z >= 2.75)
             {
                 standTexture = standBase.material.map
                 backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
@@ -1408,18 +1494,51 @@ function loadDrags()
                 backWall.position.z = -4.9
                 standBase.scale.set(getScaleLeft, 1, 2.5)
                 standSides.scale.set(getScaleLeft, 1, 2.5)
-                standTexture.repeat.set(getScaleLeft, 2.5);
-                rightWallTexture.repeat.set(1, 2.5);
-                leftWallTexture.repeat.set(1,2.5);
+                standTexture.repeat.set(getScaleLeft, 2.5)
+                rightWallTexture.repeat.set(2.5,1);
+                leftWallTexture.repeat.set(2.5,1);
                 rightWall.scale.set(1,1,2.54)
                 leftWall.scale.set(1,1,2.54)
                 getScaleFront = 2.5
-                Functions.addOrUpdateURLParam ("depth", "2.5")
             }  
     }
     dragDragFront.addEventListener( 'dragend', ()=> 
     {
     controls.enabled = true
+    if (dragFront.position.z < 0.25)
+{
+    Functions.addOrUpdateURLParam ("depth", "1")
+} 
+else if (dragFront.position.z >= 0.25 && dragFront.position.z < 0.75)
+{
+    
+    Functions.addOrUpdateURLParam ("depth", "1.25")
+}
+else if (dragFront.position.z >= 0.75 && dragFront.position.z < 1.25)
+{
+    
+    Functions.addOrUpdateURLParam ("depth", "1.5")
+} 
+else if (dragFront.position.z >= 1.25 && dragFront.position.z < 1.75)
+{
+    
+    Functions.addOrUpdateURLParam ("depth", "1.75")
+} 
+else if (dragFront.position.z >= 1.75 && dragFront.position.z < 2.25)
+{
+    
+    Functions.addOrUpdateURLParam ("depth", "2")
+} 
+else if (dragFront.position.z >= 2.25 && dragFront.position.z < 2.75)
+{
+
+    Functions.addOrUpdateURLParam ("depth", "2.25")
+}
+else if (dragFront.position.z >= 2.75)
+{
+    
+    Functions.addOrUpdateURLParam ("depth", "2.5")
+} 
     })
 
    
@@ -1436,12 +1555,17 @@ var dragDragRight = new DragControls(objectsDragRight, camera, renderer.domEleme
 dragDragRight.addEventListener( 'dragstart', ()=> 
 { 
 controls.enabled = false  
+scene.getObjectByName( "back_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+scene.getObjectByName( "back_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+scene.getObjectByName( "back_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( 1, 1 ); 
+scene.getObjectByName( "back_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+
 })
 
 dragDragRight.addEventListener ( 'drag', onDragEventDragRight)
 
-function onDragEventDragRight() 
-{  
+function onDragEventDragRight() {  
 //CONSTRAINTS
 dragRight.position.y = 0
 dragRight.position.z = 0
@@ -1458,6 +1582,7 @@ else if (dragRight.position.x > 3)
 if (dragRight.position.x < 0.25)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 0
         dragLeft.position.x = 0
     
@@ -1468,15 +1593,14 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(1, 1, getScaleFront)
         backWall.scale.set(1,1,1)
         getScaleLeft = 1
-
         standTexture.repeat.set(1, getScaleFront);
         backWallTexture.repeat.set(1, 1);
-        Functions.addOrUpdateURLParam ("width", "1")
         
     } 
     else if (dragRight.position.x >= 0.25 && dragRight.position.x < 0.75)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 0.6
         dragLeft.position.x = -0.6
         
@@ -1487,15 +1611,13 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(1.25, 1, getScaleFront)
         backWall.scale.set(1.25,1,1)
         getScaleLeft = 1.25
-
         standTexture.repeat.set(1.25, getScaleFront);
-        backWallTexture.repeat.set(1, 1.25);
-        Functions.addOrUpdateURLParam ("width", "1.25")
-        
+        backWallTexture.repeat.set(1.25,1);
     }
     else if (dragRight.position.x >= 0.75 && dragRight.position.x < 1.25)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 1.0023
         dragLeft.position.x = -1.0023
 
@@ -1506,15 +1628,15 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(1.5, 1, getScaleFront)
         backWall.scale.set(1.5,1,1)
         getScaleLeft = 1.5
-
         standTexture.repeat.set(1.5, getScaleFront);
-        backWallTexture.repeat.set(1, 1.5);
-        Functions.addOrUpdateURLParam ("width", "1.5")
+        backWallTexture.repeat.set(1.5,1);
+        
         
     }
     else if (dragRight.position.x >= 1.25 && dragRight.position.x < 1.75)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 1.5
         dragLeft.position.x = -1.5
 
@@ -1525,15 +1647,15 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(1.75, 1, getScaleFront)
         backWall.scale.set(1.75,1,1)
         getScaleLeft = 1.75
-
         standTexture.repeat.set(1.75, getScaleFront);
-        backWallTexture.repeat.set(1, 1.75);
-        Functions.addOrUpdateURLParam ("width", "1.75")
+        backWallTexture.repeat.set(1.75,1);
+        
         
     } 
     else if (dragRight.position.x >= 1.75 && dragRight.position.x < 2.25)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 1.998
         dragLeft.position.x = -1.998
 
@@ -1544,15 +1666,15 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(2, 1, getScaleFront)
         backWall.scale.set(2,1,1)
         getScaleLeft = 2
-
         standTexture.repeat.set(2, getScaleFront);
-        backWallTexture.repeat.set(1, 2);
-        Functions.addOrUpdateURLParam ("width", "2")
+        backWallTexture.repeat.set(2,1);
+        
         
     }
     else if (dragRight.position.x >= 2.25 && dragRight.position.x < 2.75)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 2.499
         dragLeft.position.x = -2.499
 
@@ -1563,15 +1685,15 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(2.25, 1, getScaleFront)
         backWall.scale.set(2.25,1,1)
         getScaleLeft = 2.25
-
         standTexture.repeat.set(2.25, getScaleFront);
-        backWallTexture.repeat.set(1, 2.25);
-        Functions.addOrUpdateURLParam ("width", "2.25")
+        backWallTexture.repeat.set(2.25,1);
+        
         
     }
     else if (dragRight.position.x >= 2.75)
     {
         standTexture = standBase.material.map
+        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
         dragRight.position.x = 3
         dragLeft.position.x = -3
 
@@ -1582,10 +1704,9 @@ if (dragRight.position.x < 0.25)
         standSides.scale.set(2.5, 1, getScaleFront)
         backWall.scale.set(2.5,1,1)
         getScaleLeft = 2.5
-
         standTexture.repeat.set(2.5, getScaleFront);
-        backWallTexture.repeat.set(1, 2.5);
-        Functions.addOrUpdateURLParam ("width", "2.5")
+        backWallTexture.repeat.set(2.5,1);
+        
         
     }  
 }
@@ -1593,6 +1714,34 @@ if (dragRight.position.x < 0.25)
 dragDragRight.addEventListener( 'dragend', ()=> 
 {
 controls.enabled = true
+if (dragRight.position.x < 0.25)
+{
+    Functions.addOrUpdateURLParam ("width", "1")
+} 
+else if (dragRight.position.x >= 0.25 && dragRight.position.x < 0.75)
+{
+    Functions.addOrUpdateURLParam ("width", "1.25")
+}
+else if (dragRight.position.x >= 0.75 && dragRight.position.x < 1.25)
+{
+    Functions.addOrUpdateURLParam ("width", "1.5")
+}
+else if (dragRight.position.x >= 1.25 && dragRight.position.x < 1.75)
+{
+    Functions.addOrUpdateURLParam ("width", "1.75")
+} 
+else if (dragRight.position.x >= 1.75 && dragRight.position.x < 2.25)
+{
+    Functions.addOrUpdateURLParam ("width", "2")
+}
+else if (dragRight.position.x >= 2.25 && dragRight.position.x < 2.75)
+{
+    Functions.addOrUpdateURLParam ("width", "2.25")
+}
+else if (dragRight.position.x >= 2.75)
+{
+    Functions.addOrUpdateURLParam ("width", "2.5")
+}  
 })
 /**
  *  DRAG LEFT
@@ -1608,9 +1757,14 @@ var dragDragLeft = new DragControls(objectsDragLeft, camera, renderer.domElement
 dragDragLeft.addEventListener( 'dragstart', ()=> 
 { 
 controls.enabled = false  
+scene.getObjectByName( "back_wall_1" ).material.map.colorSpace = THREE.SRGBColorSpace;
+scene.getObjectByName( "back_wall_1" ).material.map.wrapS = THREE.RepeatWrapping;
+scene.getObjectByName( "back_wall_1" ).material.map.wrapT = THREE.RepeatWrapping;
+scene.getObjectByName( "back_wall_1" ).material.map.repeat.set( 1, 1 ); 
+scene.getObjectByName( "back_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
 })
 
-dragDragLeft.addEventListener ( 'drag', onDragEventDragLeft)
+dragDragLeft.addEventListener ('drag', onDragEventDragLeft)
 
 function onDragEventDragLeft() 
 {
@@ -1630,6 +1784,7 @@ dragLeft.position.x = -3
 if (dragLeft.position.x > -0.25)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = 0
     dragRight.position.x = 0
 
@@ -1647,6 +1802,7 @@ if (dragLeft.position.x > -0.25)
 else if (dragLeft.position.x <= -0.25 && dragLeft.position.x > -0.75)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -0.6
     dragRight.position.x = 0.6
     
@@ -1659,11 +1815,12 @@ else if (dragLeft.position.x <= -0.25 && dragLeft.position.x > -0.75)
     getScaleLeft = 1.25
 
     standTexture.repeat.set(1.25, getScaleFront);
-    backWallTexture.repeat.set(1, 1.25);
+    backWallTexture.repeat.set(1.25,1);
 }
 else if (dragLeft.position.x <= -0.75 && dragLeft.position.x > -1.25)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -1.0023
     dragRight.position.x = 1.0023
 
@@ -1676,11 +1833,12 @@ else if (dragLeft.position.x <= -0.75 && dragLeft.position.x > -1.25)
     getScaleLeft = 1.5
 
     standTexture.repeat.set(1.5, getScaleFront);
-    backWallTexture.repeat.set(1, 1.5);
+    backWallTexture.repeat.set(1.5,1);
 } 
 else if (dragLeft.position.x <= -1.25 && dragLeft.position.x > -1.75)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -1.5
     dragRight.position.x = 1.5
 
@@ -1693,11 +1851,12 @@ else if (dragLeft.position.x <= -1.25 && dragLeft.position.x > -1.75)
     getScaleLeft = 1.75
 
     standTexture.repeat.set(1.5, getScaleFront);
-    backWallTexture.repeat.set(1, 1.5);
+    backWallTexture.repeat.set(1.5,1);
 } 
 else if (dragLeft.position.x <= -1.75 && dragLeft.position.x > -2.25)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -1.998
     dragRight.position.x = 1.998
 
@@ -1710,11 +1869,12 @@ else if (dragLeft.position.x <= -1.75 && dragLeft.position.x > -2.25)
     getScaleLeft = 2
 
     standTexture.repeat.set(2, getScaleFront);
-    backWallTexture.repeat.set(1, 2);
+    backWallTexture.repeat.set(2,1);
 } 
 else if (dragLeft.position.x <= -2.25 && dragLeft.position.x > -2.75)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -2.499
     dragRight.position.x = 2.499
 
@@ -1727,11 +1887,12 @@ else if (dragLeft.position.x <= -2.25 && dragLeft.position.x > -2.75)
     getScaleLeft = 2.25
 
     standTexture.repeat.set(2.25, getScaleFront);
-    backWallTexture.repeat.set(1, 2.25);
+    backWallTexture.repeat.set(2.25,1);
 } 
 else if (dragLeft.position.x <= -2.75)
 {
     standTexture = standBase.material.map
+    backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     dragLeft.position.x = -3
     dragRight.position.x = 3
 
@@ -1744,7 +1905,7 @@ else if (dragLeft.position.x <= -2.75)
     getScaleLeft = 2.5
 
     standTexture.repeat.set(2.5, getScaleFront);
-    backWallTexture.repeat.set(1, 2.5);
+    backWallTexture.repeat.set(2.5,1);
 } 
 }
 
@@ -1752,7 +1913,8 @@ dragDragLeft.addEventListener( 'dragend', ()=>
 {
 controls.enabled = true
 })
-} 
+
+} //END OF MAIN LOAD FUNC
 
 /*
 ###### ######  ###### #### #######  #####   
@@ -1879,15 +2041,15 @@ setTimeout(loadTest, 5000)
  {
     document.getElementById("button").onclick = ()=>
     {
-        console.log(Functions.roundXSteps(3.24342342423 , 3) )
+        
+        scene.getObjectByName( "left_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
+         
     }
     
     
     document.getElementById("button2").onclick = ()=>
     {
       
-        
-        
     }
     
    
@@ -2681,10 +2843,9 @@ function loadParameters()
     var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
     var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
-
-    var currentWidth = Functions.getQueryVariable("width")
-    var currentDepth = Functions.getQueryVariable("depth")
-    var getScaleFront , getScaleLeft
+   
+    var getScaleLeft, getScaleFront    //ÖZELLİKLE SADECE LEFT'İ KOYDUK ÇÜNKÜ WIDTH'İ OKUTUP LEFTİ KENDİMİZ BELİRLİYORUZ 0.2 SN SONRA DA DEPTHİ OKUTUP LEFTİ ORDAN GÖSTERİYORUZ.
+    //BURDA ZAMANLAMA ÖNEMLİ EĞER ZAMAN ARALIKLI OLMAZSA YAPAMAYIZ. YANİ HEM SCALELEFT HEM SCALEFRONT VERİRSEK İKİSİ BİRBİRİNE KARIŞIR.
 
 /**
  * 
@@ -2692,9 +2853,29 @@ function loadParameters()
  * STAND 
  * 
  * 
- */      
+ */    
+
+
+if (Functions.getQueryVariable("width"))
+{   
+    if (Functions.getQueryVariable("width") == 1)
+    {
+        standTexture = standBase.material.map
+        dragRight.position.x = 0
+        dragLeft.position.x = 0
     
-   /*  if (currentWidth = 1.25)
+        rightWall.position.x = 1.95
+        leftWall.position.x = -1.95
+         //scale.set(width,height,depth)           
+        standBase.scale.set(1, 1, getScaleFront)
+        standSides.scale.set(1, 1, getScaleFront)
+        backWall.scale.set(1,1,1)
+        getScaleLeft = 1
+
+        standTexture.repeat.set(1, getScaleFront);
+        backWallTexture.repeat.set(1, 1);
+    }
+    if (Functions.getQueryVariable("width") == 1.25)
     {
         standTexture = standBase.material.map
         dragRight.position.x = 0.6
@@ -2703,15 +2884,15 @@ function loadParameters()
         rightWall.position.x = 2.45
         leftWall.position.x = -2.45
 
-        standBase.scale.set(1.25, 1, getScaleFront)
-        standSides.scale.set(1.25, 1, getScaleFront)
+        standBase.scale.set(1.25, 1, 1)
+        standSides.scale.set(1.25, 1, 1)
         backWall.scale.set(1.25,1,1)
         getScaleLeft = 1.25
 
-        standTexture.repeat.set(1.25, getScaleFront);
+        standTexture.repeat.set(1.25, 1);
         backWallTexture.repeat.set(1, 1.25);
     }
-    if (currentWidth = 1.5)
+    if (Functions.getQueryVariable("width") == 1.5)
     {
         standTexture = standBase.material.map
         dragRight.position.x = 1.0023
@@ -2720,49 +2901,210 @@ function loadParameters()
         rightWall.position.x = 2.95
         leftWall.position.x = -2.95
         
-        standBase.scale.set(1.5, 1, getScaleFront)
-        standSides.scale.set(1.5, 1, getScaleFront)
+        standBase.scale.set(1.5, 1, 1)
+        standSides.scale.set(1.5, 1, 1)
         backWall.scale.set(1.5,1,1)
         getScaleLeft = 1.5
 
-        standTexture.repeat.set(1.5, getScaleFront);
+        standTexture.repeat.set(1.5, 1);
         backWallTexture.repeat.set(1, 1.5);
     }
-       
-    if (currentDepth = 1.25)
+    if (Functions.getQueryVariable("width") == 1.75)
     {
         standTexture = standBase.material.map
-        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
-        rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
-        leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
-        dragFront.position.z = 0.6
-        backWall.position.z = -2.4
-        standBase.scale.set(getScaleLeft, 1, 1.25)
-        standSides.scale.set(getScaleLeft,1, 1.25)
-        standTexture.repeat.set(getScaleLeft, 1.25)
-        rightWallTexture.repeat.set(1, 1.25)
-        leftWallTexture.repeat.set(1, 1.25)
-        rightWall.scale.set(1,1,1.26)
-        leftWall.scale.set(1,1,1.26)
-        getScaleFront = 1.25
+        dragRight.position.x = 1.5
+        dragLeft.position.x = -1.5
+
+        rightWall.position.x = 3.45
+        leftWall.position.x = -3.45
+        
+        standBase.scale.set(1.75, 1, 1)
+        standSides.scale.set(1.75, 1, 1)
+        backWall.scale.set(1.75,1,1)
+        getScaleLeft = 1.75
+
+        standTexture.repeat.set(1.75, 1);
+        backWallTexture.repeat.set(1.75,1);
     }
-    if (currentDepth = 1.5)
+    if (Functions.getQueryVariable("width") == 2)
     {
         standTexture = standBase.material.map
-        backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
-        rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
-        leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
-        dragFront.position.z = 1.0023
-        backWall.position.z = -2.9
-        standBase.scale.set(getScaleLeft, 1, 1.5)
-        standSides.scale.set(getScaleLeft, 1, 1.5)
-        standTexture.repeat.set(getScaleLeft, 1.5);
-        rightWallTexture.repeat.set(1, 1.5);
-        leftWallTexture.repeat.set(1,1.5);
-        rightWall.scale.set(1,1,1.52)
-        leftWall.scale.set(1,1,1.52)
-        getScaleFront = 1.5
-    } */
+        dragRight.position.x = 1.998
+        dragLeft.position.x = -1.998
+
+        rightWall.position.x = 3.95
+        leftWall.position.x = -3.95
+        
+        standBase.scale.set(2, 1, 1)
+        standSides.scale.set(2, 1, 1)
+        backWall.scale.set(2,1,1)
+        getScaleLeft = 2
+
+        standTexture.repeat.set(2, 1);
+        backWallTexture.repeat.set(2,1);
+    }
+    if (Functions.getQueryVariable("width") == 2.25)
+    {
+        standTexture = standBase.material.map
+        dragRight.position.x = 2.499
+        dragLeft.position.x = -2.499
+
+        rightWall.position.x = 4.45
+        leftWall.position.x = -4.45
+        
+        standBase.scale.set(2.25, 1, 1)
+        standSides.scale.set(2.25, 1, 1)
+        backWall.scale.set(2.25,1,1)
+        getScaleLeft = 2.25
+
+        standTexture.repeat.set(2.25, 1);
+        backWallTexture.repeat.set(2.25,1);
+    }
+    if (Functions.getQueryVariable("width") == 2.5)
+    {
+        standTexture = standBase.material.map
+        dragRight.position.x = 3
+        dragLeft.position.x = -3
+
+        rightWall.position.x = 4.95
+        leftWall.position.x = -4.95
+        
+        standBase.scale.set(2.5, 1, 1)
+        standSides.scale.set(2.5, 1, 1)
+        backWall.scale.set(2.5,1,1)
+        getScaleLeft = 2.5
+
+        standTexture.repeat.set(2.5, 1);
+        backWallTexture.repeat.set(2.5,1);
+    }
+    
+       
+   setTimeout(() => {
+    if (Functions.getQueryVariable("depth"))
+    {  
+        if (Functions.getQueryVariable("depth") == 1)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 0
+            backWall.position.z = -1.9  //scale.set(width,height,depth)
+            standBase.scale.set(getScaleLeft, 1, 1)
+            standSides.scale.set(getScaleLeft, 1, 1)
+            standTexture.repeat.set(getScaleLeft, 1);
+            rightWallTexture.repeat.set(1, 1);
+            leftWallTexture.repeat.set(1, 1);
+            rightWall.scale.set(1,1,1)
+            leftWall.scale.set(1,1,1)
+            getScaleFront = 1
+        }
+        if (Functions.getQueryVariable("depth") == 1.25)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 0.6
+            backWall.position.z = -2.4
+            standBase.scale.set(getScaleLeft, 1, 1.25)
+            standSides.scale.set(getScaleLeft,1, 1.25)
+            standTexture.repeat.set(getScaleLeft, 1.25)
+            rightWallTexture.repeat.set(1, 1.25)
+            leftWallTexture.repeat.set(1, 1.25)
+            rightWall.scale.set(1,1,1.26)
+            leftWall.scale.set(1,1,1.26)
+            getScaleFront = 1.25
+        }
+        if (Functions.getQueryVariable("depth") == 1.5)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 1.0023
+            backWall.position.z = -2.9
+            standBase.scale.set(getScaleLeft, 1, 1.5)
+            standSides.scale.set(getScaleLeft, 1, 1.5)
+            standTexture.repeat.set(getScaleLeft, 1.5);
+            rightWallTexture.repeat.set(1, 1.5);
+            leftWallTexture.repeat.set(1,1.5);
+            rightWall.scale.set(1,1,1.52)
+            leftWall.scale.set(1,1,1.52)
+            getScaleFront = 1.5
+        }
+        if (Functions.getQueryVariable("depth") == 1.75)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 1.998
+            backWall.position.z = -3.9
+            standBase.scale.set(getScaleLeft, 1, 2)
+            standSides.scale.set(getScaleLeft, 1, 2)
+            standTexture.repeat.set(getScaleLeft, 2);
+            rightWallTexture.repeat.set(2,1);
+            leftWallTexture.repeat.set(2,1);
+            rightWall.scale.set(1,1,2.03)
+            leftWall.scale.set(1,1,2.03)
+            getScaleFront = 1.75
+        }
+        if (Functions.getQueryVariable("depth") == 2)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 1.998
+            backWall.position.z = -3.9
+            standBase.scale.set(getScaleLeft, 1, 2)
+            standSides.scale.set(getScaleLeft, 1, 2)
+            standTexture.repeat.set(getScaleLeft, 2);
+            rightWallTexture.repeat.set(2,1);
+            leftWallTexture.repeat.set(2,1);
+            rightWall.scale.set(1,1,2.03)
+            leftWall.scale.set(1,1,2.03)
+            getScaleFront = 2
+        }
+        if (Functions.getQueryVariable("depth") == 2.25)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 2.499
+            backWall.position.z = -4.4
+            standBase.scale.set(getScaleLeft, 1, 2.25)
+            standSides.scale.set(getScaleLeft, 1, 2.25)
+            standTexture.repeat.set(getScaleLeft, 2.25);
+            rightWallTexture.repeat.set(2.25,1);
+            leftWallTexture.repeat.set(2.25,1);
+            rightWall.scale.set(1,1,2.28)
+            leftWall.scale.set(1,1,2.28)
+            getScaleFront = 2.25
+        }
+        if (Functions.getQueryVariable("depth") == 2.5)
+        {
+            standTexture = standBase.material.map
+            backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
+            rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
+            leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+            dragFront.position.z = 3
+            backWall.position.z = -4.9
+            standBase.scale.set(getScaleLeft, 1, 2.5)
+            standSides.scale.set(getScaleLeft, 1, 2.5)
+            standTexture.repeat.set(getScaleLeft, 2.5);
+            rightWallTexture.repeat.set(2.5,1);
+            leftWallTexture.repeat.set(2.5,1);
+            rightWall.scale.set(1,1,2.54)
+            leftWall.scale.set(1,1,2.54)
+            getScaleFront = 2.5
+        }
+    }
+   }, 200);
+}
 
 /**
  * 
@@ -2813,42 +3155,57 @@ function loadParameters()
                 }
             )
         }
+
+
+document.getElementById("right_icon").onclick = ()=>
+{   
+bb = Functions.roundXSteps(bb + 0.2 , 2) 
+scene.getObjectByName( "back_wall_1" ).material.map.offset.set(bb, 1)
+Functions.addOrUpdateURLParam ("backwall_image_position_right" , `${bb}`)//PARAMS SAVE BACK WALL POSITION RIGHT
+}
+
+
 //BACKWALL CUSTOM IMAGE POSITION RIGHT
 if (Functions.getQueryVariable("backwall_image_position_right"))
 {
     var posRightBackWall = Functions.getQueryVariable("backwall_image_position_right")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posRightBackWall, 1)
+   setTimeout(() => {
+     scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posRightBackWall, 1)
+   }, 200);
 }
 //BACKWALL CUSTOM IMAGE POSITION LEFT
 if (Functions.getQueryVariable("backwall_image_position_left"))
 {
-    var posLeftBackWall = Functions.getQueryVariable("backwall_image_position_right")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posLeftBackWall, 1)
+    var posLeftBackWall = Functions.getQueryVariable("backwall_image_position_left")
+    setTimeout(() => {
+        scene.getObjectByName( "back_wall_1" ).material.map.offset.set(posLeftBackWall, 1)
+    }, 200);
 }
 //BACKWALL CUSTOM IMAGE POSITION UP
 if (Functions.getQueryVariable("backwall_image_position_up"))
 {
     var posUpBackWall = Functions.getQueryVariable("backwall_image_position_up")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posUpBackWall)
+    setTimeout(() => {
+        scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posUpBackWall)
+    }, 200);
 }
 //BACKWALL CUSTOM IMAGE POSITION DOWN
 if (Functions.getQueryVariable("backwall_image_position_down"))
 {
     var posDownBackWall = Functions.getQueryVariable("backwall_image_position_down")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posDownBackWall)
+    setTimeout(() => {
+        scene.getObjectByName( "back_wall_1" ).material.map.offset.set(1, posDownBackWall)
+    }, 200);
 }
 //BACKWALL CUSTOM IMAGE ZOOM ++
-if (Functions.getQueryVariable("backwall_image_zoom_in"))
+if (Functions.getQueryVariable("backwall_image_zoom"))
 {
-    var zoomInBackWall = Functions.getQueryVariable("backwall_image_zoom_in")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(zoomInBackWall, zoomInBackWall)
+    var zoomBackWall = Functions.getQueryVariable("backwall_image_zoom")
+    setTimeout(() => {
+        scene.getObjectByName( "back_wall_1" ).material.map.repeat.set(zoomBackWall, zoomBackWall)
+    }, 200);
 }
-//BACKWALL CUSTOM IMAGE ZOOM --
-if (Functions.getQueryVariable("backwall_image_zoom_out"))
-{
-    var zoomOutBackWall = Functions.getQueryVariable("backwall_image_zoom_out")
-    scene.getObjectByName( "back_wall_1" ).material.map.offset.set(zoomOutBackWall, zoomOutBackWall)
-}
+
 /**
  * 
  * 
@@ -2895,38 +3252,43 @@ if (Functions.getQueryVariable("backwall_image_zoom_out"))
 if (Functions.getQueryVariable("rightwall_image_position_right"))
 {
     var posRightRightWall = Functions.getQueryVariable("rightwall_image_position_right")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posRightRightWall, 1)
+    setTimeout(() => {
+        scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posRightRightWall, 1)
+    }, 200);
 }
 //RIGHTWALL CUSTOM IMAGE POSITION LEFT
 if (Functions.getQueryVariable("rightwall_image_position_left"))
 {
     var posLeftRightWall = Functions.getQueryVariable("rightwall_image_position_left")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posLeftRightWall, 1)
+   setTimeout(() => {
+     scene.getObjectByName( "right_wall_1" ).material.map.offset.set(posLeftRightWall, 1)
+   }, 200);
 }
 //RIGHTWALL CUSTOM IMAGE POSITION UP
 if (Functions.getQueryVariable("rightwall_image_position_up"))
 {
     var posUpRightWall = Functions.getQueryVariable("rightwall_image_position_up")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posUpRightWall)
+    setTimeout(() => {
+        scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posUpRightWall)
+    }, 200);
 }
 //RIGHTWALL CUSTOM IMAGE POSITION DOWN
 if (Functions.getQueryVariable("rightwall_image_position_down"))
 {
     var posDownRightWall = Functions.getQueryVariable("rightwall_image_position_down")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posDownRightWall)
+    setTimeout(() => {
+        scene.getObjectByName( "right_wall_1" ).material.map.offset.set(1, posDownRightWall)
+    }, 200);
 }
-//RIGHTWALL CUSTOM IMAGE ZOOM ++
-if (Functions.getQueryVariable("rightwall_image_zoom_in"))
+//RIGHTWALL CUSTOM IMAGE ZOOM
+if (Functions.getQueryVariable("rightwall_image_zoom"))
 {
-    var zoomInRightWall = Functions.getQueryVariable("rightwall_image_zoom_in")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(zoomInRightWall, zoomInRightWall)
+    var zoomRightWall = Functions.getQueryVariable("rightwall_image_zoom")
+    setTimeout(() => {
+        scene.getObjectByName( "right_wall_1" ).material.map.repeat.set(zoomRightWall, zoomRightWall)
+    }, 200);
 }
-//RIGHTWALL CUSTOM IMAGE ZOOM --
-if (Functions.getQueryVariable("rightwall_image_zoom_out"))
-{
-    var zoomOutRightWall = Functions.getQueryVariable("rightwall_image_zoom_out")
-    scene.getObjectByName( "right_wall_1" ).material.map.offset.set(zoomOutRightWall, zoomOutRightWall)
-}
+
 /**
  * 
  * 
@@ -2961,7 +3323,10 @@ if (Functions.getQueryVariable("leftwall_image"))
         {
             var textureLoaderLw = new THREE.TextureLoader().load(mapUrlLw)
             scene.getObjectByName( "left_wall_1" ).material.map = textureLoaderLw
+            textureLoaderLw.rotation = THREE.MathUtils.degToRad(-90);
             textureLoaderLw.colorSpace = THREE.SRGBColorSpace;
+            textureLoaderLw.wrapS = THREE.RepeatWrapping;
+            textureLoaderLw.wrapT = THREE.RepeatWrapping;
         }
     )
 }
@@ -2969,57 +3334,44 @@ if (Functions.getQueryVariable("leftwall_image"))
 if (Functions.getQueryVariable("leftwall_image_position_right"))
 {
     var posRightLeftWall = Functions.getQueryVariable("leftwall_image_position_right")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posRightLeftWall, 1)
+    setTimeout(() => {
+        scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posRightLeftWall, 1)
+    }, 200);
 }
 //LEFTWALL CUSTOM IMAGE POSITION LEFT
 if (Functions.getQueryVariable("leftwall_image_position_left"))
 {
     var posLeftLeftWall = Functions.getQueryVariable("leftwall_image_position_right")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posLeftLeftWall, 1)
+    setTimeout(() => {
+        scene.getObjectByName( "left_wall_1" ).material.map.offset.set(posLeftLeftWall, 1)
+    }, 200);
 }
 //LEFTWALL CUSTOM IMAGE POSITION UP
 if (Functions.getQueryVariable("leftwall_image_position_up"))
 {
     var posUpLeftWall = Functions.getQueryVariable("leftwall_image_position_up")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posUpLeftWall)
+    setTimeout(() => {
+        scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posUpLeftWall)
+    }, 200);
 }
 //LEFTWALL CUSTOM IMAGE POSITION DOWN
 if (Functions.getQueryVariable("leftwall_image_position_down"))
 {
     var posDownLeftWall = Functions.getQueryVariable("leftwall_image_position_down")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posDownLeftWall)
+    setTimeout(() => {
+        scene.getObjectByName( "left_wall_1" ).material.map.offset.set(1, posDownLeftWall)
+    }, 200);
 }
 //LEFTWALL CUSTOM IMAGE ZOOM ++
-if (Functions.getQueryVariable("leftwall_image_zoom_in"))
+if (Functions.getQueryVariable("leftwall_image_zoom"))
 {
-    var zoomInLeftWall = Functions.getQueryVariable("leftwall_image_zoom_in")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(zoomInLeftWall, zoomInLeftWall)
-}
-//LEFTWALL CUSTOM IMAGE ZOOM --
-if (Functions.getQueryVariable("leftwall_image_zoom_out"))
-{
-    var zoomOutLeftWall = Functions.getQueryVariable("leftwall_image_zoom_out")
-    scene.getObjectByName( "left_wall_1" ).material.map.offset.set(zoomOutLeftWall, zoomOutLeftWall)
+    var zoomLeftWall = Functions.getQueryVariable("leftwall_image_zoom")
+    setTimeout(() => {
+        scene.getObjectByName( "left_wall_1" ).material.map.repeat.set(zoomLeftWall, zoomLeftWall)
+    }, 200);
 }
 
 }
-
-
-
-
-       
-
-
-
-
-    
- 
-
-        
-    
-
-
-       
          
 /*
  ###### ##   ## #######  #####   
@@ -3045,90 +3397,81 @@ if (Functions.getQueryVariable("leftwall_image_zoom_out"))
 */
 
 
-setTimeout(loadInfoDesk, 5000)      
+//setTimeout(loadInfoDesk, 5000)      
 function loadInfoDesk() 
 {
-    var intersectInfoDeskPoster = new THREE.Vector3();
-    var intersectInfoDeskSides = new THREE.Vector3();
-    var standBase = scene.getObjectByName( "stand_1" )
+    var infoDeskUploadResponseUrl,dd, rotate90InfoDesk
+
+    rotate90InfoDesk = false
+  
     var envFloor = scene.getObjectByName( "environment_floor")
-    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-    
     var infoDeskFurnitureControl = document.getElementById("furniture_icon_group_info_desk")
     var infoDeskGraphicControl =  document.getElementById("graphics_control_icon_group_info_desk")
 
     var infoDesk = scene.getObjectByName( "info_desk")
-    var infoDeskPoster = scene.getObjectByName( "info_desk_2")
     var infoDeskSides = scene.getObjectByName( "info_desk_1")
+    var infoDeskPoster = scene.getObjectByName( "info_desk_2")
     var switchInfoDesk = document.getElementById("toogle_switch_info_desk_switch")   
-
-    var dimInfoDesk = new THREE.Box3().setFromObject(infoDesk);
-    var dimWidthInfoDesk = Math.abs(dimInfoDesk.max.x)+Math.abs(dimInfoDesk.min.x)
-    var dimDepthInfoDesk = Math.abs(dimInfoDesk.max.z)+Math.abs(dimInfoDesk.min.z)
-    var dimHeightInfoDesk = Math.abs(dimInfoDesk.max.y)+Math.abs(dimInfoDesk.min.y)
-
+            
+    var standBase = scene.getObjectByName( "stand_1" )
+    var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+    var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+    var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
     var limiterPlaneGeoInfoDesk = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
     var limiterPlaneMatInfoDesk = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
     var limiterPlaneInfoDesk = new THREE.Mesh( limiterPlaneGeoInfoDesk, limiterPlaneMatInfoDesk );
     scene.add(limiterPlaneInfoDesk)
     limiterPlaneInfoDesk.rotation.x = THREE.MathUtils.degToRad(90)
     limiterPlaneInfoDesk.position.y = 0.11
-    limiterPlaneInfoDesk.visible = false
+    //limiterPlaneInfoDesk.visible = false
+    var dimInfoDesk = new THREE.Box3().setFromObject(infoDesk);
+    var dimWidthInfoDesk = Math.abs(dimInfoDesk.max.x)+Math.abs(dimInfoDesk.min.x)
+    var dimDepthInfoDesk = Math.abs(dimInfoDesk.max.z)+Math.abs(dimInfoDesk.min.z)
+   
+    //var dimHeightInfoDesk = Math.abs(dimInfoDesk.max.y)+Math.abs(dimInfoDesk.min.y)
+    
 
 /**
  *  INIT TEXTURE SETTINGS
  */
     var textureInfoDesk = new THREE.TextureLoader().load( "./media/info_desk.jpg" );
-    scene.getObjectByName( "info_desk_2" ).material = new THREE.MeshBasicMaterial({map :  textureInfoDesk})
+    infoDeskPoster.material = new THREE.MeshBasicMaterial({map :  textureInfoDesk})
     
     textureInfoDesk.colorSpace = THREE.SRGBColorSpace;
     textureInfoDesk.wrapS = THREE.RepeatWrapping;
     textureInfoDesk.wrapT = THREE.RepeatWrapping;
     textureInfoDesk.repeat.set( 8, 8 )
-    
+   
     switchInfoDesk.addEventListener('change', function () 
     {
         if (switchInfoDesk.checked)
         {
             var standBase = scene.getObjectByName( "stand_1" )
-            var envFloor = scene.getObjectByName( "environment_floor")
+            var dimInfoDesk = new THREE.Box3().setFromObject(infoDesk);
+            var dimWidthInfoDesk = Math.abs(dimInfoDesk.max.x)+Math.abs(dimInfoDesk.min.x)
+            var dimDepthInfoDesk = Math.abs(dimInfoDesk.max.z)+Math.abs(dimInfoDesk.min.z)
             var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
             var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
             var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+            var limiterPlaneGeoInfoDesk = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
+            var limiterPlaneMatInfoDesk = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+            var limiterPlaneInfoDesk = new THREE.Mesh( limiterPlaneGeoInfoDesk, limiterPlaneMatInfoDesk );
+            scene.add(limiterPlaneInfoDesk)
+            limiterPlaneInfoDesk.rotation.x = THREE.MathUtils.degToRad(90)
+            limiterPlaneInfoDesk.position.y = 0.11
+            //limiterPlaneInfoDesk.visible = false
+            
+           
             scene.getObjectByName( "info_desk_1").visible = true
             scene.getObjectByName( "info_desk_2").visible = true
             console.log("info desk switch checked")
             window.addEventListener( 'mousemove', onMouseMoveInfoDesk);
 
-
-    function onClickInfoDeskPoster()
+    function infoDeskFurnitureControls()
     {
         setTimeout(() =>
         {
-            infoDeskGraphicControl.style.visibility = "visible" 
-            infoDeskFurnitureControl.style.visibility = "hidden" 
-            
-            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
-            getPositionInfoDesk.project(camera);
-
-            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
-            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
-
-            infoDeskGraphicControl.style.left = `${x}px`
-            infoDeskGraphicControl.style.top = `${y}px`
-        }, "200");
-    }
-
-    function onClickInfoDeskSides()
-    {
-        setTimeout(() =>
-        {
-           
             infoDeskFurnitureControl.style.visibility = "visible" 
-            infoDeskGraphicControl.style.visibility = "hidden"
-            
             var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
             getPositionInfoDesk.project(camera);
 
@@ -3146,13 +3489,13 @@ function loadInfoDesk()
         
         function onMouseMoveInfoDesk(event)
         {
+            
             mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
             mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-            raycaster.setFromCamera(mouse, camera);
-            intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
             controls.enabled = false; 
-
+            infoDeskSides.material.transparent = true;
+            infoDeskSides.material.opacity = 0.5; 
+           
             if(intersect.length>0)
             {
                 // console.log("intersection true")
@@ -3161,7 +3504,6 @@ function loadInfoDesk()
                     var a = intersect[ i ].point.x 
                     var c = intersect[ i ].point.z  
                     infoDesk.position.set(a,0.902,c)
-                   
                 } 
             }
             else        
@@ -3183,80 +3525,491 @@ function loadInfoDesk()
                         if(a<0){infoDesk.position.z=c }
                         else if(a>0){infoDesk.position.z=c}
                     }
-
                 }
-
             } 
-            
-            window.addEventListener( 'click', function()
-            {
-                console.log("first drop action")
-                controls.enabled = true;
-                window.removeEventListener( 'mousemove', onMouseMoveInfoDesk);
-            })
+        window.addEventListener( 'click', function()
+        {
+            //  console.log("first drop")
+            controls.enabled = true;
+            window.removeEventListener( 'mousemove', onMouseMoveInfoDesk);
+            infoDeskSides.material.opacity = 1
+        })
             
         }
 
-        window.addEventListener( 'click', function(event)
+        canvas.addEventListener( 'click', function(event)   //3D İÇİN CANVAS HTML İÇİN WINDOW CLICK
         {
-            console.log("second click event")
+            //console.log("second click event")
             mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
             mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
             raycaster.setFromCamera(mouse, camera);
-            
-            intersectInfoDeskPoster = raycaster.intersectObject(infoDeskPoster)
-            intersectInfoDeskSides = raycaster.intersectObject(infoDeskSides)
+            intersect = raycaster.intersectObject(infoDesk)
 
-            if(intersectInfoDeskPoster.length>0)
+            if(intersect.length>0)
             {
-                console.log("clicked poster")
-               onClickInfoDeskPoster()
-                
+                infoDeskFurnitureControls()
             }
-            else if (intersectInfoDeskSides.length>0)
-            {
-                console.log("clicked sides")
-               onClickInfoDeskSides()
-                
-            }
-            else
-            {
-                infoDeskFurnitureControl.style.visibility = "hidden" 
-                infoDeskGraphicControl.style.visibility = "hidden"
-            }
-          
            
         })  
-        
 
 /**
  *  FURNITURE CONTROL ICONS
  */
     
-    document.getElementById("rotate_icon_info_desk").onclick = ()=>
+    rot90Info()
+    function rot90Info()
     {
         
-        infoDesk.rotateY(THREE.MathUtils.degToRad(15))
+        document.getElementById("rotate_icon_info_desk").onclick = ()=>
+        {
+            
+            infoDesk.rotateY(THREE.MathUtils.degToRad(90))
+            rotate90InfoDesk = true
+            console.log(rotate90InfoDesk)
+            var limiterPlaneGeoInfoDesk2 = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
+            var limiterPlaneMatInfoDesk2 = new THREE.MeshBasicMaterial( {color: "white", side: THREE.DoubleSide} );
+            var limiterPlaneInfoDesk2 = new THREE.Mesh( limiterPlaneGeoInfoDesk2, limiterPlaneMatInfoDesk2 );
+            scene.add(limiterPlaneInfoDesk2)
+            limiterPlaneInfoDesk2.rotation.x = THREE.MathUtils.degToRad(90)
+            limiterPlaneInfoDesk2.position.y = 0.11
+            //limiterPlaneInfoDesk2.visible = false
+            document.getElementById("move_icon_info_desk").onclick = ()=>
+            {    
+                window.addEventListener( 'mousemove', function onMouseMoveInfoDesk2()
+                {
+                infoDeskFurnitureControl.style.visibility = "hidden" 
+                infoDeskGraphicControl.style.visibility = "hidden"
+                infoDeskSides.material.transparent = true;
+                infoDeskSides.material.opacity = 0.5; 
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
         
+                raycaster.setFromCamera(mouse, camera);
+                intersect = raycaster.intersectObject(limiterPlaneInfoDesk2)
+                controls.enabled = false 
+        
+                if(intersect.length>0)
+                {
+                    // console.log("intersection true")
+                    for ( var i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+                        infoDesk.position.set(a,0.902,c)
+                    } 
+                }
+                else        
+                {
+                    intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                    for ( var i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+        
+                        if (Math.abs(a)<= dimWidthStandBase/2-dimDepthInfoDesk/2)
+                        {
+                            if(c<0){infoDesk.position.x=a}
+                            else if(c>0){infoDesk.position.x=a}
+                        }
+                        if (Math.abs(c)<= dimDepthStandBase/2-dimWidthInfoDesk/2)
+                        {
+                            if(a<0){infoDesk.position.z=c }
+                            else if(a>0){infoDesk.position.z=c}
+                        }
+                    }
+                } 
+                window.addEventListener( 'click', function()
+                {
+                    controls.enabled = true;
+                    window.removeEventListener( 'mousemove' , onMouseMoveInfoDesk2);
+                    infoDeskSides.material.transparent = true;
+                    infoDeskSides.material.opacity = 1
+                })
+        
+        
+        
+                })
+            }
+                document.getElementById("rotate_icon_info_desk").onclick = ()=>
+                {
+                    infoDesk.rotateY(THREE.MathUtils.degToRad(90))
+                    rotate90InfoDesk = false
+                    var limiterPlaneGeoInfoDesk = new THREE.PlaneGeometry( dimWidthStandBase - dimWidthInfoDesk , dimDepthStandBase -  dimDepthInfoDesk);
+                    var limiterPlaneMatInfoDesk = new THREE.MeshBasicMaterial( {color: "white", side: THREE.DoubleSide} );
+                    var limiterPlaneInfoDesk = new THREE.Mesh( limiterPlaneGeoInfoDesk, limiterPlaneMatInfoDesk );
+                    scene.add(limiterPlaneInfoDesk)
+                    limiterPlaneInfoDesk2.rotation.x = THREE.MathUtils.degToRad(90)
+                    limiterPlaneInfoDesk2.position.y = 0.11
+                    rot90Info()
+                    console.log(rotate90InfoDesk)
+                    document.getElementById("move_icon_info_desk").onclick = ()=>
+                    {    
+                        window.addEventListener( 'mousemove', function onMouseMoveInfoDesk2()
+                        {
+                        infoDeskFurnitureControl.style.visibility = "hidden" 
+                        infoDeskGraphicControl.style.visibility = "hidden"
+                        infoDeskSides.material.transparent = true;
+                        infoDeskSides.material.opacity = 0.5; 
+                        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                
+                        raycaster.setFromCamera(mouse, camera);
+                        intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
+                        controls.enabled = false 
+                
+                        if(intersect.length>0)
+                        {
+                            // console.log("intersection true")
+                            for ( var i = 0; i < intersect.length; i ++ )
+                            {
+                                var a = intersect[ i ].point.x 
+                                var c = intersect[ i ].point.z  
+                                infoDesk.position.set(a,0.902,c)
+                            } 
+                        }
+                        else        
+                        {
+                            intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                            for ( var i = 0; i < intersect.length; i ++ )
+                            {
+                                var a = intersect[ i ].point.x 
+                                var c = intersect[ i ].point.z  
+                
+                                if (Math.abs(a)<= dimWidthStandBase/2-dimWidthInfoDesk/2)
+                                {
+                                    if(c<0){infoDesk.position.x=a}
+                                    else if(c>0){infoDesk.position.x=a}
+                                }
+                                if (Math.abs(c)<= dimDepthStandBase/2-dimDepthInfoDesk/2)
+                                {
+                                    if(a<0){infoDesk.position.z=c }
+                                    else if(a>0){infoDesk.position.z=c}
+                                }
+                            }
+                        } 
+                        window.addEventListener( 'click', function()
+                        {
+                            controls.enabled = true;
+                            window.removeEventListener( 'mousemove' , onMouseMoveInfoDesk2);
+                            infoDeskSides.material.transparent = true;
+                            infoDeskSides.material.opacity = 1
+                        })
+                
+                
+                
+                        })
+                    }
+                }
+        }
     }
+    
     document.getElementById("trash_icon_info_desk").onclick = ()=>
     {
-        console.log("clicked trash icon info desk")
+        infoDesk.position.set(0,0.902,-20)
         scene.getObjectByName( "info_desk_1").visible = false
         scene.getObjectByName( "info_desk_2").visible = false
         infoDeskFurnitureControl.style.visibility = "hidden" 
         infoDeskGraphicControl.style.visibility = "hidden" 
-       
         switchInfoDesk.checked = false
     }
+    document.getElementById("move_icon_info_desk").onclick = ()=>   //ON CLICK MOVE FONKSİYONUNU ROTATE'İN İÇİNE HER ROTATE DE AYRI OLARAK KOYDUK VE ROTATE 90'DA INTERSECTION PLANE'İ DEĞİŞTİRDİK
+    {    
+        window.addEventListener( 'mousemove', function onMouseMoveInfoDesk2()
+        {
+        infoDeskFurnitureControl.style.visibility = "hidden" 
+        infoDeskGraphicControl.style.visibility = "hidden"
+        infoDeskSides.material.transparent = true;
+        infoDeskSides.material.opacity = 0.5; 
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
+        raycaster.setFromCamera(mouse, camera);
+        intersect = raycaster.intersectObject(limiterPlaneInfoDesk)
+        controls.enabled = false 
+
+        if(intersect.length>0)
+        {
+            // console.log("intersection true")
+            for ( var i = 0; i < intersect.length; i ++ )
+            {
+                var a = intersect[ i ].point.x 
+                var c = intersect[ i ].point.z  
+                infoDesk.position.set(a,0.902,c)
+            } 
+        }
+        else        
+        {
+            intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+            for ( var i = 0; i < intersect.length; i ++ )
+            {
+                var a = intersect[ i ].point.x 
+                var c = intersect[ i ].point.z  
+
+                if (Math.abs(a)<= dimWidthStandBase/2-dimWidthInfoDesk/2)
+                {
+                    if(c<0){infoDesk.position.x=a}
+                    else if(c>0){infoDesk.position.x=a}
+                }
+                if (Math.abs(c)<= dimDepthStandBase/2-dimDepthInfoDesk/2)
+                {
+                    if(a<0){infoDesk.position.z=c }
+                    else if(a>0){infoDesk.position.z=c}
+                }
+            }
+        } 
+        window.addEventListener( 'click', function()
+        {
+            controls.enabled = true;
+            window.removeEventListener( 'mousemove' , onMouseMoveInfoDesk2);
+            infoDeskSides.material.transparent = true;
+            infoDeskSides.material.opacity = 1
+        })
+
+
+
+        })
+    }
+
+    document.getElementById("info_icon_info_desk").onclick = ()=>
+    {
+        setTimeout(() =>
+        {
+            infoDeskFurnitureControl.style.visibility = "hidden" 
+            infoDeskGraphicControl.style.visibility = "visible"
+            
+            var getPositionInfoDesk = infoDesk.getWorldPosition(new THREE.Vector3())
+            getPositionInfoDesk.project(camera);
+
+            var x = (getPositionInfoDesk.x *  .5 + .5) * canvas.clientWidth;
+            var y = (getPositionInfoDesk.y * -.5 + .5) * canvas.clientHeight;
+
+            infoDeskGraphicControl.style.left = `${x}px`
+            infoDeskGraphicControl.style.top = `${y}px`
+        }, "200");
+         
+    }
 
     }
+    else
+    {
+        scene.getObjectByName( "info_desk_1").visible = false
+        scene.getObjectByName( "info_desk_2").visible = false
+        infoDeskFurnitureControl.style.visibility = "hidden" 
+        infoDeskGraphicControl.style.visibility = "hidden" 
+        infoDesk.position.set(0,0.902,-20)
+    }
+
+/**
+ * 
+ * 
+ * INFO DESK GRAPHIC ICONS
+ * 
+ * 
+ */ 
+document.getElementById("refresh_icon_info_desk").onclick = ()=>
+{ 
+    textureInfoDesk.repeat.set( 8, 8 )
+}
+dd=8
+document.getElementById("zoom_out_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd + 0.2 , 2) 
+    infoDeskPoster.material.map.repeat.set( dd, dd );
+    Functions.addOrUpdateURLParam ("info_desk_image_zoom_out" , `${dd}`)//PARAMS SAVE BACK WALL ZOOM OUT
+}
+
+document.getElementById("zoom_in_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd - 0.2 , 2) 
+    infoDeskPoster.material.map.repeat.set( dd, dd );
+    Functions.addOrUpdateURLParam ("info_desk_image_zoom_in" , `${dd}`)//PARAMS SAVE BACK WALL ZOOM IN
+}
+
+document.getElementById("left_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd - 0.2 , 2) 
+    infoDeskPoster.material.map.offset.set(dd, 8)
+    Functions.addOrUpdateURLParam ("info_desk_image_position_left" , `${dd}`)//PARAMS SAVE BACK WALL POSITION LEFT
+}
+
+document.getElementById("right_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd + 0.2 , 2) 
+    infoDeskPoster.material.map.offset.set(dd, 8)
+    Functions.addOrUpdateURLParam ("info_desk_image_position_right" , `${dd}`)//PARAMS SAVE BACK WALL POSITION RIGHT
+}
+
+document.getElementById("up_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd + 0.2 , 2) 
+    infoDeskPoster.material.map.offset.set(8, dd)
+    Functions.addOrUpdateURLParam ("info_desk_image_position_up" , `${dd}`)//PARAMS SAVE BACK WALL POSITION UP
+}
+document.getElementById("down_icon_info_desk").onclick = ()=>
+{   
+dd = Functions.roundXSteps(dd - 0.2 , 2) 
+    infoDeskPoster.material.map.offset.set(8, dd)
+    Functions.addOrUpdateURLParam ("info_desk_image_position_down" , `${dd}`)//PARAMS SAVE BACK WALL POSITION DOWN
+}
+
+document.getElementById("apply_icon_info_desk").onclick = ()=>
+{ 
+    infoDeskGraphicControl.style.visibility = "hidden"       
+}
+document.getElementById("add_icon_info_desk").onclick = ()=>
+{   
+    var inputDesk = document.createElement('input');
+    inputDesk.type = 'file';
+    
+    inputDesk.onchange = e => 
+    { 
+       // getting a hold of the file reference
+       var fileDesk = e.target.files[0]; 
+       // setting up the reader
+       var readerDesk = new FileReader();
+       readerDesk.readAsDataURL(fileDesk); // this is reading as data url
+       // here we tell the reader what to do when it's done reading...
+       readerDesk.onload = readerEvent => 
+       {
+        var contentDesk = readerEvent.target.result; // this is the content!
+        var textureDesk = new THREE.TextureLoader().load(contentDesk);
+        
+        Functions.sendDataParams(contentDesk , infoDeskUploadResponseUrl , "info_desk_image" )
+        infoDeskPoster.material.map = textureDesk
+        textureDesk.rotation = THREE.MathUtils.degToRad(90);
+        
+        textureDesk.colorSpace = THREE.SRGBColorSpace;
+        textureDesk.wrapS = THREE.RepeatWrapping;
+        textureDesk.wrapT = THREE.RepeatWrapping;
+        textureDesk.repeat.set( 8, 8 );
+            
+    //The last thing to note about the example is that if you change wrapS or wrapT on the texture you must also set texture.needsUpdate so three.js knows to apply those settings. The other settings are automatically applied.
+    // textureDesk.needsUpdate =true
+    //scene.getObjectByName( "back_wall_1" ).material.needsUpdate = true
+       }
+    }
+    inputDesk.click();
+}
    
 
     })  //      END OF        //        checkbox.addEventListener('change', function () 
     
 }   //      END OF        //        setTimeout(loadInfoDesk, 5000)    
 
+/*
+###### #######  ##### ###### ####    #######  
+ ##  ## ##   # ### ### ##  ## ##      ##   #  
+ ##  ## ##     ##   ## ##  ## ##      ##      
+ #####  ####   ##   ## #####  ##      ####    
+ ##     ##     ##   ## ##     ##      ##      
+ ##     ##   # ### ### ##     ##  ##  ##   #  
+####   #######  ##### ####   ####### #######  
+*/                                              
 
+//setTimeout(loadPeople, 5000)
+function loadPeople()
+{
+    
+    {//DEFAULTS
+        var mouse = new THREE.Vector2();
+        var raycaster = new THREE.Raycaster(); 
+        var intersect = new THREE.Vector3();
+        var people = scene.getObjectByName("people0")
+       // var draggerPeople = scene.getObjectByName("dragger_people")
+        var envFloor = scene.getObjectByName( "environment_floor")
+        var standBase = scene.getObjectByName( "stand_1" )
+        var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
+        var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
+        var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
+        var helperPeople = new THREE.BoxHelper( people, 0xffff00 );
+        helperPeople.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
+        var dimPeople = new THREE.Box3().setFromObject(people);  //BoxGeometry(width , height , depth)
+        var dimWidthPeople = Math.abs(dimPeople.max.x)+Math.abs(dimPeople.min.x)
+        var dimDepthPeople = Math.abs(dimPeople.max.x)+Math.abs(dimPeople.min.x)
+
+        var limiterPlaneGeo = new THREE.PlaneGeometry(dimWidthStandBase - dimWidthPeople , dimDepthStandBase - dimDepthPeople );
+        var limiterPlaneMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+        var limiterPlane = new THREE.Mesh( limiterPlaneGeo, limiterPlaneMat );
+
+        limiterPlane.rotation.x = THREE.MathUtils.degToRad(90)
+        limiterPlane.position.y = 0.11
+        limiterPlane.visible = false
+    }
+   
+/**
+* ADD PEOPLE
+*/
+var amount=0
+var clonedPeople=[]
+var clonedDraggerPeople=[]
+var clonedHelperPeople=[]
+
+document.getElementById("people0_icon").onclick = ()=>
+{
+    addPeople()
+    function addPeople() 
+    {   
+        scene.add(helperPeople)
+        scene.add(limiterPlane)
+        window.addEventListener( 'mousemove', onMouseMovePeople)
+    }
+    
+        function onMouseMovePeople(event) //FOLLOW CURSOR
+        {
+                mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                
+                intersect = raycaster.intersectObject(limiterPlane)
+                controls.enabled = false; 
+                people.visible = true
+                helperPeople.update()
+
+                if(intersect.length>0)
+                {
+                    console.log("intersection true")
+                  
+                    for ( var i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+                        people.position.set(a,1,c)
+                    } 
+                }
+                else        
+                {
+                    intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
+                    for ( var i = 0; i < intersect.length; i ++ )
+                    {
+                        var a = intersect[ i ].point.x 
+                        var c = intersect[ i ].point.z  
+                                                  
+                        if (Math.abs(a)<= dimWidthStandBase/2-dimWidthPeople/2)
+                        {
+                            if(c<0){people.position.x=a}
+                            else if(c>0){people.position.x=a}
+                        }
+    
+                        if (Math.abs(c)<= dimDepthStandBase/2-dimDepthPeople/2)
+                        {
+                            if(a<0){people.position.z=c }
+                            else if(a>0){people.position.z=c}
+                        }
+                                      
+                    }
+                    
+                } 
+               
+        
+                window.addEventListener( 'click', function()   //FIRST DROP
+                {
+                    window.removeEventListener('mousemove', onMouseMovePeople)
+                    scene.remove(helperPeople)
+                    controls.enabled = true;
+                    
+                })
+            
+        }
+    }
+}

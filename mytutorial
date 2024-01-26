@@ -1,0 +1,83 @@
+
+/**
+ *  LAYERS SET AYARLARI
+ * BU AYARLARI KULLANIRKEN CHILD'A KULLANIYORUZ
+ * LAYERS SET VERMEZSEK VISIBLE:FALSE DEDİĞİMİZDE OBJE HALA SAHNEDEYMİŞ GİBİ CLICK EVENT DEN ETKİLENİYOR.
+ * 
+ */
+
+
+scene.getObjectByName( "double_sofa" ).visible = false
+scene.getObjectByName( "double_sofa_1" ).layers.set( 1 )
+scene.getObjectByName( "double_sofa_2" ).layers.set( 1 )
+
+
+
+/**
+ * IF KULLANIMI
+ * IF'İ MUTLAKA == İKİ EŞİTTİR İLE KULLANALIM DİĞER TÜRLÜ ÇALIŞMIYOR.
+ * 
+ */
+
+    if(scene.getObjectByName( "double_sofa" ).rotation.y == THREE.MathUtils.degToRad(90))
+    {intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_double_sofa90" ))}
+
+
+
+/**
+ * BİR OBJENİN MENÜSÜNE TIKLADIĞIMIZDA OBJEYİ DE TIKLIYOR VE FURNITURE MENÜ DEVAMLI ÇIKIYOR
+ * BU DURUMU ÇÖZMEK İÇİN INDEX.HTML'DE AŞAĞIDAKİ DÜZENLEMEYİ YAPTIK
+ * 
+ *  <div class="container">
+    <canvas class="webgl"></canvas>
+    <div class="html">
+      
+    </div>
+  </div>
+ * 
+  CANVASI (WEBGL) CONTAINERIN İÇİNE ALDIK
+  BİZ CONTAINER'A TIKLADIĞIMIZDA CANVAS'A DAHİL OLAN ELEMANLAR SADECE KENDİSİNE TIKLANDIĞINDA İŞLEM GÖRÜYOR.
+  KÜMELER MANTIĞINDAKİ GİBİ OLMASI GEREK
+
+ */
+window.addEventListener('click' , onMouseMovePeopleClick)   /*YERİNE*/  
+container.addEventListener('click' , onMouseMovePeopleClick)    /*ŞEKLİNDE KULLANALIM*/
+
+/**
+ * İKONA TIKLADIĞIMIZDA HER SEFERİNDE YENİ BİR OBJE GELSİN İSTİYORUZ
+ * AŞAĞIDAKİ ÖRNEKTEKİ GİBİ BİR SİSTEM UYGULAYABİLİRİZ.
+ * TABİ BU DURUMDA TRASH İLE VISIBLE=FALSE OLAN BİR OBJE TEKRAR GERİ DÖNMEYECEKTİR.
+ */
+
+document.getElementById("double_sofa_icon").onclick = ()=>
+{
+    if(scene.getObjectByName("double_sofa_1").visible==false)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa01)}
+
+    if(scene.getObjectByName("double_sofa_1").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa02)}
+
+    if(scene.getObjectByName("double_sofa_2").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa03)}
+
+    if(scene.getObjectByName("double_sofa_3").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa04)}
+
+    if(scene.getObjectByName("double_sofa_4").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa05)}
+
+    if(scene.getObjectByName("double_sofa_5").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa06)}
+
+    if(scene.getObjectByName("double_sofa_6").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa06)}
+
+    if(scene.getObjectByName("double_sofa_7").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa07)}
+
+    if(scene.getObjectByName("double_sofa_8").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa08)}
+
+    if(scene.getObjectByName("double_sofa_9").visible==true)
+    {window.addEventListener( 'mousemove', onMouseMoveDoubleSofa10)}
+}

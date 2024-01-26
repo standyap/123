@@ -57,7 +57,7 @@ function updateAllMaterials()
         {
             child.material.envMapIntensity = global.envMapIntensity
            // console.log(child.material)
-            //console.log(child)
+            console.log(child)
             //Hide All Objects on first initilazation
             child.visible = false;
             //Show first scene objects
@@ -69,6 +69,9 @@ function updateAllMaterials()
             scene.getObjectByName( "drag_front" ).visible = true;
             scene.getObjectByName( "drag_right" ).visible = true;
             scene.getObjectByName( "drag_left" ).visible = true;
+            //scene.getObjectByName( "limiter_people" ).visible = true;
+            scene.getObjectByName( "limiter_double_sofa" ).visible = true;
+            scene.getObjectByName( "limiter_double_sofa90" ).visible = true;
                     
         }
     })
@@ -1324,6 +1327,12 @@ else
     var backWallTexture = scene.getObjectByName( "back_wall_1" ).material.map
     var rightWallTexture = scene.getObjectByName( "right_wall_1" ).material.map
     var leftWallTexture = scene.getObjectByName( "left_wall_1" ).material.map
+    var furnitureAdded = false
+/**
+ * FURNITURE LIMITERS
+ */
+var limiterPeople = scene.getObjectByName( "limiter_people" )
+
 /**
  *  DRAG FRONT
  */ 
@@ -1353,7 +1362,14 @@ else
     
     dragDragFront.addEventListener ( 'drag', onDragEventDragFront)
     
-    function onDragEventDragFront() {   
+    function onDragEventDragFront() { 
+        if(scene.getObjectByName( "people0" ).visible == true){
+            let dragAlert = "Furnitures are available in the scene.If you change the size furnitures will be removed"
+            if (confirm(dragAlert) == true) {scene.getObjectByName( "people0" ).visible = false} 
+        }
+        else if(scene.getObjectByName( "people0" ).visible == false){
+        
+         
         //CONSTRAINTS
         /**
          * CONSTRAINTS'İ DRAG START'A KOYMAYALIM.
@@ -1385,6 +1401,7 @@ else
                 dragFront.position.z = 0
                 backWall.position.z = -1.9  //scale.set(width,height,depth)
                 standBase.scale.set(getScaleLeft, 1, 1)
+                limiterPeople.scale.set(getScaleLeft, 1, 1)
                 standSides.scale.set(getScaleLeft, 1, 1)
                 standTexture.repeat.set(getScaleLeft, 1);
                 rightWallTexture.repeat.set(1, 1);
@@ -1402,6 +1419,7 @@ else
                 dragFront.position.z = 0.6
                 backWall.position.z = -2.4
                 standBase.scale.set(getScaleLeft, 1, 1.25)
+                limiterPeople.scale.set(getScaleLeft, 1, 1.25)
                 standSides.scale.set(getScaleLeft,1, 1.25)
                 standTexture.repeat.set(getScaleLeft, 1.25);
                 rightWallTexture.repeat.set(1.25,1);
@@ -1419,6 +1437,7 @@ else
                 dragFront.position.z = 1.0023
                 backWall.position.z = -2.9
                 standBase.scale.set(getScaleLeft, 1, 1.5)
+                limiterPeople.scale.set(getScaleLeft, 1, 1.5)
                 standSides.scale.set(getScaleLeft, 1, 1.5)
                 standTexture.repeat.set(getScaleLeft, 1.5);
                 rightWallTexture.repeat.set(1.5,1);
@@ -1436,6 +1455,7 @@ else
                 dragFront.position.z = 1.5
                 backWall.position.z = -3.4
                 standBase.scale.set(getScaleLeft, 1, 1.75)
+                limiterPeople.scale.set(getScaleLeft, 1, 1.75)
                 standSides.scale.set(getScaleLeft, 1, 1.75)
                 standTexture.repeat.set(getScaleLeft, 1.75);
                 rightWallTexture.repeat.set(1.75,1);
@@ -1455,6 +1475,7 @@ else
                 dragFront.position.z = 1.998
                 backWall.position.z = -3.9
                 standBase.scale.set(getScaleLeft, 1, 2)
+                limiterPeople.scale.set(getScaleLeft, 1, 2)
                 standSides.scale.set(getScaleLeft, 1, 2)
                 standTexture.repeat.set(getScaleLeft, 2);
                 rightWallTexture.repeat.set(2,1);
@@ -1474,6 +1495,7 @@ else
                 dragFront.position.z = 2.499
                 backWall.position.z = -4.4
                 standBase.scale.set(getScaleLeft, 1, 2.25)
+                limiterPeople.scale.set(getScaleLeft, 1, 2.25)
                 standSides.scale.set(getScaleLeft, 1, 2.25)
                 standTexture.repeat.set(getScaleLeft, 2.25);
                 rightWallTexture.repeat.set(2.25,1);
@@ -1493,6 +1515,7 @@ else
                 dragFront.position.z = 3
                 backWall.position.z = -4.9
                 standBase.scale.set(getScaleLeft, 1, 2.5)
+                limiterPeople.scale.set(getScaleLeft, 1, 2.5)
                 standSides.scale.set(getScaleLeft, 1, 2.5)
                 standTexture.repeat.set(getScaleLeft, 2.5)
                 rightWallTexture.repeat.set(2.5,1);
@@ -1590,6 +1613,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -1.95
          //scale.set(width,height,depth)           
         standBase.scale.set(1, 1, getScaleFront)
+        limiterPeople.scale.set(1, 1, getScaleFront)
         standSides.scale.set(1, 1, getScaleFront)
         backWall.scale.set(1,1,1)
         getScaleLeft = 1
@@ -1608,6 +1632,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -2.45
 
         standBase.scale.set(1.25, 1, getScaleFront)
+        limiterPeople.scale.set(1.25, 1, getScaleFront)
         standSides.scale.set(1.25, 1, getScaleFront)
         backWall.scale.set(1.25,1,1)
         getScaleLeft = 1.25
@@ -1625,6 +1650,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -2.95
         
         standBase.scale.set(1.5, 1, getScaleFront)
+        limiterPeople.scale.set(1.5, 1, getScaleFront)
         standSides.scale.set(1.5, 1, getScaleFront)
         backWall.scale.set(1.5,1,1)
         getScaleLeft = 1.5
@@ -1644,6 +1670,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -3.45
         
         standBase.scale.set(1.75, 1, getScaleFront)
+        limiterPeople.scale.set(1.75, 1, getScaleFront)
         standSides.scale.set(1.75, 1, getScaleFront)
         backWall.scale.set(1.75,1,1)
         getScaleLeft = 1.75
@@ -1663,6 +1690,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -3.95
         
         standBase.scale.set(2, 1, getScaleFront)
+        limiterPeople.scale.set(2, 1, getScaleFront)
         standSides.scale.set(2, 1, getScaleFront)
         backWall.scale.set(2,1,1)
         getScaleLeft = 2
@@ -1682,6 +1710,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -4.45
         
         standBase.scale.set(2.25, 1, getScaleFront)
+        limiterPeople.scale.set(2.25, 1, getScaleFront)
         standSides.scale.set(2.25, 1, getScaleFront)
         backWall.scale.set(2.25,1,1)
         getScaleLeft = 2.25
@@ -1701,6 +1730,7 @@ if (dragRight.position.x < 0.25)
         leftWall.position.x = -4.95
         
         standBase.scale.set(2.5, 1, getScaleFront)
+        limiterPeople.scale.set(2.5, 1, getScaleFront)
         standSides.scale.set(2.5, 1, getScaleFront)
         backWall.scale.set(2.5,1,1)
         getScaleLeft = 2.5
@@ -1792,6 +1822,7 @@ if (dragLeft.position.x > -0.25)
     rightWall.position.x = 1.95
      //scale.set(width,height,depth)           
     standBase.scale.set(1, 1, getScaleFront)
+    limiterPeople.scale.set(1, 1, getScaleFront)
     standSides.scale.set(1, 1, getScaleFront)
     backWall.scale.set(1,1,1)
     getScaleLeft = 1
@@ -1810,6 +1841,7 @@ else if (dragLeft.position.x <= -0.25 && dragLeft.position.x > -0.75)
     rightWall.position.x = 2.45
 
     standBase.scale.set(1.25, 1, getScaleFront)
+    limiterPeople.scale.set(1.25, 1, getScaleFront)
     standSides.scale.set(1.25, 1, getScaleFront)
     backWall.scale.set(1.25,1,1)
     getScaleLeft = 1.25
@@ -1828,6 +1860,7 @@ else if (dragLeft.position.x <= -0.75 && dragLeft.position.x > -1.25)
     rightWall.position.x = 2.95
     
     standBase.scale.set(1.5, 1, getScaleFront)
+    limiterPeople.scale.set(1.5, 1, getScaleFront)
     standSides.scale.set(1.5, 1, getScaleFront)
     backWall.scale.set(1.5,1,1)
     getScaleLeft = 1.5
@@ -1846,6 +1879,7 @@ else if (dragLeft.position.x <= -1.25 && dragLeft.position.x > -1.75)
     rightWall.position.x = 3.45
     
     standBase.scale.set(1.75, 1, getScaleFront)
+    limiterPeople.scale.set(1.75, 1, getScaleFront)
     standSides.scale.set(1.75, 1, getScaleFront)
     backWall.scale.set(1.75,1,1)
     getScaleLeft = 1.75
@@ -1864,6 +1898,7 @@ else if (dragLeft.position.x <= -1.75 && dragLeft.position.x > -2.25)
     rightWall.position.x = 3.95
     
     standBase.scale.set(2, 1, getScaleFront)
+    limiterPeople.scale.set(2, 1, getScaleFront)
     standSides.scale.set(2, 1, getScaleFront)
     backWall.scale.set(2,1,1)
     getScaleLeft = 2
@@ -1882,6 +1917,7 @@ else if (dragLeft.position.x <= -2.25 && dragLeft.position.x > -2.75)
     rightWall.position.x = 4.45
     
     standBase.scale.set(2.25, 1, getScaleFront)
+    limiterPeople.scale.set(2.25, 1, getScaleFront)
     standSides.scale.set(2.25, 1, getScaleFront)
     backWall.scale.set(2.25,1,1)
     getScaleLeft = 2.25
@@ -1900,6 +1936,7 @@ else if (dragLeft.position.x <= -2.75)
     rightWall.position.x = 4.95
     
     standBase.scale.set(2.5, 1, getScaleFront)
+    limiterPeople.scale.set(2.5, 1, getScaleFront)
     standSides.scale.set(2.5, 1, getScaleFront)
     backWall.scale.set(2.5,1,1)
     getScaleLeft = 2.5
@@ -1914,6 +1951,7 @@ dragDragLeft.addEventListener( 'dragend', ()=>
 controls.enabled = true
 })
 
+}
 } //END OF MAIN LOAD FUNC
 
 /*
@@ -2039,19 +2077,15 @@ element17.innerHTML = priceTrashCan + "$"
 setTimeout(loadTest, 5000)
  function loadTest()
  {
+      
     document.getElementById("button").onclick = ()=>
     {
         
-        scene.getObjectByName( "left_wall_1" ).material.map.rotation = THREE.MathUtils.degToRad(90);
-         
     }
-    
-    
     document.getElementById("button2").onclick = ()=>
     {
       
     }
-    
    
  }
 
@@ -2066,7 +2100,7 @@ setTimeout(loadTest, 5000)
  #####    #### #### ##  #####   ##### #######  
  */                                              
 
-setTimeout(loadPanels, 5000)
+//setTimeout(loadPanels, 5000)
  function loadPanels() 
  {
         /**
@@ -2832,6 +2866,7 @@ function loadParameters()
     var switchRight = document.getElementById("toogle_switch_right_wall_switch")
 
     var standBase = scene.getObjectByName( "stand_1" )
+    var limiterPeople= scene.getObjectByName( "limiter_people" )
     var standSides = scene.getObjectByName( "stand_2" )
     var rightWall = scene.getObjectByName( "right_wall" )
     var backWall = scene.getObjectByName( "back_wall" )
@@ -2868,6 +2903,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -1.95
          //scale.set(width,height,depth)           
         standBase.scale.set(1, 1, getScaleFront)
+        limiterPeople.scale.set(1, 1, getScaleFront)
         standSides.scale.set(1, 1, getScaleFront)
         backWall.scale.set(1,1,1)
         getScaleLeft = 1
@@ -2885,6 +2921,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -2.45
 
         standBase.scale.set(1.25, 1, 1)
+        limiterPeople.scale.set(1.25, 1, 1)
         standSides.scale.set(1.25, 1, 1)
         backWall.scale.set(1.25,1,1)
         getScaleLeft = 1.25
@@ -2902,6 +2939,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -2.95
         
         standBase.scale.set(1.5, 1, 1)
+        limiterPeople.scale.set(1.5, 1, 1)
         standSides.scale.set(1.5, 1, 1)
         backWall.scale.set(1.5,1,1)
         getScaleLeft = 1.5
@@ -2919,6 +2957,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -3.45
         
         standBase.scale.set(1.75, 1, 1)
+        limiterPeople.scale.set(1.75, 1, 1)
         standSides.scale.set(1.75, 1, 1)
         backWall.scale.set(1.75,1,1)
         getScaleLeft = 1.75
@@ -2936,6 +2975,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -3.95
         
         standBase.scale.set(2, 1, 1)
+        limiterPeople.scale.set(2, 1, 1)
         standSides.scale.set(2, 1, 1)
         backWall.scale.set(2,1,1)
         getScaleLeft = 2
@@ -2953,6 +2993,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -4.45
         
         standBase.scale.set(2.25, 1, 1)
+        limiterPeople.scale.set(2.25, 1, 1)
         standSides.scale.set(2.25, 1, 1)
         backWall.scale.set(2.25,1,1)
         getScaleLeft = 2.25
@@ -2970,6 +3011,7 @@ if (Functions.getQueryVariable("width"))
         leftWall.position.x = -4.95
         
         standBase.scale.set(2.5, 1, 1)
+        limiterPeople.scale.set(2.5, 1, 1)
         standSides.scale.set(2.5, 1, 1)
         backWall.scale.set(2.5,1,1)
         getScaleLeft = 2.5
@@ -2992,6 +3034,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 0
             backWall.position.z = -1.9  //scale.set(width,height,depth)
             standBase.scale.set(getScaleLeft, 1, 1)
+            limiterPeople.scale.set(getScaleLeft, 1, 1)
             standSides.scale.set(getScaleLeft, 1, 1)
             standTexture.repeat.set(getScaleLeft, 1);
             rightWallTexture.repeat.set(1, 1);
@@ -3009,6 +3052,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 0.6
             backWall.position.z = -2.4
             standBase.scale.set(getScaleLeft, 1, 1.25)
+            limiterPeople.scale.set(getScaleLeft, 1, 1.25)
             standSides.scale.set(getScaleLeft,1, 1.25)
             standTexture.repeat.set(getScaleLeft, 1.25)
             rightWallTexture.repeat.set(1, 1.25)
@@ -3026,6 +3070,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 1.0023
             backWall.position.z = -2.9
             standBase.scale.set(getScaleLeft, 1, 1.5)
+            limiterPeople.scale.set(getScaleLeft, 1, 1.5)
             standSides.scale.set(getScaleLeft, 1, 1.5)
             standTexture.repeat.set(getScaleLeft, 1.5);
             rightWallTexture.repeat.set(1, 1.5);
@@ -3043,6 +3088,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 1.998
             backWall.position.z = -3.9
             standBase.scale.set(getScaleLeft, 1, 2)
+            limiterPeople.scale.set(getScaleLeft, 1, 2)
             standSides.scale.set(getScaleLeft, 1, 2)
             standTexture.repeat.set(getScaleLeft, 2);
             rightWallTexture.repeat.set(2,1);
@@ -3060,6 +3106,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 1.998
             backWall.position.z = -3.9
             standBase.scale.set(getScaleLeft, 1, 2)
+            limiterPeople.scale.set(getScaleLeft, 1, 2)
             standSides.scale.set(getScaleLeft, 1, 2)
             standTexture.repeat.set(getScaleLeft, 2);
             rightWallTexture.repeat.set(2,1);
@@ -3077,6 +3124,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 2.499
             backWall.position.z = -4.4
             standBase.scale.set(getScaleLeft, 1, 2.25)
+            limiterPeople.scale.set(getScaleLeft, 1, 2.25)
             standSides.scale.set(getScaleLeft, 1, 2.25)
             standTexture.repeat.set(getScaleLeft, 2.25);
             rightWallTexture.repeat.set(2.25,1);
@@ -3094,6 +3142,7 @@ if (Functions.getQueryVariable("width"))
             dragFront.position.z = 3
             backWall.position.z = -4.9
             standBase.scale.set(getScaleLeft, 1, 2.5)
+            limiterPeople.scale.set(getScaleLeft, 1, 2.5)
             standSides.scale.set(getScaleLeft, 1, 2.5)
             standTexture.repeat.set(getScaleLeft, 2.5);
             rightWallTexture.repeat.set(2.5,1);
@@ -3907,109 +3956,321 @@ document.getElementById("add_icon_info_desk").onclick = ()=>
 ####   #######  ##### ####   ####### #######  
 */                                              
 
-//setTimeout(loadPeople, 5000)
+setTimeout(loadPeople, 5000)
 function loadPeople()
 {
     
-    {//DEFAULTS
-        var mouse = new THREE.Vector2();
-        var raycaster = new THREE.Raycaster(); 
-        var intersect = new THREE.Vector3();
-        var people = scene.getObjectByName("people0")
-       // var draggerPeople = scene.getObjectByName("dragger_people")
-        var envFloor = scene.getObjectByName( "environment_floor")
-        var standBase = scene.getObjectByName( "stand_1" )
-        var dimStandBase = new THREE.Box3().setFromObject(standBase);  //BoxGeometry(width , height , depth)
-        var dimWidthStandBase = Math.abs(dimStandBase.max.x)+Math.abs(dimStandBase.min.x)
-        var dimDepthStandBase = Math.abs(dimStandBase.max.z)+Math.abs(dimStandBase.min.z)
-        var helperPeople = new THREE.BoxHelper( people, 0xffff00 );
-        helperPeople.material = new THREE.MeshBasicMaterial({color: "#00FFFF"})
-        var dimPeople = new THREE.Box3().setFromObject(people);  //BoxGeometry(width , height , depth)
-        var dimWidthPeople = Math.abs(dimPeople.max.x)+Math.abs(dimPeople.min.x)
-        var dimDepthPeople = Math.abs(dimPeople.max.x)+Math.abs(dimPeople.min.x)
+    var mouse = new THREE.Vector2();
+    var raycaster = new THREE.Raycaster(); 
+    var intersect = new THREE.Vector3();
 
-        var limiterPlaneGeo = new THREE.PlaneGeometry(dimWidthStandBase - dimWidthPeople , dimDepthStandBase - dimDepthPeople );
-        var limiterPlaneMat = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
-        var limiterPlane = new THREE.Mesh( limiterPlaneGeo, limiterPlaneMat );
-
-        limiterPlane.rotation.x = THREE.MathUtils.degToRad(90)
-        limiterPlane.position.y = 0.11
-        limiterPlane.visible = false
-    }
-   
-/**
-* ADD PEOPLE
-*/
-var amount=0
-var clonedPeople=[]
-var clonedDraggerPeople=[]
-var clonedHelperPeople=[]
-
-document.getElementById("people0_icon").onclick = ()=>
-{
-    addPeople()
-    function addPeople() 
+    document.getElementById("people0_icon").onclick = ()=>
     {   
-        scene.add(helperPeople)
-        scene.add(limiterPlane)
         window.addEventListener( 'mousemove', onMouseMovePeople)
-    }
-    
-        function onMouseMovePeople(event) //FOLLOW CURSOR
+        function onMouseMovePeople(event) //BASIC FOLLOW CURSOR FUNCTIONS
         {
                 mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
                 mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
                 
-                intersect = raycaster.intersectObject(limiterPlane)
+                intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_people" ))
                 controls.enabled = false; 
-                people.visible = true
-                helperPeople.update()
-
+                scene.getObjectByName("people0").visible = true
+                
                 if(intersect.length>0)
                 {
                     console.log("intersection true")
-                  
+                    document.getElementById("furniture_icon_group_people0").style.visibility = "hidden" 
                     for ( var i = 0; i < intersect.length; i ++ )
                     {
                         var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                        people.position.set(a,1,c)
+                        var c = intersect[ i ].point.z 
+                        scene.getObjectByName("people0").position.set(a,1,c)
                     } 
+                    window.addEventListener( 'click', function ()   //FIRST DROP
+                    {   
+                        controls.enabled = true;
+                        setTimeout(() => {
+                            window.removeEventListener('mousemove' , onMouseMovePeople)
+                            container.addEventListener('click' , onMouseMovePeopleClick)
+                        }, 200);
+                    })
+                
                 }
-                else        
-                {
-                    intersect = raycaster.intersectObject(envFloor) //MOUSE KOORDİNATLARININ 3D SAHNEDEKİ DEĞERLERİNİ BU ŞEKİLDE ALIYORUZ.
-                    for ( var i = 0; i < intersect.length; i ++ )
-                    {
-                        var a = intersect[ i ].point.x 
-                        var c = intersect[ i ].point.z  
-                                                  
-                        if (Math.abs(a)<= dimWidthStandBase/2-dimWidthPeople/2)
-                        {
-                            if(c<0){people.position.x=a}
-                            else if(c>0){people.position.x=a}
-                        }
-    
-                        if (Math.abs(c)<= dimDepthStandBase/2-dimDepthPeople/2)
-                        {
-                            if(a<0){people.position.z=c }
-                            else if(a>0){people.position.z=c}
-                        }
-                                      
-                    }
-                    
-                } 
-               
-        
-                window.addEventListener( 'click', function()   //FIRST DROP
-                {
-                    window.removeEventListener('mousemove', onMouseMovePeople)
-                    scene.remove(helperPeople)
-                    controls.enabled = true;
-                    
-                })
-            
+                
         }
     }
+
+//AFTER DROP PEOPLE
+//CLICK TO MOVE BUTTON TO MOVE PEOPLE AGAIN
+
+
+    function onMouseMovePeopleClick() { 
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            intersect = raycaster.intersectObject(scene.getObjectByName( "people0" ))
+            if(intersect.length>0)
+            {
+                    
+                    setTimeout(() => 
+                    {
+                    document.getElementById("furniture_icon_group_people0").style.visibility = "visible"
+                    var tempV = scene.getObjectByName( "people0" ).getWorldPosition(new THREE.Vector3())
+                    tempV.project(camera)
+           
+                    var x = (tempV.x *  .5 + .5) * canvas.clientWidth;
+                    var y = (tempV.y * -.5 + .5) * canvas.clientHeight;
+           
+                    document.getElementById("furniture_icon_group_people0").style.left = `${x}px`
+                    document.getElementById("furniture_icon_group_people0").style.top = `${y}px`
+                    }, "200")   
+                }
+            
+           
+    } 
+    
+    document.getElementById("move_icon_people0").onclick = ()=>
+    {
+        window.removeEventListener( 'mousemove', onMouseMovePeopleClick)
+        window.addEventListener( 'mousemove', onMouseMovePeopleDrag)
+        function onMouseMovePeopleDrag(event) //DRAG
+        {
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            
+            intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_people" ))
+            controls.enabled = false; 
+            
+            if(intersect.length>0)
+            {
+                for ( var i = 0; i < intersect.length; i ++ )
+                {
+                    document.getElementById("furniture_icon_group_people0").style.visibility = "hidden"
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z 
+                    scene.getObjectByName("people0").position.set(a,1,c)
+                } 
+                window.addEventListener( 'click', function ()   
+                {
+                    window.removeEventListener( 'mousemove', onMouseMovePeopleDrag)
+                    controls.enabled = true;
+                  
+                })
+            }
+        }
+    }
+    document.getElementById("rotate_icon_people0").onclick = ()=>
+    {
+        scene.getObjectByName( "people0" ).rotateY(THREE.MathUtils.degToRad(90))
+    }
+    document.getElementById("trash_icon_people0").onclick = ()=>
+    {
+        document.getElementById("furniture_icon_group_people0").style.visibility = "hidden" //VISIBILITY STİLİ BURDA ÇALIŞMIYOR O YÜZDEN DISPLAY KULLANDIK.
+        scene.getObjectByName( "people0" ).visible = false
+        scene.getObjectByName( "people0" ).layers.set( 1 )
+        furnitureAdded = false
+    }
+    document.getElementById("apply_icon_people0").onclick = ()=>
+    {
+        document.getElementById("furniture_icon_group_people0").style.visibility = "hidden" //VISIBILITY STİLİ BURDA ÇALIŞMIYOR O YÜZDEN DISPLAY KULLANDIK.
+        
+    }
+}
+
+                                                                        
+ /*                                                                       
+  ####  ##  ## #######  #### ### ###  
+ ##  ## ##  ##  ##   # ##  ## ## ##   
+##      ##  ##  ##    ##      ####    
+##      ######  ####  ##      ###     
+##      ##  ##  ##    ##      ####    
+ ##  ## ##  ##  ##   # ##  ## ## ##   
+  ####  ##  ## #######  #### ### ###  
+                                      
+##   ## ###### ##### ###### ###### ####    #######  
+##   ##   ##  ##   ##  ##    ##  ## ##      ##   #  
+##   ##   ##  ##       ##    ##  ## ##      ##      
+ ## ##    ##   #####   ##    #####  ##      ####    
+ ## ##    ##       ##  ##    ##  ## ##      ##      
+  ###     ##  ##   ##  ##    ##  ## ##  ##  ##   #  
+  ###   ###### ##### ###### ###### ####### #######  
+
+*/ 
+setTimeout(loadCheckVisible, 5000)
+function loadCheckVisible()
+{  
+var furnitureAdded = false                                          
+setInterval(() => { console.log(furnitureAdded)
+    if(
+        scene.getObjectByName("people0").visible==true || 
+        scene.getObjectByName("double_sofa_1").visible==true)
+        {
+            furnitureAdded = true  
+        }
+    else{furnitureAdded = false}
+}, 500);
+}
+/*
+####    ###### ##   ## ###### # ##### ####### ######   #####   
+ ##       ##   ### ###   ##  ## ## ##  ##   #  ##  ## ##   ##  
+ ##       ##   #######   ##     ##     ##      ##  ## ##       
+ ##       ##   ## # ##   ##     ##     ####    #####   #####   
+ ##       ##   ##   ##   ##     ##     ##      ## ##       ##  
+ ##  ##   ##   ##   ##   ##     ##     ##   #  ## ##  ##   ##  
+####### ###### ### ### ######  ####   ####### #### ##  #####   
+*/
+
+/**
+ * TEMP.JS DOSYASININ İÇİNDE HAZIRLANIYOR...
+ */
+
+/*
+#####    #####  ##   ## ###### ####    #######          
+ ## ##  ### ### ##   ##  ##  ## ##      ##   #          
+ ##  ## ##   ## ##   ##  ##  ## ##      ##              
+ ##  ## ##   ## ##   ##  #####  ##      ####            
+ ##  ## ##   ## ##   ##  ##  ## ##      ##              
+ ## ##  ### ### ##   ##  ##  ## ##  ##  ##   #          
+#####    #####   #####  ###### ####### #######          
+                                                        
+ #####   ##### #######  ###    
+##   ## ### ### ##   # ## ##   
+##      ##   ## ##    ##   ##  
+ #####  ##   ## ####  ##   ##  
+     ## ##   ## ##    #######  
+##   ## ### ### ##    ##   ##  
+ #####   ##### ####   ##   ##  
+*/                                                                              
+
+setTimeout(loadDoubleSofa, 5000)
+function loadDoubleSofa()
+{
+    
+    var mouse = new THREE.Vector2();
+    var raycaster = new THREE.Raycaster(); 
+    var intersect = new THREE.Vector3();
+
+    document.getElementById("double_sofa_icon").onclick = ()=>
+    {
+        if(scene.getObjectByName("double_sofa_1").visible==false){window.addEventListener( 'mousemove', onMouseMoveDoubleSofa01)}
+        if(scene.getObjectByName("double_sofa_1").visible==true){/* onMouseMoveDoubleSofa02 */}
+    }
+    function onMouseMoveDoubleSofa01()
+    {
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_double_sofa" ))
+        controls.enabled = false; 
+        scene.getObjectByName("double_sofa_1").visible = true
+        scene.getObjectByName("double_sofa_2").visible = true
+
+        if(intersect.length>0)
+        {
+            console.log("intersection true")
+            document.getElementById("furniture_icon_group_double_sofa").style.visibility = "hidden" 
+            for ( var i = 0; i < intersect.length; i ++ )
+            {
+                var a = intersect[ i ].point.x 
+                var c = intersect[ i ].point.z 
+                scene.getObjectByName("double_sofa").position.set(a,0.554,c)
+            } 
+            window.addEventListener( 'click', function ()   //FIRST DROP
+            {   
+                controls.enabled = true;
+                setTimeout(() => {
+                window.removeEventListener('mousemove' , onMouseMoveDoubleSofa01)
+                container.addEventListener('click' , onMouseMoveDoubleSofaClick)
+                }, 200);
+            })
+
+        }
+    }
+
+//AFTER DROP DOUBLE SOFA
+//CLICK TO MOVE BUTTON TO MOVE DOUBLE SOFA AGAIN
+
+
+function onMouseMoveDoubleSofaClick() { 
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    intersect = raycaster.intersectObject(scene.getObjectByName( "double_sofa" ))
+    if(intersect.length>0)
+    {
+            
+            setTimeout(() => 
+            {
+            document.getElementById("furniture_icon_group_double_sofa").style.visibility = "visible"
+            var tempV = scene.getObjectByName( "double_sofa" ).getWorldPosition(new THREE.Vector3())
+            tempV.project(camera)
+   
+            var x = (tempV.x *  .5 + .5) * canvas.clientWidth;
+            var y = (tempV.y * -.5 + .5) * canvas.clientHeight;
+   
+            document.getElementById("furniture_icon_group_double_sofa").style.left = `${x}px`
+            document.getElementById("furniture_icon_group_double_sofa").style.top = `${y}px`
+            }, "200")   
+        }
+    
+   
+} 
+document.getElementById("move_icon_double_sofa").onclick = ()=>
+    {
+        window.removeEventListener( 'mousemove', onMouseMoveDoubleSofaClick)
+        window.addEventListener( 'mousemove', onMouseMoveDoubleSofaDrag)
+        function onMouseMoveDoubleSofaDrag(event) //DRAG
+        {
+            mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+            mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            
+            if(scene.getObjectByName( "double_sofa" ).rotation.y == 0)
+            {intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_double_sofa" ))}
+
+            if(scene.getObjectByName( "double_sofa" ).rotation.y == THREE.MathUtils.degToRad(90))
+            {intersect = raycaster.intersectObject(scene.getObjectByName( "limiter_double_sofa90" ))}
+            
+            controls.enabled = false; 
+            
+            if(intersect.length>0)
+            {
+                for ( var i = 0; i < intersect.length; i ++ )
+                {
+                    document.getElementById("furniture_icon_group_double_sofa").style.visibility = "hidden"
+                    var a = intersect[ i ].point.x 
+                    var c = intersect[ i ].point.z 
+                    scene.getObjectByName("double_sofa").position.set(a,0.554,c)
+                } 
+                window.addEventListener( 'click', function ()   
+                {
+                    window.removeEventListener( 'mousemove', onMouseMoveDoubleSofaDrag)
+                    controls.enabled = true;
+                  
+                })
+            }
+        }
+}
+document.getElementById("rotate_icon_double_sofa").onclick = ()=>
+{
+    scene.getObjectByName( "double_sofa" ).rotateY(THREE.MathUtils.degToRad(90))
+}
+document.getElementById("trash_icon_double_sofa").onclick = ()=>
+{
+    document.getElementById("furniture_icon_group_double_sofa").style.visibility = "hidden" //VISIBILITY STİLİ BURDA ÇALIŞMIYOR O YÜZDEN DISPLAY KULLANDIK.
+    scene.getObjectByName( "double_sofa" ).visible = false
+    scene.getObjectByName( "double_sofa_1" ).layers.set( 1 )
+    scene.getObjectByName( "double_sofa_2" ).layers.set( 1 )
+}
+document.getElementById("apply_icon_double_sofa").onclick = ()=>
+{
+    document.getElementById("furniture_icon_group_double_sofa").style.visibility = "hidden" //VISIBILITY STİLİ BURDA ÇALIŞMIYOR O YÜZDEN DISPLAY KULLANDIK.
+    
+}
+
+
+
 }
